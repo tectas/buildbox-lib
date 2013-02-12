@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <string name="app_name">BuildBox</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="kitchen_content_url_property">kitchen.contenturl</string>
+    <string name="kitchen_rom_url_property">kitchen.updateurl</string>
+    <string name="kitchen_rom_version_property">kitchen.version</string>
+    <string name="kitchen_download_dir">kitchen.downloaddir</string>
+    <string name="app_cancel_message">It seems your rom is not supporting this application, please speak with the maintainer of it for further informations.</string>
+    <string name="thumbnail_description">Thumbnail</string>
+    <string name="default_rom_url">http://kitchen.tectas.eu/Test.json</string>
+    <string name="default_content_url"/>
+    <string name="changelog_head">Changelog:</string>
+    <string name="md5sum_head">md5sum:</string>
+    <string name="detail_property">detail</string>
+    <string name="changelog_property">changelog</string>
+    <string name="item_parent_type">parent</string>
+    <string name="item_type_property">type</string>
+    <string name="item_child_type">child</string>
+    <string name="description_property">description</string>
+    <string name="children_property">children</string>
+    <string name="dependencies_property">dependencies</string>
+    <string name="detailurl_property">detailurl</string>
+    <string name="developers_donationurls_property">donationUrls</string>
+    <string name="homepages_property">homepages</string>
+    <string name="url_property">url</string>
+    <string name="developers_property">developers</string>
+    <string name="title_property">title</string>
+    <string name="version_property">version</string>
+    <string name="md5sum_property">md5</string>
+    <string name="thumbnailurl_property">thumbnailurl</string>
+    <string name="developer_names_property">names</string>
+    <string name="id_property">ID</string>
+    <string name="imageurls_property">imageurls</string>
+    <string name="item_detail_type">detail</string>
+</resources>
