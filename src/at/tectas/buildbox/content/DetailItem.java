@@ -21,9 +21,9 @@ public class DetailItem extends Item {
 	
 	public DetailItem (JSONObject json) throws JSONException {
 		super(json);
-		this.description = json.getString(Item.activity.getString(R.string.description_property));
-		this.version = json.getString(Item.activity.getString(R.string.version_property));
-		this.url = json.getString(Item.activity.getString(R.string.url_property));
+		this.description = json.optString(Item.activity.getString(R.string.description_property));
+		this.version = json.optString(Item.activity.getString(R.string.version_property));
+		this.url = json.optString(Item.activity.getString(R.string.url_property));
 		this.md5sum = json.optString(Item.activity.getString(R.string.md5sum_property));
 		
 		JSONArray dummyArray = json.optJSONArray(Item.activity.getString(R.string.developers_property));
