@@ -4,19 +4,15 @@ import java.util.ArrayList;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.helpers.ViewHelper;
 
-public class DetailFragment extends Fragment implements View.OnClickListener {
+public class DetailFragment extends Fragment {
 	public static final String TAG = "DetailFragment";
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,10 +34,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener {
 			
 			ArrayList<String> changelog = arguments.getStringArrayList(getString(R.string.changelog_property));
 			
-			if (changelog == null || changelog.size() == 0) {
-				
-			}
-			else {
+			if (changelog != null && changelog.size() != 0) {
 				ChangelogFragment fragment = new ChangelogFragment();
 				Bundle argument = new Bundle();
 				argument.putStringArrayList(getString(R.string.changelog_property), changelog);
@@ -52,10 +45,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener {
 			
 			String md5sum = arguments.getString(getString(R.string.md5sum_property));
 			
-			if (md5sum == null) {
-				
-			}
-			else {				
+			if (md5sum != null) {				
 				Md5sumFragment fragment = new Md5sumFragment();
 				Bundle argument = new Bundle();
 				argument.putString(getString(R.string.md5sum_property), md5sum);
@@ -67,48 +57,28 @@ public class DetailFragment extends Fragment implements View.OnClickListener {
 			ArrayList<String> homePages = arguments.getStringArrayList(getString(R.string.homepages_property));
 			
 			if (homePages.size() != 0) {
-				ViewGroup homePagesLayout = helper.getLayout(R.id.home_pages);
 				
-				for (String homePage: homePages) {
-					TextView dummy = new TextView(this.getActivity().getApplicationContext());
-					dummy.setText(homePage);
-					homePagesLayout.addView(dummy);
-					
-					dummy.setOnClickListener(this);
-				}
-			}
-			else {
-				view.removeView(view.findViewById(R.id.home_pages));
+				HomePagesBaseFragment fragment = new HomePagesBaseFragment();
+				
+				Bundle argument = new Bundle();
+				argument.putStringArrayList(getString(R.string.homepages_property), homePages);
+				
+				fragment.setArguments(argument);
+				ft.add(R.id.detail_main_layout, fragment);
 			}
 			
 			Bundle developers = arguments.getBundle(getString(R.string.developers_property));
 			
 			if (developers != null) {
-				ArrayList<String> developerNames = developers.getStringArrayList(getString(R.string.developer_names_property));
-				ArrayList<String> developerUrls = developers.getStringArrayList(getString(R.string.developers_donationurls_property));
-				ViewGroup developersLayout = (ViewGroup) view.findViewById(R.id.developers);
+				DevelopersBaseFragment fragment = new DevelopersBaseFragment();
 				
-				for (int i = 0; i < developerNames.size() && i < developerUrls.size(); i++) {
-					TextView name = new TextView(this.getActivity().getApplicationContext());
-					name.setText(developerNames.get(i));
-					developersLayout.addView(name);
-				}
+				fragment.setArguments(developers);
+				ft.add(R.id.detail_main_layout, fragment);
 			}
 
 			ft.commit();
 		}
 		
 		return view;
-	}
-
-	@Override
-	public void onClick(View v) {
-		String url = (String) ((TextView)v).getText();
-		
-		if (!url.startsWith("http://") && !url.startsWith("https://"))
-			url = "http://" + url;
-		
-		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-		startActivity(browserIntent);
 	}
 }

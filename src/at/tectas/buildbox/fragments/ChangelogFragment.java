@@ -2,12 +2,9 @@ package at.tectas.buildbox.fragments;
 
 import java.util.ArrayList;
 
-import junit.framework.TestFailure;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -29,9 +26,8 @@ public class ChangelogFragment extends Fragment {
 				builder.append("\n");
 			}
 			
-			TextView textView = new TextView(this.getActivity().getApplicationContext());
+			TextView textView = (TextView) view.findViewById(R.id.changelog_text);
 			textView.setText(builder.toString());
-			view.addView(textView);
 		}
 		
 		return view;
