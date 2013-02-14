@@ -21,13 +21,17 @@
 	        android:id="@+id/version"
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="1" />
+	        android:layout_weight="1"
+	        android:paddingTop="5sp" />
 	
 	    <TextView
 	        android:id="@+id/description"
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="1" />
+	        android:layout_weight="1"
+	        android:textSize="15sp"
+	        android:paddingLeft="5sp"
+	        android:paddingTop="10sp" />
 	        
     </LinearLayout>
     

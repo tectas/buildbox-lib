@@ -4,13 +4,17 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -120,64 +124,60 @@ public class Communicator {
 		}
 	}
 	
-	public BitmapAsyncCommunicator executeBitmapAsyncCommunicator (String URL) {
+	public BitmapAsyncCommunicator executeBitmapAsyncCommunicator (String url) {
 		BitmapAsyncCommunicator communicator = new BitmapAsyncCommunicator();
 		
-		communicator.execute(URL);
+		communicator.execute(url);
 		
 		return communicator;
 	}
 	
-	public BitmapAsyncCommunicator executeBitmapAsyncCommunicator (String URL, ImageView view, ICommunicatorCallback callback) {
+	public BitmapAsyncCommunicator executeBitmapAsyncCommunicator (String url, ImageView view, ICommunicatorCallback callback) {
 		BitmapAsyncCommunicator communicator = new BitmapAsyncCommunicator(view, callback);
 		
-		communicator.execute(URL);
+		communicator.execute(url);
 		
 		return communicator;
 	}
 	
-	public JSONObjectAsyncCommunicator executeJSONObjectAsyncCommunicator (String URL) {
+	public JSONObjectAsyncCommunicator executeJSONObjectAsyncCommunicator (String url) {
 		JSONObjectAsyncCommunicator communicator = new JSONObjectAsyncCommunicator();
 		
-		communicator.execute(URL);
+		communicator.execute(url);
 		
 		return communicator;
 	}
 
-	public JSONObjectAsyncCommunicator executeJSONObjectAsyncCommunicator (String URL, ICommunicatorCallback callback) {
+	public JSONObjectAsyncCommunicator executeJSONObjectAsyncCommunicator (String url, ICommunicatorCallback callback) {
 		JSONObjectAsyncCommunicator communicator = new JSONObjectAsyncCommunicator(callback);
 		
-		communicator.execute(URL);
+		communicator.execute(url);
 		
 		return communicator;
 	}
 	
-	public JSONArrayAsyncCommunicator executeJSONArrayAsyncCommunicator (String URL) {
+	public JSONArrayAsyncCommunicator executeJSONArrayAsyncCommunicator (String url) {
 		JSONArrayAsyncCommunicator communicator = new JSONArrayAsyncCommunicator();
 		
-		communicator.execute(URL);
+		communicator.execute(url);
 		
 		return communicator;
 	}
 	
-	public JSONArrayAsyncCommunicator executeJSONArrayAsyncCommunicator (String URL, ICommunicatorCallback callback) {
+	public JSONArrayAsyncCommunicator executeJSONArrayAsyncCommunicator (String url, ICommunicatorCallback callback) {
 		JSONArrayAsyncCommunicator communicator = new JSONArrayAsyncCommunicator(callback);
 		
-		communicator.execute(URL);
+		communicator.execute(url);
 		
 		return communicator;
 	}
 	
-	public static String getString(String URL) throws Exception {
-		if (URL != null) {
+	public static String getString(String url) throws Exception {
+		if (url != null) {
 		    BufferedReader in = null;
 		    try 
 		    {
-		        HttpClient client = new DefaultHttpClient();
-		        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android");
-		        HttpGet request = new HttpGet();
-		        request.setURI(new URI(URL));
-		        HttpResponse response = client.execute(request);
+		    	HttpResponse response = Communicator.getResponse(url);
 		        in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		
 		        StringBuilder sb = new StringBuilder();
@@ -220,7 +220,9 @@ public class Communicator {
 	    BufferedOutputStream out = null;
 
 	    try {
-	        in = new BufferedInputStream(new URL(url).openStream());
+	    	HttpResponse response = Communicator.getResponse(url);
+	        
+	        in = new BufferedInputStream(response.getEntity().getContent());
 	        
 	        final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
 	        out = new BufferedOutputStream(dataStream);
@@ -239,8 +241,8 @@ public class Communicator {
 	        BitmapFactory.Options options = new BitmapFactory.Options();
 
 	        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length,options);
-	    } catch (IOException e) {
-	        Log.e(TAG, "Could not load Bitmap from: " + url);
+	    } catch (Exception e) {
+	        Log.e(TAG, e.getMessage());
 	    } finally {
 	    	if (in != null)
 	    		in.close();
@@ -251,18 +253,85 @@ public class Communicator {
 	    return bitmap;
 	}
 	
-	public static JSONObject getJSONObject(String URL) throws Exception 
+	public static void downloadFileToSd(String url, String directory, String filename) throws IOException {
+		if (url != null && !url.isEmpty()) {
+			InputStream in = null;
+		    FileOutputStream out = null;
+	
+		    try {
+		        HttpResponse response = Communicator.getResponse(url);
+		        
+		        String responseFilename = Communicator.tryGetFilenameFromResponse(response);
+		        
+		        in = new BufferedInputStream(response.getEntity().getContent());
+		        
+		        File file = new File(directory, responseFilename == null? filename : responseFilename);
+		        
+		        out = new FileOutputStream(file);
+		        
+		        byte[] buffer = new byte[1024];
+		        
+		        int len;
+		        
+		        while ((len = in.read(buffer)) != -1) {
+		            out.write(buffer, 0, len);
+		        }
+		        
+		        out.flush();
+	
+		    } catch (Exception e) {
+		        Log.e(TAG, e.getMessage());
+		    } finally {
+		    	if (in != null)
+		    		in.close();
+		    	if (out != null)
+		    		out.close();
+		    }
+		}
+	}
+	
+	@SuppressWarnings("null")
+	public static HttpResponse getResponse(String url) throws ClientProtocolException, IOException, URISyntaxException {
+        HttpClient client = new DefaultHttpClient();
+        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android");
+        HttpGet request = new HttpGet();
+        request.setURI(new URI(url));
+        HttpResponse response = client.execute(request);
+        Header header = response.getFirstHeader("Location");
+        
+        if (header != null) {
+        	response = Communicator.getResponse(header.getValue());
+        }
+        
+        return response;
+	}
+	
+	public static String tryGetFilenameFromResponse(HttpResponse response) {
+		Header[] headers = response.getHeaders("Content-Disposition");
+		
+		for (Header header: headers) {
+			String headerValue = header.getValue();
+			
+			if (headerValue.contains(".")) {
+				return headerValue;
+			}
+		}
+		
+		return null;
+	}
+	
+	public static JSONObject getJSONObject(String url) throws Exception 
 	{	
-		String respond = Communicator.getString(URL);
+		String respond = Communicator.getString(url);
 		
         JSONObject json = new JSONObject(respond);
         
         return json;
 	}
 	
-	public static JSONArray getJSONArray(String URL) throws Exception 
+	public static JSONArray getJSONArray(String url) throws Exception 
 	{	
-		String respond = Communicator.getString(URL);
+		String respond = Communicator.getString(url);
 		
         JSONArray json = new JSONArray(respond);
         

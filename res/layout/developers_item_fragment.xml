@@ -3,5 +3,6 @@
     android:id="@+id/developer_item"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:textSize="15sp" />
+    android:textSize="15sp"
+    android:paddingLeft="5sp" />
 

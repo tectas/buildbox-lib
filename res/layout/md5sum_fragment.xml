@@ -4,8 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"
-    android:orientation="horizontal"
-    android:paddingTop="10dp" >
+    android:orientation="horizontal" >
 
     <TextView
         android:id="@+id/md5sum_head"
@@ -13,10 +12,13 @@
         android:layout_height="wrap_content"
         android:text="@string/md5sum_head"
         android:textSize="15sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:paddingTop="0dp" />
 
     <TextView
         android:id="@+id/md5sum"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingTop="0dp"
+        android:paddingLeft="5sp" />
 </LinearLayout>

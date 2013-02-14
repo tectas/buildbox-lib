@@ -4,6 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:textColor="@android:color/holo_blue_light"
-    android:textColorHint="@android:color/holo_blue_light" >
+    android:textColorHint="@android:color/holo_blue_light"
+    android:paddingLeft="5sp" >
 
 </TextView>

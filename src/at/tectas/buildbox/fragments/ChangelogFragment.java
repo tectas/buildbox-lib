@@ -21,9 +21,11 @@ public class ChangelogFragment extends Fragment {
 			
 			StringBuilder builder = new StringBuilder();
 			
-			for (String log: changelog) {
-				builder.append(log);
-				builder.append("\n");
+			for (int i = 0; i < changelog.size(); i++) {
+				builder.append(changelog.get(i));
+				
+				if (i < changelog.size())
+					builder.append("\n");
 			}
 			
 			TextView textView = (TextView) view.findViewById(R.id.changelog_text);

@@ -41,17 +41,16 @@ public final class R {
     public static final class layout {
         public static final int activity_main=0x7f030000;
         public static final int changelog_fragment=0x7f030001;
-        public static final int description_fragment=0x7f030002;
-        public static final int detail_fragment=0x7f030003;
-        public static final int developers_base_fragment=0x7f030004;
-        public static final int developers_item_fragment=0x7f030005;
-        public static final int image_item_fragment=0x7f030006;
-        public static final int images_base_fragment=0x7f030007;
-        public static final int list_fragment=0x7f030008;
-        public static final int list_item=0x7f030009;
-        public static final int md5sum_fragment=0x7f03000a;
-        public static final int webpage_url_fragment=0x7f03000b;
-        public static final int webpages_base_fragment=0x7f03000c;
+        public static final int detail_fragment=0x7f030002;
+        public static final int developers_base_fragment=0x7f030003;
+        public static final int developers_item_fragment=0x7f030004;
+        public static final int image_item_fragment=0x7f030005;
+        public static final int images_base_fragment=0x7f030006;
+        public static final int list_fragment=0x7f030007;
+        public static final int list_item=0x7f030008;
+        public static final int md5sum_fragment=0x7f030009;
+        public static final int webpage_url_fragment=0x7f03000a;
+        public static final int webpages_base_fragment=0x7f03000b;
     }
     public static final class menu {
         public static final int activity_main=0x7f060000;
