@@ -14,7 +14,7 @@ public class Md5sumFragment extends Fragment {
 		
 		Bundle arguments = this.getArguments();
 		
-		if (arguments != null) {
+		if (arguments != null && !arguments.isEmpty()) {
 			String md5sum = arguments.getString(getString(R.string.md5sum_property));
 			
 			TextView textView = (TextView) view.findViewById(R.id.md5sum);

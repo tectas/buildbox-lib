@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/changelog_list"
+    android:id="@+id/webpages_base_layout"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingTop="10dp" >
 
     <TextView
-        android:id="@+id/changelog_head"
+        android:id="@+id/webpages_head"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/changelog_head"
         android:textSize="15sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:text="@string/webpages_head" />
 
-        <TextView
-        android:id="@+id/changelog_text"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
 </LinearLayout>

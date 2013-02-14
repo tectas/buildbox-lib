@@ -22,7 +22,7 @@ public class DetailFragment extends Fragment {
 		
 		Bundle arguments = this.getArguments();
 		
-		if (arguments != null) {
+		if (arguments != null && !arguments.isEmpty()) {
 			FragmentManager fm = getFragmentManager();
 			FragmentTransaction ft = fm.beginTransaction();
 			
@@ -34,7 +34,7 @@ public class DetailFragment extends Fragment {
 			
 			ArrayList<String> changelog = arguments.getStringArrayList(getString(R.string.changelog_property));
 			
-			if (changelog != null && changelog.size() != 0) {
+			if (changelog != null) {
 				ChangelogFragment fragment = new ChangelogFragment();
 				Bundle argument = new Bundle();
 				argument.putStringArrayList(getString(R.string.changelog_property), changelog);
@@ -45,7 +45,7 @@ public class DetailFragment extends Fragment {
 			
 			String md5sum = arguments.getString(getString(R.string.md5sum_property));
 			
-			if (md5sum != null) {				
+			if (md5sum != null && !md5sum.isEmpty()) {				
 				Md5sumFragment fragment = new Md5sumFragment();
 				Bundle argument = new Bundle();
 				argument.putString(getString(R.string.md5sum_property), md5sum);
@@ -54,14 +54,14 @@ public class DetailFragment extends Fragment {
 				ft.add(R.id.detail_main_layout, fragment);
 			}
 			
-			ArrayList<String> homePages = arguments.getStringArrayList(getString(R.string.homepages_property));
+			ArrayList<String> homePages = arguments.getStringArrayList(getString(R.string.webpages_property));
 			
-			if (homePages.size() != 0) {
+			if (homePages != null) {
 				
-				HomePagesBaseFragment fragment = new HomePagesBaseFragment();
+				WebPagesBaseFragment fragment = new WebPagesBaseFragment();
 				
 				Bundle argument = new Bundle();
-				argument.putStringArrayList(getString(R.string.homepages_property), homePages);
+				argument.putStringArrayList(getString(R.string.webpages_property), homePages);
 				
 				fragment.setArguments(argument);
 				ft.add(R.id.detail_main_layout, fragment);
@@ -69,13 +69,25 @@ public class DetailFragment extends Fragment {
 			
 			Bundle developers = arguments.getBundle(getString(R.string.developers_property));
 			
-			if (developers != null) {
+			if (developers != null && !developers.isEmpty()) {
 				DevelopersBaseFragment fragment = new DevelopersBaseFragment();
 				
 				fragment.setArguments(developers);
 				ft.add(R.id.detail_main_layout, fragment);
 			}
+			
+			ArrayList<String> images = arguments.getStringArrayList(getString(R.string.imageurls_property));
 
+			if (images != null && !images.isEmpty()) {
+				ImagesBaseFragment fragment = new ImagesBaseFragment();
+				
+				Bundle argument = new Bundle();
+				argument.putStringArrayList(getString(R.string.imageurls_property), images);
+				
+				fragment.setArguments(argument);
+				ft.add(R.id.detail_main_layout, fragment);
+			}
+			
 			ft.commit();
 		}
 		

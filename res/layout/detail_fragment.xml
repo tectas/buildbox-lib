@@ -15,7 +15,6 @@
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
 	        android:ems="10"
-	        android:gravity="center_horizontal"
 	        android:textSize="35sp" />
 	
 	    <TextView
@@ -29,33 +28,7 @@
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1" />
-	    
-
-	
-	    <LinearLayout
-	        android:id="@+id/developers"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:orientation="vertical" >
-	    </LinearLayout>
-	
-	    <LinearLayout
-	        android:id="@+id/home_pages"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:orientation="vertical" >
-	    </LinearLayout>
-	
-	    <GridLayout
-	        android:id="@+id/images"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:columnCount="2" >
-	    </GridLayout>
-	    
+	        
     </LinearLayout>
     
 </ScrollView>

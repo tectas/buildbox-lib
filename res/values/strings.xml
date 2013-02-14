@@ -11,7 +11,7 @@
     <string name="default_rom_url">http://kitchen.tectas.eu/Test.json</string>
     <string name="default_content_url"/>
     <string name="changelog_head">Changelog:</string>
-    <string name="md5sum_head">md5sum:</string>
+    <string name="md5sum_head">md5sum: </string>
     <string name="detail_property">detail</string>
     <string name="changelog_property">changelog</string>
     <string name="item_parent_type">parent</string>
@@ -22,7 +22,6 @@
     <string name="dependencies_property">dependencies</string>
     <string name="detailurl_property">detailurl</string>
     <string name="developers_donationurls_property">donationUrls</string>
-    <string name="homepages_property">homepages</string>
     <string name="url_property">url</string>
     <string name="developers_property">developers</string>
     <string name="title_property">title</string>
@@ -31,6 +30,9 @@
     <string name="thumbnailurl_property">thumbnailurl</string>
     <string name="developer_names_property">names</string>
     <string name="id_property">ID</string>
-    <string name="imageurls_property">imageurls</string>
+    <string name="imageurls_property">images</string>
     <string name="item_detail_type">detail</string>
+    <string name="webpages_property">webpages</string>
+    <string name="developers_head">Developers: </string>
+    <string name="webpages_head">Webpages: </string>
 </resources>

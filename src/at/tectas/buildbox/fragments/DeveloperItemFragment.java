@@ -17,14 +17,19 @@ public class DeveloperItemFragment extends Fragment implements OnClickListener {
 		
 		Bundle arguments = this.getArguments();
 		
-		if (arguments != null) {
+		if (arguments != null && !arguments.isEmpty()) {
 			String name = arguments.getString(getString(R.string.developer_names_property));
 			view.setText(name);
 			
 			String url = arguments.getString(getString(R.string.developers_donationurls_property));
-			view.setHint(url);
 			
-			view.setOnClickListener(this);
+			if (url != null && !url.isEmpty()) {
+				view.setHint(url);
+				
+				view.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.donate_button, 0);
+				
+				view.setOnClickListener(this);
+			}	
 		}
 		
 		return view;

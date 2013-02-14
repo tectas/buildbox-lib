@@ -7,11 +7,14 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.animation.Animation;
+import android.widget.ImageView;
 import at.tectas.buildbox.adapters.TabsAdapter;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
@@ -42,6 +45,10 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 	private DetailItem romItem = null;
 	private ItemList contentItems = null;
 	private Communicator communicator = new Communicator();
+	
+	public Communicator getCommunicator() {
+		return this.communicator;
+	}
 	
 	public String getRomUrl() {
 		return this.romUrl;
@@ -163,6 +170,20 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 		}
 		catch (Exception e) {
 			Log.e(MainActivity.TAG, e.getMessage().toString());
+		}
+	}
+
+	@Override
+	public void updateWithImage(ImageView view, Bitmap bitmap) {
+		try {
+			if (view != null) {
+				Animation animation = view.getAnimation();
+				animation.cancel();
+				view.setImageBitmap(bitmap);
+			}
+		}
+		catch (Exception e) {
+			Log.e(MainActivity.TAG, e.getMessage());
 		}
 	}
 

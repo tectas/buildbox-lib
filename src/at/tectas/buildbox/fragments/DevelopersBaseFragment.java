@@ -20,7 +20,7 @@ public class DevelopersBaseFragment extends Fragment {
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		
-		if (arguments != null) {
+		if (arguments != null && !arguments.isEmpty()) {
 			ArrayList<String> names = arguments.getStringArrayList(getString(R.string.developer_names_property));
 			ArrayList<String> urls = arguments.getStringArrayList(getString(R.string.developers_donationurls_property));
 			

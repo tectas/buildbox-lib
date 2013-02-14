@@ -11,26 +11,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import at.tectas.buildbox.R;
 
-public class HomePagesBaseFragment extends Fragment {
+public class ImagesBaseFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.homepages_base_fragment, container, false);
+		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.images_base_fragment, container, false);
 		
 		Bundle arguments = this.getArguments();
 		
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		
-		if (arguments != null) {
-			ArrayList<String> urls = arguments.getStringArrayList(getString(R.string.homepages_property));
+		if (arguments != null && !arguments.isEmpty()) {
+			ArrayList<String> urls = arguments.getStringArrayList(getString(R.string.imageurls_property));
 			
 			for (String url: urls) {
-				HomePagesUrlFragment hpUrl = new HomePagesUrlFragment();
+				ImageItemFragment image = new ImageItemFragment();
 				Bundle urlBundle = new Bundle();
-				urlBundle.putString(getString(R.string.homepages_property), url);
+				urlBundle.putString(getString(R.string.imageurls_property), url);
 				
-				hpUrl.setArguments(urlBundle);
+				image.setArguments(urlBundle);
 				
-				ft.add(R.id.homepages_base_layout, hpUrl);
+				ft.add(R.id.images_base_fragment, image);
 			}
 			
 			ft.commit();

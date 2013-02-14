@@ -31,7 +31,7 @@ public class DetailItem extends Item {
 		this.parseJSONArray(dummyArray, ArrayTypes.DEVELOPERS);
 		
 		dummyArray = null;
-		dummyArray = json.optJSONArray(Item.activity.getString(R.string.homepages_property));
+		dummyArray = json.optJSONArray(Item.activity.getString(R.string.webpages_property));
 		
 		this.parseJSONArray(dummyArray, ArrayTypes.HOMEPAGES);
 		
@@ -61,7 +61,7 @@ public class DetailItem extends Item {
 		
 		result.putStringArrayList(Item.activity.getString(R.string.changelog_property), this.changelog);
 		
-		result.putStringArrayList(Item.activity.getString(R.string.homepages_property), this.homePages);
+		result.putStringArrayList(Item.activity.getString(R.string.webpages_property), this.homePages);
 		
 		result.putStringArrayList(Item.activity.getString(R.string.imageurls_property), this.imageUrls);
 		

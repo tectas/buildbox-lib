@@ -11,14 +11,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import at.tectas.buildbox.R;
 
-public class HomePagesUrlFragment extends Fragment implements OnClickListener {
+public class WebPageUrlFragment extends Fragment implements OnClickListener {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		TextView view = (TextView) inflater.inflate(R.layout.homepages_url_fragment, container, false);
+		TextView view = (TextView) inflater.inflate(R.layout.webpage_url_fragment, container, false);
 		
 		Bundle arguments = this.getArguments();
 		
-		if (arguments != null) {
-			String url = arguments.getString(getString(R.string.homepages_property));
+		if (arguments != null && !arguments.isEmpty()) {
+			String url = arguments.getString(getString(R.string.webpages_property));
 			view.setText(url);
 			
 			view.setOnClickListener(this);
