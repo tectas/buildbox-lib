@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -120,6 +122,37 @@ public class Communicator {
 		protected void onPostExecute(Bitmap result) {
 			if (this.callbackListener != null)
 				this.callbackListener.updateWithImage(this.view, result);
+			super.onPostExecute(result);
+		}
+	}
+	
+	public class DownloadAsyncCommunicator extends AsyncTask<String, Integer, Boolean> {
+		
+		private IDownloadProcessProgressCallback callbackListener = null;
+		
+		public DownloadAsyncCommunicator (IDownloadProcessProgressCallback callback) {
+			this.callbackListener = callback;
+		}
+		
+		@Override
+		protected Boolean doInBackground(String... params) {
+			try {
+				Communicator.downloadFileToSd(params[0], params[1], params[2], params[3], this);
+				
+				return true;
+			}
+			catch (Exception e) {
+				return false;
+			}
+		}
+		
+		protected void onProgressUpdate(Integer... progress) {
+			if (this.callbackListener != null)
+				this.callbackListener.updateDownloadProgess(progress[0]);
+	     }
+		
+		@Override
+		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 		}
 	}
@@ -253,17 +286,24 @@ public class Communicator {
 	    return bitmap;
 	}
 	
-	public static void downloadFileToSd(String url, String directory, String filename) throws IOException {
+	public static Boolean downloadFileToSd(String url, String directory, String filename, String md5sum, AsyncTask<String, Integer, Boolean> progressHandler) throws IOException {
+		Boolean result = false;
 		if (url != null && !url.isEmpty()) {
 			InputStream in = null;
 		    FileOutputStream out = null;
-	
+		    
 		    try {
 		        HttpResponse response = Communicator.getResponse(url);
 		        
 		        String responseFilename = Communicator.tryGetFilenameFromResponse(response);
 		        
+		        Integer fileSize = Communicator.tryGetFilesizeFromResponse(response);
+		        
 		        in = new BufferedInputStream(response.getEntity().getContent());
+		        
+			    MessageDigest md = MessageDigest.getInstance("MD5");
+		        
+		        in = new DigestInputStream(in, md);
 		        
 		        File file = new File(directory, responseFilename == null? filename : responseFilename);
 		        
@@ -278,7 +318,14 @@ public class Communicator {
 		        }
 		        
 		        out.flush();
-	
+		        
+		        byte[] sumBytes = md.digest();
+		        
+		        String sum = new String(sumBytes);
+		        
+		        if (sum == md5sum)
+		        	result = true;
+		        
 		    } catch (Exception e) {
 		        Log.e(TAG, e.getMessage());
 		    } finally {
@@ -288,6 +335,7 @@ public class Communicator {
 		    		out.close();
 		    }
 		}
+		return result;
 	}
 	
 	@SuppressWarnings("null")
@@ -312,12 +360,25 @@ public class Communicator {
 		for (Header header: headers) {
 			String headerValue = header.getValue();
 			
-			if (headerValue.contains(".")) {
-				return headerValue;
+			if (!(headerValue.isEmpty()) && headerValue.contains(".")) {
+				return headerValue.split("=")[1];
 			}
 		}
 		
 		return null;
+	}
+	
+	public static Integer tryGetFilesizeFromResponse(HttpResponse response) {
+		Header header = response.getFirstHeader("Content-Length");
+		
+		String headerValue = header.getValue();
+		try {
+			return Integer.valueOf(headerValue);
+		}
+		catch (NumberFormatException e) {
+			Log.e(TAG, e.getMessage());
+			return -1;
+		}
 	}
 	
 	public static JSONObject getJSONObject(String url) throws Exception 
