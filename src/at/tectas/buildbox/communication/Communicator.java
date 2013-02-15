@@ -126,7 +126,7 @@ public class Communicator {
 		}
 	}
 	
-	public class DownloadAsyncCommunicator extends AsyncTask<String, Integer, Boolean> {
+	public class DownloadAsyncCommunicator extends IDownloadAsyncCommunicator {
 		
 		private IDownloadProcessProgressCallback callbackListener = null;
 		
@@ -144,6 +144,10 @@ public class Communicator {
 			catch (Exception e) {
 				return false;
 			}
+		}
+		
+		public void indirectPublishProgress(Integer progress) {
+			this.publishProgress(progress);
 		}
 		
 		protected void onProgressUpdate(Integer... progress) {
@@ -286,7 +290,7 @@ public class Communicator {
 	    return bitmap;
 	}
 	
-	public static Boolean downloadFileToSd(String url, String directory, String filename, String md5sum, AsyncTask<String, Integer, Boolean> progressHandler) throws IOException {
+	public static Boolean downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler) throws IOException {
 		Boolean result = false;
 		if (url != null && !url.isEmpty()) {
 			InputStream in = null;
@@ -313,8 +317,12 @@ public class Communicator {
 		        
 		        int len;
 		        
+		        Integer processed = 0;
+		        
 		        while ((len = in.read(buffer)) != -1) {
 		            out.write(buffer, 0, len);
+		            processed += len;
+		            progressHandler.indirectPublishProgress(((100 / fileSize) * processed));
 		        }
 		        
 		        out.flush();
@@ -338,7 +346,6 @@ public class Communicator {
 		return result;
 	}
 	
-	@SuppressWarnings("null")
 	public static HttpResponse getResponse(String url) throws ClientProtocolException, IOException, URISyntaxException {
         HttpClient client = new DefaultHttpClient();
         client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android");
