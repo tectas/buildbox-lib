@@ -432,7 +432,7 @@ public class Communicator {
 		        else {
 		        	result.status = DownloadStatus.Md5mismatch;
 		        	
-		        	result = Communicator.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, retries);
+		        	result = Communicator.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, retries + 1);
 		        }
 		        
 		    } catch (Exception e) {
