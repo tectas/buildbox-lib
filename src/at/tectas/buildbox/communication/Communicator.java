@@ -29,6 +29,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
+import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 
 public class Communicator {
 	public static final String TAG = "Communicator";
@@ -135,14 +136,12 @@ public class Communicator {
 		}
 		
 		@Override
-		protected Boolean doInBackground(String... params) {
+		protected DownloadResponse doInBackground(String... params) {
 			try {
-				Communicator.downloadFileToSd(params[0], params[1], params[2], params[3], this);
-				
-				return true;
+				return Communicator.downloadFileToSd(params[0], params[1], params[2], params[3], this);
 			}
 			catch (Exception e) {
-				return false;
+				return new DownloadResponse();
 			}
 		}
 		
@@ -156,7 +155,7 @@ public class Communicator {
 	     }
 		
 		@Override
-		protected void onPostExecute(Boolean result) {
+		protected void onPostExecute(DownloadResponse result) {
 			super.onPostExecute(result);
 		}
 	}
@@ -266,10 +265,16 @@ public class Communicator {
 	        
 	        byte[] buffer = new byte[1024];
 	        
-	        int len;
+	        int len, processed = 0;
 	        
-	        while ((len = in.read(buffer)) != -1) {
+	        while ((len = in.read(buffer)) != -1) {	        	
 	            out.write(buffer, 0, len);
+	            
+	        	processed += len;
+	            
+	            if (processed % 10240 <= 512) {
+	            	out.flush();
+	            }
 	        }
 	        
 	        out.flush();
@@ -290,8 +295,10 @@ public class Communicator {
 	    return bitmap;
 	}
 	
-	public static Boolean downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler) throws IOException {
-		Boolean result = false;
+	public static DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler) throws IOException {
+		String[] splittedFilename = filename.split(".");
+		
+		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1]);
 		if (url != null && !url.isEmpty()) {
 			InputStream in = null;
 		    FileOutputStream out = null;
@@ -301,7 +308,7 @@ public class Communicator {
 		        
 		        String responseFilename = Communicator.tryGetFilenameFromResponse(response);
 		        
-		        Integer fileSize = Communicator.tryGetFilesizeFromResponse(response);
+		        long fileSize = response.getEntity().getContentLength();
 		        
 		        in = new BufferedInputStream(response.getEntity().getContent());
 		        
@@ -321,8 +328,97 @@ public class Communicator {
 		        
 		        while ((len = in.read(buffer)) != -1) {
 		            out.write(buffer, 0, len);
+		            
 		            processed += len;
-		            progressHandler.indirectPublishProgress(((100 / fileSize) * processed));
+		            
+		            progressHandler.indirectPublishProgress((int)((100 / fileSize) * processed));
+		            
+		            if (processed % 10240 <= 512) {
+		            	out.flush();
+		            }
+		        }
+		        
+		        out.flush();
+		        
+		        if (processed != (int)fileSize) {
+		        	if (in != null) {
+		        		in.close();
+		        		in = null;
+		        	}
+		        		
+		        	if (out != null) {
+		        		out.close();
+		        		out = null;
+		        	}
+		        	
+		        	result = Communicator.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
+		        }
+		        else {
+			        byte[] sumBytes = md.digest();
+			        
+			        String sum = new String(sumBytes);
+			        
+			        if (sum == md5sum)
+			        	result.status = DownloadStatus.Successful;
+			        else {
+			        	result.status = DownloadStatus.Md5mismatch;
+			        	
+			        	result = Communicator.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
+			        }
+		        }
+		        
+		    } catch (Exception e) {
+		        Log.e(TAG, e.getMessage());
+		    } finally {
+		    	if (in != null)
+		    		in.close();
+		    	if (out != null)
+		    		out.close();
+		    }
+		}
+		return result;
+	}
+	
+	public static DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) throws IOException {
+		String[] splittedFilename = filename.split(".");
+		
+		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1]);
+		
+		if (url != null && !url.isEmpty() && retries <= 10) {
+			InputStream in = null;
+		    FileOutputStream out = null;
+		    
+		    try {
+		        HttpResponse response = Communicator.getResponse(url, alreadyDownloaded);
+		        
+		        Boolean ranges = Communicator.tryGetAcceptRangesFromResponse(response);
+		        
+		        long fileSize = response.getEntity().getContentLength();
+		        
+		        in = new BufferedInputStream(response.getEntity().getContent());
+		        
+			    MessageDigest md = MessageDigest.getInstance("MD5");
+		        
+		        in = new DigestInputStream(in, md);
+		        
+		        File file = new File(directory, filename);
+		        
+		        out = new FileOutputStream(file, ranges);
+		        
+		        byte[] buffer = new byte[1024];
+		        
+		        int len;
+		        
+		        Integer processed = ranges ? alreadyDownloaded : 0;
+		        
+		        while ((len = in.read(buffer)) != -1) {
+		            out.write(buffer, 0, len);
+		            processed += len;
+		            progressHandler.indirectPublishProgress((int)((100 / fileSize) * processed));
+		            
+		            if (processed % 10240 <= 512) {
+		            	out.flush();
+		            }
 		        }
 		        
 		        out.flush();
@@ -332,7 +428,12 @@ public class Communicator {
 		        String sum = new String(sumBytes);
 		        
 		        if (sum == md5sum)
-		        	result = true;
+		        	result.status = DownloadStatus.Successful;
+		        else {
+		        	result.status = DownloadStatus.Md5mismatch;
+		        	
+		        	result = Communicator.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, retries);
+		        }
 		        
 		    } catch (Exception e) {
 		        Log.e(TAG, e.getMessage());
@@ -359,6 +460,32 @@ public class Communicator {
         }
         
         return response;
+	}
+	
+	public static HttpResponse getResponse(String url, int alreadyDownloaded) throws ClientProtocolException, IOException, URISyntaxException {
+        HttpClient client = new DefaultHttpClient();
+        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android");
+        client.getParams().setParameter("Range", "bytes=" + alreadyDownloaded + "-");
+        HttpGet request = new HttpGet();
+        request.setURI(new URI(url));
+        HttpResponse response = client.execute(request);
+        Header header = response.getFirstHeader("Location");
+        
+        if (header != null) {
+        	response = Communicator.getResponse(header.getValue());
+        }
+        
+        return response;
+	}
+	
+	public static Boolean tryGetAcceptRangesFromResponse(HttpResponse response) {
+		Header header = response.getFirstHeader("Accept-Ranges");
+		
+		if (header.getValue().isEmpty() || header.getValue() != "none") {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public static String tryGetFilenameFromResponse(HttpResponse response) {
