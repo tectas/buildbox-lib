@@ -1,5 +1,7 @@
 ---------------------------------
-All content inside this application is licensed under GNU LESSER GENERAL PUBLIC LICENSE described below, except of res/values/strings.xml, res/layout and res/drawable* files and folders, which can be changed without the need to publish the changes.
+All content inside this application is licensed under GNU LESSER GENERAL PUBLIC LICENSE described below,
+except of res/values/strings.xml, res/layout, AndroidManifest.xml and res/drawable* files and folders, 
+which can be changed without the need to publish the changes.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
