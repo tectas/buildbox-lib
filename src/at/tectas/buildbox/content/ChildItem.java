@@ -11,7 +11,12 @@ public class ChildItem extends ParentItem {
 	public String detailUrl;
 	
 	public ChildItem(JSONObject json) throws JSONException, NullPointerException {
-		super(json);
+		this(null, json);
+	}
+	
+	public ChildItem(Item parent, JSONObject json) throws JSONException, NullPointerException {
+		super(parent, json);
+		
 		this.detailUrl = json.optString(Item.activity.getString(R.string.detailurl_property));
 		
 		JSONArray children = json.optJSONArray(Item.activity.getString(R.string.detail_property));

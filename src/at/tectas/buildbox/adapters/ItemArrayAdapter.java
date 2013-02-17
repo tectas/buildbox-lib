@@ -1,6 +1,9 @@
 package at.tectas.buildbox.adapters;
 
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
@@ -13,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import at.tectas.buildbox.content.ChildItem;
 import at.tectas.buildbox.content.Item;
+import at.tectas.buildbox.content.Item.ItemTypes;
 import at.tectas.buildbox.content.ParentItem;
 import at.tectas.buildbox.R;
 
@@ -20,7 +24,8 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 	
 	private final static String TAG = "ItemArrayAdapter";
 	private final Activity context;
-	private final Item[] items;
+	private final ArrayList<Item> items;
+	private Item currentItem = null;
 	
 	static class ViewHolder {
 		public TextView text;
@@ -31,7 +36,7 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 			Item[] objects) {
 		super(context, textViewResourceId, objects);
 		this.context = context;
-		this.items = objects;
+		this.items = new ArrayList<Item>(Arrays.asList(objects));
 	}
 	
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -46,10 +51,11 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 		}
 		
 		ViewHolder holder = (ViewHolder) rowView.getTag();
-		Item item = this.items[position];
+		Item item = this.items.get(position);
+		this.currentItem = item;
 	    holder.text.setText(item.title);
 	    
-	    if (item.getClass() == ChildItem.class || item.getClass() == ParentItem.class) {
+	    if (item.type == ItemTypes.ParentItem || item.type == ItemTypes.ChildItem) {
 	    	
 	    	ChildItem child = (ChildItem) item;
 	    	
@@ -65,6 +71,10 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 		        }
 		    }
 	    }
+	    else if (item.type == ItemTypes.DetailItem) {
+	    	
+	    }
+	    
 		return rowView;
 	}
 }

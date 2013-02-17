@@ -15,7 +15,12 @@ public class ParentItem extends Item {
 	public ItemList childs = new ItemList();
 	
 	public ParentItem(JSONObject json) throws JSONException {
-		super(json);
+		this(null, json);
+	}
+	
+	public ParentItem(Item parent, JSONObject json) throws JSONException {
+		super(parent, json);
+		
 		this.thumbnailUrl = json.optString(Item.activity.getString(R.string.thumbnailurl_property));
 		
 		JSONArray children = json.optJSONArray(Item.activity.getString(R.string.children_property));

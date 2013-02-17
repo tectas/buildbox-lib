@@ -24,12 +24,19 @@ public class Item {
 	public static final String TAG = "ITEM";
 	protected static Activity activity;
 	
+	public Item parent = null;
 	public ItemTypes type = null;
 	public final UUID ID = UUID.randomUUID();
 	public String title;
 	public ArrayList<String> dependencies = new ArrayList<String>();
 	
 	public Item (JSONObject json) throws JSONException {
+		this(null, json);
+	}
+	
+	public Item (Item parent, JSONObject json) throws JSONException {
+		this.parent = parent;
+		
 		this.title = json.optString(Item.activity.getString(R.string.title_property));
 		
 		this.parseJSONArray(json.optJSONArray(Item.activity.getString(R.string.dependencies_property)), ArrayTypes.DEPENDENCIES);
