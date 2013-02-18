@@ -1,11 +1,11 @@
 package at.tectas.buildbox.content;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
 import at.tectas.buildbox.R;
+import at.tectas.buildbox.helpers.JsonParser;
 
 public class ChildItem extends ParentItem {
 	public String detailUrl;
@@ -19,17 +19,10 @@ public class ChildItem extends ParentItem {
 		
 		this.detailUrl = json.optString(Item.activity.getString(R.string.detailurl_property));
 		
-		JSONArray children = json.optJSONArray(Item.activity.getString(R.string.detail_property));
+		JSONObject children = json.optJSONObject(Item.activity.getString(R.string.detail_property));
 		
-		if (children != null) {
-			for (int i = 0; i < children.length(); i++) {
-				this.childs.put(new DetailItem(children.optJSONObject(i)));
-			}
-		}
-		else {
-			if (detailUrl == null)
-				throw new NullPointerException("Childitem must contain an detail item or url!!");
-		}
+		if (children != null)
+			this.childs.add(JsonParser.parseJsonToItem(children));
 		
 		this.type = ItemTypes.ChildItem;
 	}

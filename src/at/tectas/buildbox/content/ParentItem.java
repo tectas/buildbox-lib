@@ -26,10 +26,10 @@ public class ParentItem extends Item {
 		JSONArray children = json.optJSONArray(Item.activity.getString(R.string.children_property));
 		
 		if (children != null)
-			for (int i = 0; i < children.length(); i++) {
+			for (int i = 0; i < children.length(); i++) {				
 				JSONObject object = children.optJSONObject(i);
 				
-				this.childs.put(JsonParser.parseJsonToItem(object));
+				this.childs.add(JsonParser.parseJsonToItem(object));
 			}
 		
 		this.type = ItemTypes.ParentItem;

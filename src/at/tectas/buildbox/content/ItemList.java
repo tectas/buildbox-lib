@@ -1,17 +1,13 @@
 package at.tectas.buildbox.content;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import android.os.Bundle;
 
-public class ItemList implements Map<ItemListKey, Item>  {
+public class ItemList extends ArrayList<Item>  {
 	
-	private Map<ItemListKey, Item> items = new HashMap<ItemListKey, Item>();
+	private static final long serialVersionUID = 1L;
 	
 	public ItemList () {
 		
@@ -19,52 +15,65 @@ public class ItemList implements Map<ItemListKey, Item>  {
 	
 	public ItemList (ArrayList<Item> itemList) {
 		for (Item item : itemList) {
-			this.items.put(new ItemListKey(item.ID, item.title), item);
+			this.add(item);
 		}
-	}
-	
-	public ItemList (Map<ItemListKey, Item> itemMap) {
-		this.items = itemMap;
 	}
 	
 	@Override
 	public void clear() {
-		this.items.clear();
+		this.clear();
 	}
 
-	@Override
-	public boolean containsKey(Object key) {
-		return this.items.containsKey(key);
+	public boolean contains(UUID key) {
+		boolean result = false;
+		
+		for (Item item: this) {
+			if (item.ID == key) {
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 
-	@Override
-	public boolean containsValue(Object value) {
-		return this.items.containsValue(value);
+	public boolean contains(String key) {
+		boolean result = false;
+		
+		for (Item item: this) {
+			if (item.ID.toString() == key) {
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 
-	@Override
-	public Set<java.util.Map.Entry<ItemListKey, Item>> entrySet() {
-		return this.items.entrySet();
-	}
-
-	@Override
 	public Item get(Object key) {
-		return this.items.get(key);
+		for (Item item: this) {
+			if (item.ID == key) {
+				return item;
+			}
+		}
+		return null;
 	}
-
+	
+	public Item get(Integer index) {
+		return this.get((int)index);
+	}
+	
 	public Item get(UUID id) {
-		for (ItemListKey key: this.items.keySet()) {
-			if (key.getID() == id) {
-				return this.items.get(key);
+		for (Item item: this) {
+			if (item.ID == id) {
+				return item;
 			}
 		}
 		return null;
 	}
 	
 	public Item get (String title) {
-		for (ItemListKey key: this.items.keySet()) {
-			if (key.getTitle() == title) {
-				return this.items.get(key);
+		for (Item item: this) {
+			if (item.title == title) {
+				return item;
 			}
 		}
 		return null;
@@ -72,48 +81,24 @@ public class ItemList implements Map<ItemListKey, Item>  {
 	
 	@Override
 	public boolean isEmpty() {
-		return this.items.isEmpty();
+		return this.isEmpty();
 	}
 
-	@Override
-	public Set<ItemListKey> keySet() {
-		return this.items.keySet();
-	}
-	
-	public Item put(Item item) {
-		return this.items.put(new ItemListKey(item.ID, item.title), item);
-	}
-	
-	@Override
-	public Item put(ItemListKey key, Item value) {
-		return this.items.put(key, value);
-	}
-
-	@Override
-	public void putAll(Map<? extends ItemListKey, ? extends Item> arg0) {
-		this.items.putAll(arg0);
-	}
-
-	@Override
-	public Item remove(Object key) {
-		return this.items.remove(key);
-	}
-
-	@Override
-	public int size() {
-		return this.items.size();
-	}
-
-	@Override
-	public Collection<Item> values() {
-		return this.items.values();
+	public boolean remove(UUID key) {
+		for (Item item: this) {
+			if (item.ID == key) {
+				this.remove(item);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public Bundle getBundle() {
 		Bundle result = new Bundle();
 		
-		for (ItemListKey itemKey: this.items.keySet()) {
-			result.putBundle(itemKey.getID().toString(), this.items.get(itemKey).parseItemToBundle());
+		for (Item item: this) {
+			result.putBundle(item.ID.toString(), item.parseItemToBundle());
 		}
 		
 		return result;

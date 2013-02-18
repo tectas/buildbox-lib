@@ -9,7 +9,7 @@
     <string name="app_cancel_message">It seems your rom is not supporting this application, please speak with the maintainer of it for further informations.</string>
     <string name="thumbnail_description">Thumbnail</string>
     <string name="default_rom_url">http://kitchen.tectas.eu/Test.json</string>
-    <string name="default_content_url"/>
+    <string name="default_content_url">http://kitchen.tectas.eu/Content.json</string>
     <string name="changelog_head">Changelog</string>
     <string name="md5sum_head">md5sum:</string>
     <string name="detail_property">detail</string>

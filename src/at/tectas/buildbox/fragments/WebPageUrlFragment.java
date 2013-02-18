@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import at.tectas.buildbox.R;
-import at.tectas.buildbox.helpers.BrowserUrlListener;
+import at.tectas.buildbox.listeners.BrowserUrlListener;
 
 public class WebPageUrlFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

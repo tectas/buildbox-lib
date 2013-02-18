@@ -1,6 +1,7 @@
 package at.tectas.buildbox;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
@@ -20,10 +21,10 @@ import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
 import at.tectas.buildbox.content.DetailItem;
 import at.tectas.buildbox.content.Item;
-import at.tectas.buildbox.content.ItemList;
 import at.tectas.buildbox.fragments.ContentListFragment;
 import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.helpers.JsonParser;
+import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.R;
 
 @SuppressLint("DefaultLocale")
@@ -43,7 +44,6 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 	private ActionBar bar = null;
 	private TabsAdapter adapter = null;
 	private DetailItem romItem = null;
-	private ItemList contentItems = null;
 	private Communicator communicator = new Communicator();
 	
 	public Communicator getCommunicator() {
@@ -60,10 +60,6 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 	
 	public DetailItem getRomItem() {
 		return this.romItem;
-	}
-	
-	public ItemList getContentItems() {
-		return contentItems;
 	}
 
 	public String getContentUrl() {
@@ -109,11 +105,11 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 		}
 		
 		try {
-			if (this.romUrl != null)
+			if (this.romUrl != null && !this.romUrl.isEmpty())
 				this.communicator.executeJSONObjectAsyncCommunicator(this.romUrl, this);			
 
-			//if (this.contentUrl != null)
-			//	this.communicator.executeJSONArrayAsyncCommunicator(this.contentUrl, this);
+			if (this.contentUrl != null && !this.contentUrl.isEmpty())
+				this.communicator.executeJSONArrayAsyncCommunicator(this.contentUrl, this);
 		} 
 		catch (Exception e) {
 			if (e != null && e.getMessage() != null)
@@ -151,25 +147,59 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 					DetailFragment.class, 
 					this.romItem.parseItemToBundle());
 
-		} catch (Exception e) {
-			Log.e(MainActivity.TAG, e.getMessage());
+		} 
+		catch (JSONException e) {
+			Log.e(MainActivity.TAG, " " + e.getMessage());
+			
+			for (StackTraceElement trace: e.getStackTrace()) {
+				Log.e(MainActivity.TAG, trace.toString());
+			}
+		}
+		catch (NullPointerException e) {
+			Log.e(MainActivity.TAG, " " + e.getMessage());
+			
+			for (StackTraceElement trace: e.getStackTrace()) {
+				Log.e(MainActivity.TAG, trace.toString());
+			}
 		}
 	}
 
 	@Override
 	public void updateWithJSONArray(JSONArray result) {
+		
 		try {
-			this.contentItems = JsonParser.parseJson(result);
+			SharedObjectsHelper.contentItems = JsonParser.parseJson(result);
 			
-			for (Item item : this.contentItems.values()) {
+			Log.e(MainActivity.TAG, ((Boolean)(SharedObjectsHelper.contentItems != null)).toString());
+			
+			int i = 0;
+			
+			for (Item item : SharedObjectsHelper.contentItems) {
+				Bundle bundle = new Bundle();
+				
+				bundle.putInt("index", i);
+				
 				this.adapter.addTab(
 						this.bar.newTab().setText(item.title), 
 						ContentListFragment.class, 
-						item.parseItemToBundle());
+						bundle);
+				
+				i++;
 			}
 		}
-		catch (Exception e) {
-			Log.e(MainActivity.TAG, e.getMessage().toString());
+		catch (JSONException e) {
+			Log.e(MainActivity.TAG, " " + e.getMessage());
+			
+			for (StackTraceElement trace: e.getStackTrace()) {
+				Log.e(MainActivity.TAG, trace.toString());
+			}
+		}
+		catch (NullPointerException e) {
+			Log.e(MainActivity.TAG, " " + e.getMessage());
+			
+			for (StackTraceElement trace: e.getStackTrace()) {
+				Log.e(MainActivity.TAG, trace.toString());
+			}
 		}
 	}
 
@@ -178,12 +208,17 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 		try {
 			if (view != null) {
 				Animation animation = view.getAnimation();
-				animation.cancel();
+				if (animation.hasStarted())
+					animation.cancel();
 				view.setImageBitmap(bitmap);
 			}
 		}
-		catch (Exception e) {
-			Log.e(MainActivity.TAG, e.getMessage());
+		catch (NullPointerException e) {
+			//Log.e(MainActivity.TAG, " " + e.getMessage());
+			
+			//for (StackTraceElement trace: e.getStackTrace()) {
+			//	Log.e(MainActivity.TAG, trace.toString());
+			//}
 		}
 	}
 

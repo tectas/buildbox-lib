@@ -11,17 +11,19 @@ import at.tectas.buildbox.content.ItemList;
 import at.tectas.buildbox.content.ParentItem;
 
 public class JsonParser {
+	public static final String TAG = "JsonParser";
+	
 	public static ItemList parseJson (JSONArray json) throws JSONException {
 		ItemList items = new ItemList();
 		
 		for (int i = 0; i < json.length(); i++) {
-			items.put(JsonParser.parseJsonToItem(json.optJSONObject(i)));
+			items.add(JsonParser.parseJsonToItem(json.optJSONObject(i)));
 		}
 		
-		return null;
+		return items;
 	}
 	
-	public static  Item parseJsonToItem(JSONObject json) throws JSONException {			
+	public static  Item parseJsonToItem(JSONObject json) throws JSONException {	
 		if (json != null) {
 			if (json.has("detail") || json.has("detailUrl")) {
 				return new ChildItem(json);
