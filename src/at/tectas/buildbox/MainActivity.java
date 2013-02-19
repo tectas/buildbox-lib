@@ -208,18 +208,32 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 		try {
 			if (view != null) {
 				Animation animation = view.getAnimation();
-				if (animation.hasStarted())
+				if (animation != null && animation.hasStarted())
 					animation.cancel();
+				
+				if (!SharedObjectsHelper.remoteDrawables.containsKey((String)view.getTag())) {
+					SharedObjectsHelper.remoteDrawables.put((String)view.getTag(), bitmap);
+				}
+				else {
+					bitmap = SharedObjectsHelper.remoteDrawables.get((String)view.getTag());
+				}
+				
 				view.setImageBitmap(bitmap);
 			}
 		}
 		catch (NullPointerException e) {
-			//Log.e(MainActivity.TAG, " " + e.getMessage());
+			Log.e(MainActivity.TAG, " " + e.getMessage());
 			
-			//for (StackTraceElement trace: e.getStackTrace()) {
-			//	Log.e(MainActivity.TAG, trace.toString());
-			//}
+			for (StackTraceElement trace: e.getStackTrace()) {
+				Log.e(MainActivity.TAG, trace.toString());
+			}
 		}
 	}
-
+	
+	@Override
+	public void onBackPressed() {
+	    if (!SharedObjectsHelper.fragment.getChildFragmentManager().popBackStackImmediate()) {
+	        finish();
+	    }
+	}
 }

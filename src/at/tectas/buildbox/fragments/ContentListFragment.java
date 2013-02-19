@@ -26,6 +26,7 @@ public class ContentListFragment extends Fragment {
 		this.adapter = adapter;
 	}
 	
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
 		

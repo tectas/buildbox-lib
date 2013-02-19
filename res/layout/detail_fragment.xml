@@ -32,7 +32,7 @@
 	        android:textSize="15sp"
 	        android:paddingLeft="5sp"
 	        android:paddingTop="10sp" />
-	        
+		
     </LinearLayout>
     
 </ScrollView>

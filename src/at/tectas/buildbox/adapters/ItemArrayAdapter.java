@@ -23,6 +23,7 @@ import at.tectas.buildbox.content.Item;
 import at.tectas.buildbox.content.Item.ItemTypes;
 import at.tectas.buildbox.content.ParentItem;
 import at.tectas.buildbox.content.DetailItem;
+import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.listeners.ChildItemListItemListener;
 import at.tectas.buildbox.listeners.ParentItemListItemListener;
 
@@ -70,23 +71,30 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 	    try {
 	        String thumbnail = (((ParentItem)item).thumbnailUrl);
 	        
-	        holder.image.setImageResource(R.drawable.spinner);
-			
-			RotateAnimation animation = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-			
-			animation.setDuration(1000);
-			
-			animation.setRepeatCount(Animation.INFINITE);
-			
-			animation.setRepeatMode(Animation.INFINITE);
-			
-			animation.setInterpolator(new LinearInterpolator());
-			
-			holder.image.startAnimation(animation);
-			
-			Communicator communicator = ((MainActivity)this.context).getCommunicator();
-			
-			communicator.executeBitmapAsyncCommunicator(thumbnail, holder.image, ((MainActivity)this.context));
+	        holder.image.setTag(thumbnail);
+	        
+	        if (SharedObjectsHelper.remoteDrawables.containsKey(thumbnail)) {
+	        	holder.image.setImageBitmap(SharedObjectsHelper.remoteDrawables.get(thumbnail));
+	        }
+	        else {
+		        holder.image.setImageResource(R.drawable.spinner);
+				
+				RotateAnimation animation = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+				
+				animation.setDuration(1000);
+				
+				animation.setRepeatCount(Animation.INFINITE);
+				
+				animation.setRepeatMode(Animation.INFINITE);
+				
+				animation.setInterpolator(new LinearInterpolator());
+				
+				holder.image.startAnimation(animation);
+				
+				Communicator communicator = ((MainActivity)this.context).getCommunicator();
+				
+				communicator.executeBitmapAsyncCommunicator(thumbnail, holder.image, ((MainActivity)this.context));
+	        }
 	    }
 	    catch (Exception e) {
 	        Log.e(ItemArrayAdapter.TAG, " " + e.getMessage());

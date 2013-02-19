@@ -11,9 +11,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import at.tectas.buildbox.helpers.SharedObjectsHelper;
 
 public class TabsAdapter extends FragmentPagerAdapter implements
 		ActionBar.TabListener, ViewPager.OnPageChangeListener {
+	private static final String TAG = "TabsAdapter";
 	private final Context mContext;
 	private final ActionBar mActionBar;
 	private final ViewPager mViewPager;
@@ -45,6 +47,11 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 		mTabs.add(info);
 		mActionBar.addTab(tab);
 		notifyDataSetChanged();
+		
+		if (this.mTabs.size() == 1) {
+			SharedObjectsHelper.viewPagerIndex = 0;
+			SharedObjectsHelper.fragment = (Fragment) this.instantiateItem(this.mViewPager, SharedObjectsHelper.viewPagerIndex);
+		}
 	}
 
 	@Override
@@ -55,7 +62,9 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 	@Override
 	public Fragment getItem(int position) {
 		TabInfo info = mTabs.get(position);
-		return Fragment.instantiate(mContext, info.clss.getName(), info.args);
+		Fragment fragment = Fragment.instantiate(mContext, info.clss.getName(), info.args);
+		
+		return fragment;
 	}
 
 	@Override
@@ -65,8 +74,11 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 
 	@Override
 	public void onPageSelected(int position) {
-		if (position < this.mTabs.size())
-		mActionBar.setSelectedNavigationItem(position);
+		if (position < this.mTabs.size()) {
+			SharedObjectsHelper.viewPagerIndex = position;
+			SharedObjectsHelper.fragment = (Fragment) this.instantiateItem(this.mViewPager, SharedObjectsHelper.viewPagerIndex);
+			mActionBar.setSelectedNavigationItem(position);
+		}
 	}
 
 	@Override
@@ -77,7 +89,7 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		Object tag = tab.getTag();
 		for (int i = 0; i < mTabs.size(); i++) {
-			if (mTabs.get(i) == tag) {
+			if (mTabs.get(i) == tag) {				
 				mViewPager.setCurrentItem(i);
 			}
 		}
@@ -89,5 +101,9 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+	}
+
+	public static String getTag() {
+		return TAG;
 	}
 }

@@ -13,5 +13,5 @@
         android:textSize="15sp"
         android:textStyle="bold"
         android:text="@string/developers_head" />
-
+    
 </LinearLayout>

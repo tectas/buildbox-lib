@@ -112,7 +112,7 @@ public class Communicator {
 		@Override
 		protected Bitmap doInBackground(String... params) {
 			try {
-				return Communicator.getBitmap(params[0]);
+				return Communicator.getBitmap(params[0], view.getWidth());
 			}
 			catch (Exception e) {
 				return null;
@@ -250,7 +250,7 @@ public class Communicator {
 		}
 	}
 	
-	public static Bitmap getBitmap(String url) throws IOException {
+	public static Bitmap getBitmap(String url, int width) throws IOException {
 	    Bitmap bitmap = null;
 	    InputStream in = null;
 	    BufferedOutputStream out = null;
@@ -280,9 +280,19 @@ public class Communicator {
 	        out.flush();
 
 	        final byte[] data = dataStream.toByteArray();
-	        BitmapFactory.Options options = new BitmapFactory.Options();
+	        
+	        BitmapFactory.Options boundsOptions = new BitmapFactory.Options();
 
-	        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length,options);
+	        boundsOptions.inJustDecodeBounds = true;
+	        
+	        BitmapFactory.decodeByteArray(data, 0, data.length, boundsOptions);
+	        
+	        BitmapFactory.Options options = new BitmapFactory.Options();
+	        
+	        if (boundsOptions.outWidth != 0 && width != 0)
+	        	options.inSampleSize = (int)Math.floor(boundsOptions.outWidth / (((double)width / 4) * 3));
+	        
+	        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 	    } catch (Exception e) {
 	        Log.e(TAG, e.getMessage());
 	    } finally {
