@@ -12,6 +12,7 @@ public class SharedObjectsHelper {
 	public static int viewPagerIndex = 0;
 	public static Fragment fragment = null;
 	public static Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
+	public static Hashtable<String, DownloadPackage> downloads = new Hashtable<String, DownloadPackage>();
 	
 	public static ItemList getContentItems() {
 		return contentItems;

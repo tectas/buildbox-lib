@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -129,10 +130,21 @@ public class Communicator {
 	
 	public class DownloadAsyncCommunicator extends IDownloadAsyncCommunicator {
 		
-		private IDownloadProcessProgressCallback callbackListener = null;
+		private ArrayList<IDownloadProcessProgressCallback> updateListener = new ArrayList<IDownloadProcessProgressCallback>();
+		private ArrayList<IDownloadProcessFinishedCallback> finishedListener = new ArrayList<IDownloadProcessFinishedCallback>();
 		
-		public DownloadAsyncCommunicator (IDownloadProcessProgressCallback callback) {
-			this.callbackListener = callback;
+		public DownloadAsyncCommunicator (IDownloadProcessProgressCallback updateCallback, IDownloadProcessFinishedCallback finishedCallback) {
+			this.updateListener.add(updateCallback);
+			this.finishedListener.add(finishedCallback);
+		}
+		
+		public DownloadAsyncCommunicator (ArrayList<IDownloadProcessProgressCallback> updateCallback, ArrayList<IDownloadProcessFinishedCallback> finishedCallback) {
+			this.updateListener = updateCallback;
+			this.finishedListener = finishedCallback;
+		}
+		
+		public boolean removeProgressListener (IDownloadProcessProgressCallback callback) {
+			return this.updateListener.remove(callback);
 		}
 		
 		@Override
@@ -150,14 +162,37 @@ public class Communicator {
 		}
 		
 		protected void onProgressUpdate(Integer... progress) {
-			if (this.callbackListener != null)
-				this.callbackListener.updateDownloadProgess(progress[0]);
+			if (this.updateListener != null && this.updateListener.size() != 0)
+				for (IDownloadProcessProgressCallback callback: this.updateListener) {
+					callback.updateDownloadProgess(progress[0]);
+				}
 	     }
 		
 		@Override
 		protected void onPostExecute(DownloadResponse result) {
+			if (this.finishedListener != null && this.finishedListener.size() != 0) {
+				for (IDownloadProcessFinishedCallback callback: this.finishedListener) {
+					callback.downloadFinished(result);
+				}
+			}
 			super.onPostExecute(result);
 		}
+	}
+	
+	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(String url, String directory, String filename, String md5sum, IDownloadProcessProgressCallback updateCallback, IDownloadProcessFinishedCallback finishedCallback) {
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(updateCallback, finishedCallback);
+		
+		communicator.execute(new String[] { url, directory, filename, md5sum });
+		
+		return communicator;
+	}
+	
+	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(String url, String directory, String filename, String md5sum, ArrayList<IDownloadProcessProgressCallback> updateCallback, ArrayList<IDownloadProcessFinishedCallback> finishedCallback) {
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(updateCallback, finishedCallback);
+		
+		communicator.execute(new String[] { url, directory, filename, md5sum });
+		
+		return communicator;
 	}
 	
 	public BitmapAsyncCommunicator executeBitmapAsyncCommunicator (String url) {
@@ -308,7 +343,7 @@ public class Communicator {
 	public static DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler) throws IOException {
 		String[] splittedFilename = filename.split(".");
 		
-		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1]);
+		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1], md5sum);
 		if (url != null && !url.isEmpty()) {
 			InputStream in = null;
 		    FileOutputStream out = null;
@@ -392,7 +427,7 @@ public class Communicator {
 	public static DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) throws IOException {
 		String[] splittedFilename = filename.split(".");
 		
-		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1]);
+		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1], md5sum);
 		
 		if (url != null && !url.isEmpty() && retries <= 10) {
 			InputStream in = null;
