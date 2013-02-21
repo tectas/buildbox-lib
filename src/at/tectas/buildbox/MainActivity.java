@@ -23,6 +23,7 @@ import at.tectas.buildbox.content.DetailItem;
 import at.tectas.buildbox.content.Item;
 import at.tectas.buildbox.fragments.ContentListFragment;
 import at.tectas.buildbox.fragments.DetailFragment;
+import at.tectas.buildbox.fragments.DownloadListFragment;
 import at.tectas.buildbox.helpers.JsonParser;
 import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.R;
@@ -235,5 +236,13 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 	    if (!SharedObjectsHelper.fragment.getChildFragmentManager().popBackStackImmediate()) {
 	        finish();
 	    }
+	}
+	
+	public void addTab(String title, Class<?> clss, Bundle bundle) {
+		this.adapter.addTab(this.bar.newTab().setText(title), clss, bundle);
+	}
+	
+	public void addDownloadsTab() {
+		this.addTab("Downloads", DownloadListFragment.class, new Bundle());
 	}
 }

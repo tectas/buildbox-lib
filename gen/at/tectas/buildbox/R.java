@@ -18,29 +18,40 @@ public final class R {
         public static final int spinner_small=0x7f020004;
     }
     public static final class id {
-        public static final int ListItemImageView=0x7f07000f;
-        public static final int ListItemTextView=0x7f070010;
+        public static final int ListItemImageView=0x7f07001a;
+        public static final int ListItemTextView=0x7f07001b;
         public static final int changelog_head=0x7f070002;
         public static final int changelog_list=0x7f070001;
         public static final int changelog_text=0x7f070003;
-        public static final int description=0x7f070007;
-        public static final int detail_main_layout=0x7f070004;
-        public static final int developer_item=0x7f07000a;
-        public static final int developers_base_fragment=0x7f070008;
-        public static final int developers_head=0x7f070009;
-        public static final int image_item_fragment=0x7f07000b;
-        public static final int images_base_fragment=0x7f07000c;
-        public static final int list_layout=0x7f07000d;
-        public static final int list_view=0x7f07000e;
-        public static final int md5sum=0x7f070013;
-        public static final int md5sum_container=0x7f070011;
-        public static final int md5sum_head=0x7f070012;
+        public static final int description=0x7f07000a;
+        public static final int detail_base_layout=0x7f070004;
+        public static final int detail_base_scroll_layout=0x7f070005;
+        public static final int detail_button_layout=0x7f07000b;
+        public static final int detail_main_layout=0x7f070007;
+        public static final int detail_scroll_layout=0x7f070006;
+        public static final int developer_item=0x7f07000e;
+        public static final int developers_base_fragment=0x7f07000c;
+        public static final int developers_head=0x7f07000d;
+        public static final int download_base_layout=0x7f070010;
+        public static final int download_button=0x7f07000f;
+        public static final int download_item_layout=0x7f070012;
+        public static final int download_item_progress=0x7f070015;
+        public static final int download_item_text=0x7f070013;
+        public static final int download_list=0x7f070011;
+        public static final int download_md5sum_check=0x7f070014;
+        public static final int image_item_fragment=0x7f070016;
+        public static final int images_base_fragment=0x7f070017;
+        public static final int list_layout=0x7f070018;
+        public static final int list_view=0x7f070019;
+        public static final int md5sum=0x7f07001e;
+        public static final int md5sum_container=0x7f07001c;
+        public static final int md5sum_head=0x7f07001d;
         public static final int pager=0x7f070000;
-        public static final int title=0x7f070005;
-        public static final int version=0x7f070006;
-        public static final int webpage_url=0x7f070014;
-        public static final int webpages_base_layout=0x7f070015;
-        public static final int webpages_head=0x7f070016;
+        public static final int title=0x7f070008;
+        public static final int version=0x7f070009;
+        public static final int webpage_url=0x7f07001f;
+        public static final int webpages_base_layout=0x7f070020;
+        public static final int webpages_head=0x7f070021;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -48,13 +59,16 @@ public final class R {
         public static final int detail_fragment=0x7f030002;
         public static final int developers_base_fragment=0x7f030003;
         public static final int developers_item_fragment=0x7f030004;
-        public static final int image_item_fragment=0x7f030005;
-        public static final int images_base_fragment=0x7f030006;
-        public static final int list_fragment=0x7f030007;
-        public static final int list_item=0x7f030008;
-        public static final int md5sum_fragment=0x7f030009;
-        public static final int webpage_url_fragment=0x7f03000a;
-        public static final int webpages_base_fragment=0x7f03000b;
+        public static final int download_button=0x7f030005;
+        public static final int download_list_fragment=0x7f030006;
+        public static final int download_list_item_fragment=0x7f030007;
+        public static final int image_item_fragment=0x7f030008;
+        public static final int images_base_fragment=0x7f030009;
+        public static final int list_fragment=0x7f03000a;
+        public static final int list_item=0x7f03000b;
+        public static final int md5sum_fragment=0x7f03000c;
+        public static final int webpage_url_fragment=0x7f03000d;
+        public static final int webpages_base_fragment=0x7f03000e;
     }
     public static final class menu {
         public static final int activity_main=0x7f060000;

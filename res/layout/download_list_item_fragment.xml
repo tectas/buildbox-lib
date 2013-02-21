@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/download_item_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:columnCount="2">
+
+    <TextView
+        android:id="@+id/download_item_text"
+        android:textSize="15sp"
+        android:layout_gravity="left" />
+
+    <CheckBox
+        android:id="@+id/download_md5sum_check"
+        android:layout_gravity="right" />
+
+    <ProgressBar
+        android:id="@+id/download_item_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:layout_columnSpan="2" />
+
+</GridLayout>

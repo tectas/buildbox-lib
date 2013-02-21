@@ -3,23 +3,29 @@ package at.tectas.buildbox.fragments;
 import java.util.ArrayList;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import at.tectas.buildbox.MainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
+import at.tectas.buildbox.helpers.DownloadKey;
+import at.tectas.buildbox.helpers.DownloadPackage;
 import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
 
-public class DetailFragment extends Fragment {
+public class DetailFragment extends Fragment implements OnClickListener {
 	public static final String TAG = "DetailFragment";
 	
 	private ViewGroup relatedView = null;
@@ -27,6 +33,8 @@ public class DetailFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.relatedView = (ViewGroup) inflater.inflate(R.layout.detail_fragment, container, false);
+		
+		DownloadPackage pack = new DownloadPackage();
 		
 		ViewGroup layoutView = (ViewGroup) this.relatedView.findViewById(R.id.detail_main_layout);
 		
@@ -36,7 +44,11 @@ public class DetailFragment extends Fragment {
 		
 		if (arguments != null) {
 			
-			helper.changeTextViewText(R.id.title, arguments.getString(getString(R.string.title_property), "Stock"));
+			String title = arguments.getString(getString(R.string.title_property), "Stock");
+			
+			pack.filename = title;
+			
+			helper.changeTextViewText(R.id.title, title);
 			
 			helper.changeTextViewText(R.id.version, arguments.getString(getString(R.string.version_property), ""));
 			
@@ -64,7 +76,9 @@ public class DetailFragment extends Fragment {
 			
 			String md5sum = arguments.getString(getString(R.string.md5sum_property));
 			
-			if (md5sum != null && !md5sum.isEmpty()) {				
+			if (md5sum != null && !md5sum.isEmpty()) {
+				pack.md5sum = md5sum;
+				
 				View childView = inflater.inflate(R.layout.md5sum_fragment, layoutView, false);
 				
 				TextView textView = (TextView) childView.findViewById(R.id.md5sum);
@@ -162,8 +176,53 @@ public class DetailFragment extends Fragment {
 				
 				layoutView.addView(childView);
 			}
+			
+			String url = arguments.getString(getString(R.string.url_property));
+			
+			if (url != null && !url.isEmpty()) {				
+				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
+				
+				pack.url = url;
+				
+				pack.directory = ((MainActivity)getActivity()).getDownloadDir();
+				
+				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
+				
+				downloadButton.setText("Download");
+				
+				downloadButton.setTag(pack);
+				
+				downloadButton.setOnClickListener(this);
+				
+				buttonLayout.addView(downloadButton);
+			}
 		}
 		
 		return this.relatedView;
+	}
+	
+	@Override
+	public void onClick(View v) {
+		MainActivity activity = (MainActivity) getActivity();
+		
+		final View button = v;
+		
+		if (!SharedObjectsHelper.downloadTabAdded) {
+			activity.addDownloadsTab();
+			SharedObjectsHelper.downloadTabAdded = true;
+		}
+		
+ 		DownloadPackage pack = (DownloadPackage) button.getTag();
+		
+ 		String key = pack.md5sum == null? pack.url : pack.md5sum;
+ 		
+ 		if (!SharedObjectsHelper.downloads.containsKey(key)) {
+ 			if (SharedObjectsHelper.downloadAdapter != null) {
+ 				SharedObjectsHelper.downloadAdapter.add(pack);
+ 			}
+ 			else {
+ 	 			SharedObjectsHelper.downloads.put(key, pack);
+ 			}
+ 		}
 	}
 }

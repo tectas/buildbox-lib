@@ -2,13 +2,14 @@ package at.tectas.buildbox.communication;
 
 public class DownloadResponse {
 	public enum DownloadStatus {
-		Successful, Broken, Md5mismatch
+		Pending, Successful, Broken, Md5mismatch
 	}
 	
-	public DownloadStatus status = DownloadStatus.Broken;
+	public DownloadStatus status = DownloadStatus.Pending;
 	public String fileName = null;
 	public String mime = null;
 	public String md5sum = null;
+	public int progress = 0;
 	
 	public DownloadResponse () {
 		
