@@ -9,48 +9,51 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.util.ArrayList;
+import java.util.Hashtable;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreProtocolPNames;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.ImageView;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 
 public class Communicator {
+	public enum CallbackType {
+		UI, Service
+	}
+	
 	public static final String TAG = "Communicator";
 	
-	public class JSONObjectAsyncCommunicator extends AsyncTask<String, Integer, JSONObject> {
+	public class JSONObjectAsyncCommunicator extends AsyncTask<String, Integer, JsonObject> {
 		
 		private ICommunicatorCallback callbackListener = null;
+		private Communicator communicator = null;
 		
-		public JSONObjectAsyncCommunicator () {
-			
+		public JSONObjectAsyncCommunicator (Communicator communicator) {
+			this.communicator = communicator;
 		}
 		
-		public JSONObjectAsyncCommunicator (ICommunicatorCallback callback) {
+		public JSONObjectAsyncCommunicator (Communicator communicator, ICommunicatorCallback callback) {
+			this(communicator);
 			this.callbackListener = callback;
 		}
 		
 		@Override
-		protected JSONObject doInBackground(String... params) {
+		protected JsonObject doInBackground(String... params) {
 			try {
-				return Communicator.getJSONObject(params[0]);
+				return this.communicator.getJsonObject(params[0]);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -58,40 +61,41 @@ public class Communicator {
 		}
 		
 		@Override
-		protected void onPostExecute(JSONObject result) {
+		protected void onPostExecute(JsonObject result) {
 			if (this.callbackListener != null)
-				this.callbackListener.updateWithJSONObject(result);
+				this.callbackListener.updateWithJsonObject(result);
 			super.onPostExecute(result);
 		}
 	}
 	
-	public class JSONArrayAsyncCommunicator extends AsyncTask<String, Integer, JSONArray> {
+	public class JSONArrayAsyncCommunicator extends AsyncTask<String, Integer, JsonArray> {
 		
 		private ICommunicatorCallback callbackListener = null;
+		private Communicator communicator = null;
 		
-		public JSONArrayAsyncCommunicator () {
-			
+		public JSONArrayAsyncCommunicator (Communicator communicator) {
+			this.communicator = communicator;
 		}
 		
-		public JSONArrayAsyncCommunicator (ICommunicatorCallback callback) {
+		public JSONArrayAsyncCommunicator (Communicator communicator, ICommunicatorCallback callback) {
+			this(communicator);
 			this.callbackListener = callback;
 		}
 		
 		@Override
-		protected JSONArray doInBackground(String... params) {
+		protected JsonArray doInBackground(String... params) {
 			try {
-				return Communicator.getJSONArray(params[0]);
+				return this.communicator.getJsonArray(params[0]);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			}
 		}
 		
 		@Override
-		protected void onPostExecute(JSONArray result) {
+		protected void onPostExecute(JsonArray result) {
 			if (this.callbackListener != null)
-				this.callbackListener.updateWithJSONArray(result);
+				this.callbackListener.updateWithJsonArray(result);
 			super.onPostExecute(result);
 		}
 	}
@@ -100,12 +104,14 @@ public class Communicator {
 		
 		private ImageView view = null;
 		private ICommunicatorCallback callbackListener = null;
+		private Communicator communicator = null;
 		
-		public BitmapAsyncCommunicator () {
-
+		public BitmapAsyncCommunicator (Communicator communicator) {
+			this.communicator = communicator;
 		}
 		
-		public BitmapAsyncCommunicator (ImageView view, ICommunicatorCallback callback) {
+		public BitmapAsyncCommunicator (Communicator communicator, ImageView view, ICommunicatorCallback callback) {
+			this(communicator);
 			this.view = view;
 			this.callbackListener = callback;
 		}
@@ -113,7 +119,7 @@ public class Communicator {
 		@Override
 		protected Bitmap doInBackground(String... params) {
 			try {
-				return Communicator.getBitmap(params[0], view.getWidth());
+				return this.communicator.getBitmap(params[0], view.getWidth());
 			}
 			catch (Exception e) {
 				return null;
@@ -130,49 +136,127 @@ public class Communicator {
 	
 	public class DownloadAsyncCommunicator extends IDownloadAsyncCommunicator {
 		
-		private ArrayList<IDownloadProcessProgressCallback> updateListener = new ArrayList<IDownloadProcessProgressCallback>();
-		private ArrayList<IDownloadProcessFinishedCallback> finishedListener = new ArrayList<IDownloadProcessFinishedCallback>();
+		public String ID = null;
+		private Communicator communicator = null;
+		private Hashtable<CallbackType, IDownloadProcessProgressCallback> updateListener = new Hashtable<CallbackType, IDownloadProcessProgressCallback>();
+		private Hashtable<CallbackType, IDownloadProcessFinishedCallback> finishedListener = new Hashtable<CallbackType, IDownloadProcessFinishedCallback>();
 		
-		public DownloadAsyncCommunicator (IDownloadProcessProgressCallback updateCallback, IDownloadProcessFinishedCallback finishedCallback) {
-			this.updateListener.add(updateCallback);
-			this.finishedListener.add(finishedCallback);
+		private DownloadAsyncCommunicator (Communicator communicator, String ID) {
+			this.ID = ID;
+			this.communicator = communicator;
 		}
 		
-		public DownloadAsyncCommunicator (ArrayList<IDownloadProcessProgressCallback> updateCallback, ArrayList<IDownloadProcessFinishedCallback> finishedCallback) {
+		public DownloadAsyncCommunicator (Communicator communicator, String ID, IDownloadProcessProgressCallback updateCallback, IDownloadProcessFinishedCallback finishedCallback) {
+			this(communicator, ID);
+			this.updateListener.put(CallbackType.Service, updateCallback);
+			
+			this.finishedListener.put(CallbackType.Service, finishedCallback);
+		}
+		
+		public DownloadAsyncCommunicator (Communicator communicator, String ID, Hashtable<CallbackType, IDownloadProcessProgressCallback> updateCallback, Hashtable<CallbackType, IDownloadProcessFinishedCallback> finishedCallback) {
+			this(communicator, ID);
 			this.updateListener = updateCallback;
 			this.finishedListener = finishedCallback;
 		}
 		
-		public boolean removeProgressListener (IDownloadProcessProgressCallback callback) {
-			return this.updateListener.remove(callback);
+		public synchronized boolean removeProgressListener (CallbackType type) {
+			if (this.updateListener.containsKey(type)) {
+				IDownloadProcessProgressCallback removedCallback = this.updateListener.remove(type);
+				if (removedCallback != null) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		
+		public synchronized boolean addProgressListener (CallbackType type, IDownloadProcessProgressCallback callback) {
+			if (this.updateListener.containsKey(type)) {
+				this.updateListener.remove(type);
+			}
+			
+			IDownloadProcessProgressCallback newCallback = this.updateListener.put(type, callback);
+			
+			if (newCallback != null) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		
+		public synchronized boolean removeResultListener(CallbackType type) {
+			if (this.finishedListener.containsKey(type)) {
+				
+				IDownloadProcessFinishedCallback removedCallback = this.finishedListener.remove(type);
+				
+				if (removedCallback != null) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		
+		public synchronized boolean addResultListener(CallbackType type, IDownloadProcessFinishedCallback callback) {
+			if (this.finishedListener.containsKey(type))
+				this.finishedListener.remove(type);
+			
+			IDownloadProcessFinishedCallback newCallback = this.finishedListener.put(type, callback);
+				
+			if (newCallback != null) {
+				return true;
+			}
+			else {
+				return false;
+			}
+			
 		}
 		
 		@Override
 		protected DownloadResponse doInBackground(String... params) {
 			try {
-				return Communicator.downloadFileToSd(params[0], params[1], params[2], params[3], this);
+				return this.communicator.downloadFileToSd(params[0], params[1], params[2], params[3], this);
 			}
 			catch (Exception e) {
 				return new DownloadResponse();
 			}
 		}
 		
-		public void indirectPublishProgress(Integer progress) {
-			this.publishProgress(progress);
+		public void indirectPublishProgress(DownloadResponse response) {
+			this.publishProgress(response);
 		}
 		
-		protected void onProgressUpdate(Integer... progress) {
+		protected void onProgressUpdate(DownloadResponse... response) {
 			if (this.updateListener != null && this.updateListener.size() != 0)
-				for (IDownloadProcessProgressCallback callback: this.updateListener) {
-					callback.updateDownloadProgess(progress[0]);
+				for (CallbackType callbackKey: this.updateListener.keySet()) {
+					
+					IDownloadProcessProgressCallback listener = this.updateListener.get(callbackKey);
+					
+					if (listener != null) {
+						listener.updateDownloadProgess(response[0]);
+					}
 				}
 	     }
 		
 		@Override
 		protected void onPostExecute(DownloadResponse result) {
 			if (this.finishedListener != null && this.finishedListener.size() != 0) {
-				for (IDownloadProcessFinishedCallback callback: this.finishedListener) {
-					callback.downloadFinished(result);
+				for (CallbackType callbackKey: this.finishedListener.keySet()) {
+					
+					IDownloadProcessFinishedCallback listener = this.finishedListener.get(callbackKey);
+					
+					if (listener != null) {
+						listener.downloadFinished(result);
+					}
 				}
 			}
 			super.onPostExecute(result);
@@ -180,76 +264,77 @@ public class Communicator {
 	}
 	
 	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(String url, String directory, String filename, String md5sum, IDownloadProcessProgressCallback updateCallback, IDownloadProcessFinishedCallback finishedCallback) {
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(updateCallback, finishedCallback);
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback);
 		
-		communicator.execute(new String[] { url, directory, filename, md5sum });
+		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new String[] { url, directory, filename, md5sum });
 		
 		return communicator;
 	}
 	
-	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(String url, String directory, String filename, String md5sum, ArrayList<IDownloadProcessProgressCallback> updateCallback, ArrayList<IDownloadProcessFinishedCallback> finishedCallback) {
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(updateCallback, finishedCallback);
+	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(String url, String directory, String filename, String md5sum, Hashtable<CallbackType, IDownloadProcessProgressCallback> updateCallback, Hashtable<CallbackType, IDownloadProcessFinishedCallback> finishedCallback) {
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback);
 		
-		communicator.execute(new String[] { url, directory, filename, md5sum });
+		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new String[] { url, directory, filename, md5sum });
 		
 		return communicator;
 	}
 	
 	public BitmapAsyncCommunicator executeBitmapAsyncCommunicator (String url) {
-		BitmapAsyncCommunicator communicator = new BitmapAsyncCommunicator();
+		BitmapAsyncCommunicator communicator = new BitmapAsyncCommunicator(this);
 		
-		communicator.execute(url);
+		communicator = (BitmapAsyncCommunicator)communicator.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, url);
 		
 		return communicator;
 	}
 	
 	public BitmapAsyncCommunicator executeBitmapAsyncCommunicator (String url, ImageView view, ICommunicatorCallback callback) {
-		BitmapAsyncCommunicator communicator = new BitmapAsyncCommunicator(view, callback);
+		BitmapAsyncCommunicator communicator = new BitmapAsyncCommunicator(this, view, callback);
 		
-		communicator.execute(url);
+		communicator = (BitmapAsyncCommunicator)communicator.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, url);
 		
 		return communicator;
 	}
 	
 	public JSONObjectAsyncCommunicator executeJSONObjectAsyncCommunicator (String url) {
-		JSONObjectAsyncCommunicator communicator = new JSONObjectAsyncCommunicator();
+		JSONObjectAsyncCommunicator communicator = new JSONObjectAsyncCommunicator(this);
 		
-		communicator.execute(url);
+		communicator = (JSONObjectAsyncCommunicator)communicator.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, url);
 		
 		return communicator;
 	}
 
 	public JSONObjectAsyncCommunicator executeJSONObjectAsyncCommunicator (String url, ICommunicatorCallback callback) {
-		JSONObjectAsyncCommunicator communicator = new JSONObjectAsyncCommunicator(callback);
+		JSONObjectAsyncCommunicator communicator = new JSONObjectAsyncCommunicator(this, callback);
 		
-		communicator.execute(url);
+		communicator = (JSONObjectAsyncCommunicator)communicator.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, url);
 		
 		return communicator;
 	}
 	
 	public JSONArrayAsyncCommunicator executeJSONArrayAsyncCommunicator (String url) {
-		JSONArrayAsyncCommunicator communicator = new JSONArrayAsyncCommunicator();
-		
-		communicator.execute(url);
+		JSONArrayAsyncCommunicator communicator = new JSONArrayAsyncCommunicator(this);
+
+		communicator = (JSONArrayAsyncCommunicator)communicator.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, url);
 		
 		return communicator;
 	}
 	
 	public JSONArrayAsyncCommunicator executeJSONArrayAsyncCommunicator (String url, ICommunicatorCallback callback) {
-		JSONArrayAsyncCommunicator communicator = new JSONArrayAsyncCommunicator(callback);
-		
-		communicator.execute(url);
+		JSONArrayAsyncCommunicator communicator = new JSONArrayAsyncCommunicator(this, callback);
+
+		communicator = (JSONArrayAsyncCommunicator)communicator.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, url);
 		
 		return communicator;
 	}
 	
-	public static String getString(String url) throws Exception {
+	public String getString(String url) throws Exception {
 		if (url != null) {
 		    BufferedReader in = null;
 		    try 
 		    {
-		    	HttpResponse response = Communicator.getResponse(url);
-		        in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		    	HttpURLConnection connection = Communicator.getConnection(url);
+		    	
+		        in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 		
 		        StringBuilder sb = new StringBuilder();
 		        String line = "";
@@ -262,7 +347,7 @@ public class Communicator {
 		        return sb.toString();
 		    }
 		    catch (Exception e) {
-		    	Log.e(Communicator.TAG, e.getMessage());
+		    	e.printStackTrace();
 		    	return null;
 		    }
 		    finally 
@@ -275,7 +360,7 @@ public class Communicator {
 		            } 
 		            catch (IOException e)    
 		            {
-		                Log.d(Communicator.TAG, e.toString());
+		            	e.printStackTrace();
 		            }
 		        }
 		    }
@@ -285,51 +370,59 @@ public class Communicator {
 		}
 	}
 	
-	public static Bitmap getBitmap(String url, int width) throws IOException {
+	public Bitmap getBitmap(String url, int width) throws IOException {
 	    Bitmap bitmap = null;
 	    InputStream in = null;
 	    BufferedOutputStream out = null;
 
 	    try {
-	    	HttpResponse response = Communicator.getResponse(url);
+	    	HttpURLConnection connection = Communicator.getConnection(url);
 	        
-	        in = new BufferedInputStream(response.getEntity().getContent());
+	        boolean statusOk = Communicator.checkHttpStatus(connection);
 	        
-	        final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-	        out = new BufferedOutputStream(dataStream);
-	        
-	        byte[] buffer = new byte[1024];
-	        
-	        int len, processed = 0;
-	        
-	        while ((len = in.read(buffer)) != -1) {	        	
-	            out.write(buffer, 0, len);
-	            
-	        	processed += len;
-	            
-	            if (processed % 10240 <= 512) {
-	            	out.flush();
-	            }
+	        if (statusOk) {
+	    	
+		        in = new BufferedInputStream(connection.getInputStream());
+		        
+		        final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+		        out = new BufferedOutputStream(dataStream);
+		        
+		        byte[] buffer = new byte[1024];
+		        
+		        int len, processed = 0;
+		        
+		        while ((len = in.read(buffer)) != -1) {	        	
+		            out.write(buffer, 0, len);
+		            
+		        	processed += len;
+		            
+		            if (processed % 10240 <= 512) {
+		            	out.flush();
+		            }
+		        }
+		        
+		        out.flush();
+	
+		        final byte[] data = dataStream.toByteArray();
+		        
+		        BitmapFactory.Options boundsOptions = new BitmapFactory.Options();
+	
+		        boundsOptions.inJustDecodeBounds = true;
+		        
+		        BitmapFactory.decodeByteArray(data, 0, data.length, boundsOptions);
+		        
+		        BitmapFactory.Options options = new BitmapFactory.Options();
+		        
+		        if (boundsOptions.outWidth != 0 && width != 0)
+		        	options.inSampleSize = (int)Math.floor(boundsOptions.outWidth / (((double)width / 4) * 3));
+		        
+		        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 	        }
-	        
-	        out.flush();
-
-	        final byte[] data = dataStream.toByteArray();
-	        
-	        BitmapFactory.Options boundsOptions = new BitmapFactory.Options();
-
-	        boundsOptions.inJustDecodeBounds = true;
-	        
-	        BitmapFactory.decodeByteArray(data, 0, data.length, boundsOptions);
-	        
-	        BitmapFactory.Options options = new BitmapFactory.Options();
-	        
-	        if (boundsOptions.outWidth != 0 && width != 0)
-	        	options.inSampleSize = (int)Math.floor(boundsOptions.outWidth / (((double)width / 4) * 3));
-	        
-	        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+	        else {
+	        	throw new Exception("Bad request at: " + url + ". " + "Statuscode: " + connection.getResponseCode());
+	        }
 	    } catch (Exception e) {
-	        Log.e(TAG, e.getMessage());
+	        e.printStackTrace();
 	    } finally {
 	    	if (in != null)
 	    		in.close();
@@ -340,242 +433,342 @@ public class Communicator {
 	    return bitmap;
 	}
 	
-	public static DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler) throws IOException {
-		String[] splittedFilename = filename.split(".");
+	public JsonObject getJsonObject(String url) throws Exception 
+	{	
+		String respond = this.getString(url);
 		
-		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1], md5sum);
-		if (url != null && !url.isEmpty()) {
+		JsonParser parser = new JsonParser();
+		
+        JsonObject json = parser.parse(respond).getAsJsonObject();
+        
+        return json;
+	}
+	
+	public JsonArray getJsonArray(String url) throws Exception 
+	{	
+		String respond = this.getString(url);
+		
+		JsonParser parser = new JsonParser();
+		
+        JsonArray json = parser.parse(respond).getAsJsonArray();
+        
+        return json;
+	}
+	
+	public DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler) {
+		DownloadResponse result = new DownloadResponse(DownloadStatus.Pending, filename, url, md5sum);
+		
+		if (url != null) {
+			
 			InputStream in = null;
 		    FileOutputStream out = null;
 		    
 		    try {
-		        HttpResponse response = Communicator.getResponse(url);
+		    	HttpURLConnection connection = Communicator.getConnection(url);
 		        
-		        String responseFilename = Communicator.tryGetFilenameFromResponse(response);
+		        boolean statusOk = Communicator.checkHttpStatus(connection);
 		        
-		        long fileSize = response.getEntity().getContentLength();
-		        
-		        in = new BufferedInputStream(response.getEntity().getContent());
-		        
-			    MessageDigest md = MessageDigest.getInstance("MD5");
-		        
-		        in = new DigestInputStream(in, md);
-		        
-		        File file = new File(directory, responseFilename == null? filename : responseFilename);
-		        
-		        out = new FileOutputStream(file);
-		        
-		        byte[] buffer = new byte[1024];
-		        
-		        int len;
-		        
-		        Integer processed = 0;
-		        
-		        while ((len = in.read(buffer)) != -1) {
-		            out.write(buffer, 0, len);
-		            
-		            processed += len;
-		            
-		            progressHandler.indirectPublishProgress((int)((100 / fileSize) * processed));
-		            
-		            if (processed % 10240 <= 512) {
-		            	out.flush();
-		            }
-		        }
-		        
-		        out.flush();
-		        
-		        if (processed != (int)fileSize) {
-		        	if (in != null) {
-		        		in.close();
-		        		in = null;
-		        	}
-		        		
-		        	if (out != null) {
-		        		out.close();
-		        		out = null;
-		        	}
+		        if (statusOk) {
 		        	
-		        	result = Communicator.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
-		        }
-		        else {
-			        byte[] sumBytes = md.digest();
+			        String responseFilename = Communicator.tryGetFilenameFromConnection(connection);
 			        
-			        String sum = new String(sumBytes);
+			        long fileSize = connection.getContentLength();
 			        
-			        if (sum == md5sum)
-			        	result.status = DownloadStatus.Successful;
-			        else {
-			        	result.status = DownloadStatus.Md5mismatch;
+			        in = new BufferedInputStream(connection.getInputStream());
+			        
+				    MessageDigest md = MessageDigest.getInstance("MD5");
+			        
+			        in = new DigestInputStream(in, md);
+			        
+			        File dir = new File(directory);
+			        
+			        if (!dir.exists()) {
+			        	dir.mkdir();
+			        }
+			        
+			        File file = new File(directory, responseFilename == null? filename : responseFilename);
+			        
+			        if (file.exists()) {
+			        	file.delete();
+			        }
+			        
+			        out = new FileOutputStream(file);
+			        
+			        byte[] buffer = new byte[1024];
+			        
+			        int len;
+			        
+			        Integer processed = 0;
+			        
+			        while ((len = in.read(buffer)) != -1) {
+			            out.write(buffer, 0, len);
+			            
+			            processed += len;
+			            
+			            if (processed % 2097152 <= 512) {
+			            	out.flush();
+			            	result.progress = (int)((100d / fileSize) * processed);
+			            	progressHandler.indirectPublishProgress(result);
+			            }
+			        }
+			        
+			        result.progress = (int)((100d / fileSize) * processed);
+			        progressHandler.indirectPublishProgress(result);
+			        
+			        out.flush();
+			        
+			        if (processed != (int)fileSize) {
+			        	if (in != null) {
+			        		in.close();
+			        		in = null;
+			        	}
+			        		
+			        	if (out != null) {
+			        		out.close();
+			        		out = null;
+			        	}
 			        	
-			        	result = Communicator.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
+			        	result = this.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
+			        }
+			        else {
+			        	if (md5sum != null) {
+					        byte[] sumBytes = md.digest();
+					        
+					        StringBuffer hexString = new StringBuffer();
+					        
+					        for (int i=0; i<sumBytes.length; i++) {
+					        	
+					        	StringBuffer hex = new StringBuffer();
+					        	
+					        	hex.append(Integer.toHexString(0xFF & sumBytes[i]));
+					        	
+					        	if (hex.length() == 1)
+					        		hexString.append(0);
+					        	
+					            hexString.append(hex);
+					        }
+					        
+					        String sum = hexString.toString();
+					        
+					        if (sum.equals(md5sum)) 
+					        	result.status = DownloadStatus.Successful;
+					        else {
+					        	
+					        	result.status = DownloadStatus.Md5mismatch;
+					        	
+					        	result = this.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
+					        }
+			        	}
+			        	else {
+			        		result.status = DownloadStatus.Done;
+			        	}
 			        }
 		        }
-		        
-		    } catch (Exception e) {
-		        Log.e(TAG, e.getMessage());
-		    } finally {
+		        else {
+		        	result.status = DownloadStatus.Broken;
+		        }
+		    }
+	        catch (Exception e) {
+	        	e.printStackTrace();
+	        	result.status = DownloadStatus.Broken;
+	        }
+		    finally {
 		    	if (in != null)
-		    		in.close();
+					try {
+						in.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 		    	if (out != null)
-		    		out.close();
+					try {
+						out.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 		    }
 		}
 		return result;
 	}
 	
-	public static DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) throws IOException {
-		String[] splittedFilename = filename.split(".");
+	public DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) {
 		
-		DownloadResponse result = new DownloadResponse(DownloadStatus.Broken, filename, splittedFilename[splittedFilename.length -1], md5sum);
+		DownloadResponse result = new DownloadResponse(DownloadStatus.Pending, filename, url, md5sum);
 		
-		if (url != null && !url.isEmpty() && retries <= 10) {
+		if (url != null && !url.isEmpty() && retries <= 5) {
 			InputStream in = null;
 		    FileOutputStream out = null;
 		    
 		    try {
-		        HttpResponse response = Communicator.getResponse(url, alreadyDownloaded);
+		        HttpURLConnection connection = Communicator.getConnection(url, alreadyDownloaded);
 		        
-		        Boolean ranges = Communicator.tryGetAcceptRangesFromResponse(response);
+		        boolean statusOk = Communicator.checkHttpStatus(connection);
 		        
-		        long fileSize = response.getEntity().getContentLength();
-		        
-		        in = new BufferedInputStream(response.getEntity().getContent());
-		        
-			    MessageDigest md = MessageDigest.getInstance("MD5");
-		        
-		        in = new DigestInputStream(in, md);
-		        
-		        File file = new File(directory, filename);
-		        
-		        out = new FileOutputStream(file, ranges);
-		        
-		        byte[] buffer = new byte[1024];
-		        
-		        int len;
-		        
-		        Integer processed = ranges ? alreadyDownloaded : 0;
-		        
-		        while ((len = in.read(buffer)) != -1) {
-		            out.write(buffer, 0, len);
-		            processed += len;
-		            progressHandler.indirectPublishProgress((int)((100 / fileSize) * processed));
-		            
-		            if (processed % 10240 <= 512) {
-		            	out.flush();
-		            }
-		        }
-		        
-		        out.flush();
-		        
-		        byte[] sumBytes = md.digest();
-		        
-		        String sum = new String(sumBytes);
-		        
-		        if (sum == md5sum)
-		        	result.status = DownloadStatus.Successful;
-		        else {
-		        	result.status = DownloadStatus.Md5mismatch;
+		        if (statusOk) {
 		        	
-		        	result = Communicator.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, retries + 1);
+			        Boolean ranges = Communicator.tryGetAcceptRangesFromConnection(connection);
+			        
+			        long fileSize = connection.getContentLength();
+			        
+			        in = new BufferedInputStream(connection.getInputStream());
+			        
+				    MessageDigest md = MessageDigest.getInstance("MD5");
+			        
+			        in = new DigestInputStream(in, md);
+			        
+			        File file = new File(directory, filename);
+			        
+			        if (!ranges && file.exists()) {
+			        	file.delete();
+			        }
+			        
+			        out = new FileOutputStream(file, ranges);
+			        
+			        byte[] buffer = new byte[1024];
+			        
+			        int len;
+			        
+			        Integer processed = ranges ? alreadyDownloaded : 0;
+			        
+			        while ((len = in.read(buffer)) != -1) {
+			            out.write(buffer, 0, len);
+			            processed += len;
+			            
+			            if (processed % 2097152 <= 128) {
+			            	out.flush();
+			            	result.progress = (int)((100d / fileSize) * processed);
+			            	progressHandler.indirectPublishProgress(result);
+			            }
+			        }
+
+	            	result.progress = (int)((100d / fileSize) * processed);
+	            	progressHandler.indirectPublishProgress(result);
+			        
+			        out.flush();
+			        
+			        if (processed != (int)fileSize) {
+			        	if (in != null) {
+			        		in.close();
+			        		in = null;
+			        	}
+			        		
+			        	if (out != null) {
+			        		out.close();
+			        		out = null;
+			        	}
+			        	
+			        	result = this.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, 1);
+			        }
+			        else {
+			        	if (md5sum != null) {
+					        byte[] sumBytes = md.digest();
+					        
+					        StringBuffer hexString = new StringBuffer();
+					        
+					        for (int i=0; i<sumBytes.length; i++) {
+					        	
+					        	StringBuffer hex = new StringBuffer();
+					        	
+					        	hex.append(Integer.toHexString(0xFF & sumBytes[i]));
+					        	
+					        	if (hex.length() == 1)
+					        		hexString.append(0);
+					        	
+					            hexString.append(hex);
+					        }
+					        
+					        String sum = hexString.toString();
+					        
+					        if (sum.equals(md5sum)) 
+					        	result.status = DownloadStatus.Successful;
+					        else {
+					        	
+					        	result.status = DownloadStatus.Md5mismatch;
+					        	
+					        	result = this.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, 1);
+					        }
+			        	}
+			        	else {
+			        		result.status = DownloadStatus.Successful;
+			        	}
+			        }
 		        }
-		        
-		    } catch (Exception e) {
-		        Log.e(TAG, e.getMessage());
-		    } finally {
+		        else {
+		        	result.status = DownloadStatus.Broken;
+		        }
+		    }
+		    catch (Exception e) {
+		    	e.printStackTrace();
+	        	result.status = DownloadStatus.Broken;
+		    }
+		    finally {
 		    	if (in != null)
-		    		in.close();
+					try {
+						in.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 		    	if (out != null)
-		    		out.close();
+					try {
+						out.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 		    }
 		}
 		return result;
 	}
 	
-	public static HttpResponse getResponse(String url) throws ClientProtocolException, IOException, URISyntaxException {
-        HttpClient client = new DefaultHttpClient();
-        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android");
-        HttpGet request = new HttpGet();
-        request.setURI(new URI(url));
-        HttpResponse response = client.execute(request);
-        Header header = response.getFirstHeader("Location");
+	public static HttpURLConnection getConnection(String urlString) throws ClientProtocolException, IOException, URISyntaxException {
+		URL url = new URL(urlString);
+		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+		urlConnection.addRequestProperty(CoreProtocolPNames.USER_AGENT, "android");
+		urlConnection.addRequestProperty("Cache-Control", "no-cache");
         
-        if (header != null) {
-        	response = Communicator.getResponse(header.getValue());
-        }
-        
-        return response;
-	}
-	
-	public static HttpResponse getResponse(String url, int alreadyDownloaded) throws ClientProtocolException, IOException, URISyntaxException {
-        HttpClient client = new DefaultHttpClient();
-        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android");
-        client.getParams().setParameter("Range", "bytes=" + alreadyDownloaded + "-");
-        HttpGet request = new HttpGet();
-        request.setURI(new URI(url));
-        HttpResponse response = client.execute(request);
-        Header header = response.getFirstHeader("Location");
-        
-        if (header != null) {
-        	response = Communicator.getResponse(header.getValue());
-        }
-        
-        return response;
-	}
-	
-	public static Boolean tryGetAcceptRangesFromResponse(HttpResponse response) {
-		Header header = response.getFirstHeader("Accept-Ranges");
+		urlConnection.connect();
 		
-		if (header.getValue().isEmpty() || header.getValue() != "none") {
+        return urlConnection;
+	}
+	
+	public static HttpURLConnection getConnection(String urlString, int alreadyDownloaded) throws ClientProtocolException, IOException, URISyntaxException {
+		URL url = new URL(urlString);
+		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+		urlConnection.addRequestProperty(CoreProtocolPNames.USER_AGENT, "android");
+		urlConnection.addRequestProperty("Cache-Control", "no-cache");
+		urlConnection.addRequestProperty("Range", "bytes=" + alreadyDownloaded);
+        
+		urlConnection.connect();
+		
+        return urlConnection;
+	}
+	
+	public static Boolean tryGetAcceptRangesFromConnection(HttpURLConnection response) {
+		String header = response.getHeaderField("Accept-Ranges");
+		
+		if (!header.isEmpty() || header != "none") {
 			return true;
 		}
 		
 		return false;
 	}
 	
-	public static String tryGetFilenameFromResponse(HttpResponse response) {
-		Header[] headers = response.getHeaders("Content-Disposition");
+	public static String tryGetFilenameFromConnection(HttpURLConnection connection) {
+		String header = connection.getHeaderField("Content-Disposition");
 		
-		for (Header header: headers) {
-			String headerValue = header.getValue();
-			
-			if (!(headerValue.isEmpty()) && headerValue.contains(".")) {
-				return headerValue.split("=")[1];
-			}
+		if (!(header.isEmpty()) && header.contains(".")) {
+			return header.split("=")[1];
 		}
 		
 		return null;
 	}
 	
-	public static Integer tryGetFilesizeFromResponse(HttpResponse response) {
-		Header header = response.getFirstHeader("Content-Length");
+	public static boolean checkHttpStatus(HttpURLConnection connection) throws IOException {
+		int status = connection.getResponseCode();
 		
-		String headerValue = header.getValue();
-		try {
-			return Integer.valueOf(headerValue);
+		if (status >= 400) {
+			return false;
 		}
-		catch (NumberFormatException e) {
-			Log.e(TAG, e.getMessage());
-			return -1;
-		}
-	}
-	
-	public static JSONObject getJSONObject(String url) throws Exception 
-	{	
-		String respond = Communicator.getString(url);
 		
-        JSONObject json = new JSONObject(respond);
-        
-        return json;
-	}
-	
-	public static JSONArray getJSONArray(String url) throws Exception 
-	{	
-		String respond = Communicator.getString(url);
-		
-        JSONArray json = new JSONArray(respond);
-        
-        return json;
+		return true;
 	}
 }
 

@@ -2,34 +2,38 @@ package at.tectas.buildbox.content;
 
 import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import android.os.Bundle;
 import at.tectas.buildbox.R;
-import at.tectas.buildbox.helpers.JsonParser;
+import at.tectas.buildbox.helpers.JsonItemParser;
 
 public class ParentItem extends Item {
-	public String thumbnailUrl;
+	public String thumbnailUrl = null;
 	public ItemList childs = new ItemList();
 	
-	public ParentItem(JSONObject json) throws JSONException {
+	public ParentItem(JsonObject json) {
 		this(null, json);
 	}
 	
-	public ParentItem(Item parent, JSONObject json) throws JSONException {
+	public ParentItem(Item parent, JsonObject json) {
 		super(parent, json);
 		
-		this.thumbnailUrl = json.optString(Item.activity.getString(R.string.thumbnailurl_property));
+		this.thumbnailUrl = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.thumbnailurl_property), json);
 		
-		JSONArray children = json.optJSONArray(Item.activity.getString(R.string.children_property));
+		JsonArray children = Item.helper.tryGetJsonArrayFromJson(Item.activity.getString(R.string.children_property), json);
 		
 		if (children != null)
-			for (int i = 0; i < children.length(); i++) {				
-				JSONObject object = children.optJSONObject(i);
+			for (int i = 0; i < children.size(); i++) {	
+				JsonElement element = children.get(i);
 				
-				this.childs.add(JsonParser.parseJsonToItem(object));
+				if (element.isJsonObject()) {
+					JsonObject object = element.getAsJsonObject();
+					
+					this.childs.add(JsonItemParser.parseJsonToItem(this, object));
+				}
 			}
 		
 		this.type = ItemTypes.ParentItem;

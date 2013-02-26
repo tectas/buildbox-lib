@@ -2,12 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/download_base_layout"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <ListView 
-	    android:id="@+id/download_list"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent" >
-	    
-	
-	</ListView>
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:weightSum="11">
+   	
+    <LinearLayout
+   	    android:id="@+id/download_list_layout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:orientation="vertical"
+	   	android:layout_weight="10">
+	    <ListView 
+		    android:id="@+id/download_list"
+		    android:layout_width="match_parent"
+		    android:layout_height="fill_parent" >
+		    
+		
+		</ListView>
+	</LinearLayout>
+	<LinearLayout
+   	    android:id="@+id/download_button_layout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical"
+	    android:layout_weight="1">
+		<Button 
+		    android:id="@+id/download_all_button"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/download_all_button_text" />
+	</LinearLayout>
 </LinearLayout>

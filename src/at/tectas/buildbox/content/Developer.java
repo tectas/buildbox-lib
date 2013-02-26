@@ -1,22 +1,21 @@
 package at.tectas.buildbox.content;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public class Developer {
 	public String Name;
 	public String DonationUrl;
 	
-	public Developer(JSONObject json) throws JSONException {
-		JSONArray names = json.names();
+	public Developer(JsonObject json) {
+		Set<Entry<String, JsonElement>> names = json.entrySet();
 		
-		int index = 0;
-		
-		for (; index < names.length(); index++) {
-			this.Name = names.optString(index);
+		for (Entry<String, JsonElement> name: names) {
+			this.Name = name.getKey();
+			this.DonationUrl = json.get(this.Name).getAsString();
 		}
-		
-		this.DonationUrl = json.optString(this.Name);
 	}
 }

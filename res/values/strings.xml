@@ -2,10 +2,10 @@
 <resources>
     <string name="app_name">BuildBox</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="kitchen_content_url_property">kitchen.contenturl</string>
-    <string name="kitchen_rom_url_property">kitchen.updateurl</string>
-    <string name="kitchen_rom_version_property">kitchen.version</string>
-    <string name="kitchen_download_dir">kitchen.downloaddir</string>
+    <string name="kitchen_content_url_property">buildbox.contenturl</string>
+    <string name="kitchen_rom_url_property">buildbox.updateurl</string>
+    <string name="kitchen_rom_version_property">buildbox.version</string>
+    <string name="kitchen_download_dir">buildbox.downloaddir</string>
     <string name="app_cancel_message">It seems your rom is not supporting this application, please speak with the maintainer of it for further informations.</string>
     <string name="thumbnail_description">Thumbnail</string>
     <string name="default_rom_url">http://kitchen.tectas.eu/Test.json</string>
@@ -35,4 +35,18 @@
     <string name="webpages_property">webpages</string>
     <string name="developers_head">Developers</string>
     <string name="webpages_head">Webpages</string>
+    <string name="service_notification_title">BuildBox Download Service</string>
+    <string name="service_notification_text"> </string>
+    <string name="service_result_notification_title">BuildBox Finished Downloads</string>
+    <string name="service_result_notification_text">Expand to view</string>
+    <string name="service_download_finished">successfully finished</string>
+    <string name="service_download_failed">failed</string>
+    <string name="service_download_mismatch">md5sum mismatch</string>
+    <string name="service_result_notification_bigview_title">Finished Downloads</string>
+    <string name="download_checkbox_label">md5:</string>
+    <string name="downloads_cach_filename">downloads.json</string>
+    <string name="default_sd_directory">BuildBox</string>
+    <string name="update_notification_title">Rom update found</string>
+    <string name="update_notification_text">There is an update for your Rom available!</string>
+    <string name="download_all_button_text">Download</string>
 </resources>

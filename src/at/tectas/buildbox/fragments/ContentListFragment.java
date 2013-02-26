@@ -8,11 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.ItemArrayAdapter;
 import at.tectas.buildbox.content.ParentItem;
 import at.tectas.buildbox.content.Item;
-import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import android.app.Activity;
 
 public class ContentListFragment extends Fragment {
@@ -46,7 +46,7 @@ public class ContentListFragment extends Fragment {
 								(Activity)this.getActivity(), 
 								R.id.ListItemTextView, 
 								new ArrayList<Item>(
-										((ParentItem)SharedObjectsHelper.getContentItems()
+										((ParentItem)((BuildBoxMainActivity)this.getActivity()).contentItems
 												.get(arrayIndex))
 												.childs), 
 								getChildFragmentManager()) : 

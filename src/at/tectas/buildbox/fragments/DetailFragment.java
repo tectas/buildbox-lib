@@ -3,9 +3,7 @@ package at.tectas.buildbox.fragments;
 import java.util.ArrayList;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,14 +14,14 @@ import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import at.tectas.buildbox.MainActivity;
+import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
-import at.tectas.buildbox.helpers.DownloadKey;
-import at.tectas.buildbox.helpers.DownloadPackage;
+import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
+import at.tectas.buildbox.service.DownloadService;
 
 public class DetailFragment extends Fragment implements OnClickListener {
 	public static final String TAG = "DetailFragment";
@@ -46,7 +44,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 			
 			String title = arguments.getString(getString(R.string.title_property), "Stock");
 			
-			pack.filename = title;
+			pack.title = title;
 			
 			helper.changeTextViewText(R.id.title, title);
 			
@@ -166,9 +164,9 @@ public class DetailFragment extends Fragment implements OnClickListener {
 						
 						imageView.startAnimation(animation);
 						
-						Communicator communicator = ((MainActivity)this.getActivity()).getCommunicator();
+						Communicator communicator = ((BuildBoxMainActivity)this.getActivity()).getCommunicator();
 						
-						communicator.executeBitmapAsyncCommunicator(url, imageView, ((MainActivity)this.getActivity()));
+						communicator.executeBitmapAsyncCommunicator(url, imageView, ((BuildBoxMainActivity)this.getActivity()));
 					}
 					
 					childView.addView(imageView);
@@ -179,12 +177,16 @@ public class DetailFragment extends Fragment implements OnClickListener {
 			
 			String url = arguments.getString(getString(R.string.url_property));
 			
-			if (url != null && !url.isEmpty()) {				
+			if (url != null && !url.isEmpty() && DownloadService.Processing == false) {				
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
-				
+
 				pack.url = url;
 				
-				pack.directory = ((MainActivity)getActivity()).getDownloadDir();
+				String[] splittedFilename = url.split("/");
+				
+				pack.filename = splittedFilename[splittedFilename.length - 1];
+				
+				pack.directory = ((BuildBoxMainActivity)getActivity()).getDownloadDir();
 				
 				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
 				
@@ -203,26 +205,21 @@ public class DetailFragment extends Fragment implements OnClickListener {
 	
 	@Override
 	public void onClick(View v) {
-		MainActivity activity = (MainActivity) getActivity();
+		BuildBoxMainActivity activity = (BuildBoxMainActivity) getActivity();
 		
 		final View button = v;
 		
-		if (!SharedObjectsHelper.downloadTabAdded) {
+		if (!activity.bar.getTabAt(activity.bar.getTabCount() - 1).getText().equals("Downloads")) {
 			activity.addDownloadsTab();
-			SharedObjectsHelper.downloadTabAdded = true;
 		}
 		
  		DownloadPackage pack = (DownloadPackage) button.getTag();
-		
- 		String key = pack.md5sum == null? pack.url : pack.md5sum;
  		
- 		if (!SharedObjectsHelper.downloads.containsKey(key)) {
- 			if (SharedObjectsHelper.downloadAdapter != null) {
- 				SharedObjectsHelper.downloadAdapter.add(pack);
- 			}
- 			else {
- 	 			SharedObjectsHelper.downloads.put(key, pack);
- 			}
- 		}
+		if (activity.downloadAdapter != null) {
+			activity.downloadAdapter.add(pack);
+		}
+		else {
+			activity.downloads.put(pack);
+		}
 	}
 }

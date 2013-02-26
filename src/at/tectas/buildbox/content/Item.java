@@ -3,14 +3,14 @@ package at.tectas.buildbox.content;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import at.tectas.buildbox.R;
+import at.tectas.buildbox.helpers.JsonHelper;
 
 public class Item {
 	public enum ArrayTypes {
@@ -23,6 +23,7 @@ public class Item {
 	
 	public static final String TAG = "ITEM";
 	protected static Activity activity;
+	public static JsonHelper helper = new JsonHelper();
 	
 	public Item parent = null;
 	public ItemTypes type = null;
@@ -30,16 +31,16 @@ public class Item {
 	public String title;
 	public ArrayList<String> dependencies = new ArrayList<String>();
 	
-	public Item (JSONObject json) throws JSONException {
+	public Item (JsonObject json) {
 		this(null, json);
 	}
 	
-	public Item (Item parent, JSONObject json) throws JSONException {
+	public Item (Item parent, JsonObject json) {
 		this.parent = parent;
+
+		this.title = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.title_property), json);
 		
-		this.title = json.optString(Item.activity.getString(R.string.title_property));
-		
-		this.parseJSONArray(json.optJSONArray(Item.activity.getString(R.string.dependencies_property)), ArrayTypes.DEPENDENCIES);
+		this.tryGetArrayFromJson(Item.activity.getString(R.string.dependencies_property), json, ArrayTypes.DEPENDENCIES);
 	}
 	
 	public static void setActivity(Activity activity_) {
@@ -58,7 +59,7 @@ public class Item {
 		return result;
 	};
 	
-	protected void parseJSONArray (JSONArray json, ArrayTypes detail) throws JSONException {
+	protected void parseJsonArray (JsonArray json, ArrayTypes detail) {
 		Object dummyObject = null;
 		
 		if (detail == ArrayTypes.DEPENDENCIES) {
@@ -86,8 +87,8 @@ public class Item {
 				@SuppressWarnings("unchecked")
 				ArrayList<String> list = (ArrayList<String>) dummyObject;
 				
-				for (int i = 0; i < json.length(); i++) {
-					String object = json.optString(i);
+				for (int i = 0; i < json.size(); i++) {
+					String object = json.get(i).getAsString();
 					
 					if (object != null)
 						list.add(object);
@@ -97,13 +98,13 @@ public class Item {
 				@SuppressWarnings("unchecked")
 				ArrayList<Developer> list = (ArrayList<Developer>) dummyObject;
 				
-				for (int i = 0; i < json.length(); i++) {
+				for (int i = 0; i < json.size(); i++) {
 					Developer object = null;
 					
 					try {
-						object = new Developer(json.optJSONObject(i));
+						object = new Developer(json.get(i).getAsJsonObject());
 					}
-					catch (JSONException e) {
+					catch (Exception e) {
 						Log.e(Item.TAG, "Couldn't parse developer: " + e.getMessage());
 					}
 					
@@ -112,8 +113,10 @@ public class Item {
 					}
 				}
 			}
-			
-			//Log.e(Item.TAG, ((Boolean)(((DetailItem)(this)).homePages.size() == 0)).toString());
 		}
+	}
+	
+	public void tryGetArrayFromJson(String property, JsonObject json, ArrayTypes type) {
+		this.parseJsonArray(Item.helper.tryGetJsonArrayFromJson(property, json), type);
 	}
 }

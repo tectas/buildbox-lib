@@ -1,28 +1,33 @@
 package at.tectas.buildbox.content;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import android.os.Bundle;
 import at.tectas.buildbox.R;
-import at.tectas.buildbox.helpers.JsonParser;
+import at.tectas.buildbox.helpers.JsonItemParser;
 
 public class ChildItem extends ParentItem {
 	public String detailUrl;
 	
-	public ChildItem(JSONObject json) throws JSONException, NullPointerException {
+	public ChildItem(JsonObject json) throws NullPointerException {
 		this(null, json);
 	}
 	
-	public ChildItem(Item parent, JSONObject json) throws JSONException, NullPointerException {
+	public ChildItem(Item parent, JsonObject json) throws NullPointerException {
 		super(parent, json);
 		
-		this.detailUrl = json.optString(Item.activity.getString(R.string.detailurl_property));
+		JsonElement detail = json.get(Item.activity.getString(R.string.detail_property));
 		
-		JSONObject children = json.optJSONObject(Item.activity.getString(R.string.detail_property));
+		JsonObject children = null;
+		
+		if (detail.isJsonPrimitive())
+			this.detailUrl = detail.getAsString();
+		else if (detail.isJsonObject())
+			children = detail.getAsJsonObject();
 		
 		if (children != null)
-			this.childs.add(JsonParser.parseJsonToItem(children));
+			this.childs.add(JsonItemParser.parseJsonToItem(this, children));
 		
 		this.type = ItemTypes.ChildItem;
 	}

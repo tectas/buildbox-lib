@@ -1,4 +1,4 @@
-package at.tectas.buildbox.helpers;
+package at.tectas.buildbox.communication;
 
 public class DownloadKey {
 	public int index;

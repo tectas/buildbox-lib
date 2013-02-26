@@ -2,9 +2,7 @@ package at.tectas.buildbox.content;
 
 import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import android.os.Bundle;
 import at.tectas.buildbox.R;
@@ -19,33 +17,30 @@ public class DetailItem extends Item {
 	public ArrayList<String> imageUrls = new ArrayList<String>();
 	public ArrayList<String> changelog = new ArrayList<String>();
 	
-	public DetailItem (JSONObject json) throws JSONException {
-		super(json);
-		this.description = json.optString(Item.activity.getString(R.string.description_property));
-		this.version = json.optString(Item.activity.getString(R.string.version_property));
-		this.url = json.optString(Item.activity.getString(R.string.url_property));
-		this.md5sum = json.optString(Item.activity.getString(R.string.md5sum_property));
-		
-		JSONArray dummyArray = json.optJSONArray(Item.activity.getString(R.string.developers_property));
-		
-		this.parseJSONArray(dummyArray, ArrayTypes.DEVELOPERS);
-		
-		dummyArray = null;
-		dummyArray = json.optJSONArray(Item.activity.getString(R.string.webpages_property));
-		
-		this.parseJSONArray(dummyArray, ArrayTypes.HOMEPAGES);
-		
-		dummyArray = null;
-		dummyArray = json.optJSONArray(Item.activity.getString(R.string.imageurls_property));
-		
-		this.parseJSONArray(dummyArray, ArrayTypes.IMAGEURLS);
-		
-		dummyArray = null;
-		dummyArray = json.optJSONArray(Item.activity.getString(R.string.changelog_property));
+	public DetailItem (Item parent, JsonObject json) {
+		super(parent, json);
 
-		this.parseJSONArray(dummyArray, ArrayTypes.CHANGELOG);
+		this.description = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.description_property), json);
+		
+		this.version = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.version_property), json);
+		
+		this.url = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.url_property), json);
+	
+		this.md5sum = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.md5sum_property), json);
+		
+		this.tryGetArrayFromJson(Item.activity.getString(R.string.developers_property), json, ArrayTypes.DEVELOPERS);
+		
+		this.tryGetArrayFromJson(Item.activity.getString(R.string.webpages_property), json, ArrayTypes.HOMEPAGES);
+		
+		this.tryGetArrayFromJson(Item.activity.getString(R.string.imageurls_property), json, ArrayTypes.IMAGEURLS);
+		
+		this.tryGetArrayFromJson(Item.activity.getString(R.string.changelog_property), json, ArrayTypes.CHANGELOG);
 		
 		this.type = ItemTypes.DetailItem;
+	}
+	
+	public DetailItem (JsonObject json) {
+		this(null, json);
 	}
 	
 	@Override

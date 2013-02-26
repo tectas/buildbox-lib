@@ -15,7 +15,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import at.tectas.buildbox.MainActivity;
+import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.content.ChildItem;
@@ -91,9 +91,9 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 				
 				holder.image.startAnimation(animation);
 				
-				Communicator communicator = ((MainActivity)this.context).getCommunicator();
+				Communicator communicator = ((BuildBoxMainActivity)this.context).getCommunicator();
 				
-				communicator.executeBitmapAsyncCommunicator(thumbnail, holder.image, ((MainActivity)this.context));
+				communicator.executeBitmapAsyncCommunicator(thumbnail, holder.image, ((BuildBoxMainActivity)this.context));
 	        }
 	    }
 	    catch (Exception e) {

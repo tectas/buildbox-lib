@@ -8,15 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import at.tectas.buildbox.helpers.SharedObjectsHelper;
+import at.tectas.buildbox.BuildBoxMainActivity;
 
 public class TabsAdapter extends FragmentStatePagerAdapter implements
 		ActionBar.TabListener, ViewPager.OnPageChangeListener {
 	private static final String TAG = "TabsAdapter";
-	private final Context mContext;
+	private final BuildBoxMainActivity mContext;
 	private final ActionBar mActionBar;
 	private final ViewPager mViewPager;
 	private final ArrayList<TabInfo> mTabs = new ArrayList<TabInfo>();
@@ -30,10 +29,10 @@ public class TabsAdapter extends FragmentStatePagerAdapter implements
 			args = _args;
 		}
 	}
-
+	
 	public TabsAdapter(FragmentActivity activity, ViewPager pager) {
 		super(activity.getSupportFragmentManager());
-		mContext = activity;
+		mContext = (BuildBoxMainActivity)activity;
 		mActionBar = activity.getActionBar();
 		mViewPager = pager;
 		mViewPager.setAdapter(this);
@@ -49,8 +48,8 @@ public class TabsAdapter extends FragmentStatePagerAdapter implements
 		notifyDataSetChanged();
 		
 		if (this.mTabs.size() == 1) {
-			SharedObjectsHelper.viewPagerIndex = 0;
-			SharedObjectsHelper.fragment = (Fragment) this.instantiateItem(this.mViewPager, SharedObjectsHelper.viewPagerIndex);
+			this.mContext.viewPagerIndex = 0;
+			this.mContext.fragment = (Fragment) this.instantiateItem(this.mViewPager, this.mContext.viewPagerIndex);
 		}
 	}
 
@@ -75,8 +74,8 @@ public class TabsAdapter extends FragmentStatePagerAdapter implements
 	@Override
 	public void onPageSelected(int position) {
 		if (position < this.mTabs.size()) {
-			SharedObjectsHelper.viewPagerIndex = position;
-			SharedObjectsHelper.fragment = (Fragment) this.instantiateItem(this.mViewPager, SharedObjectsHelper.viewPagerIndex);
+			this.mContext.viewPagerIndex = position;
+			this.mContext.fragment = (Fragment) this.instantiateItem(this.mViewPager, this.mContext.viewPagerIndex);
 			mActionBar.setSelectedNavigationItem(position);
 		}
 	}
@@ -105,5 +104,9 @@ public class TabsAdapter extends FragmentStatePagerAdapter implements
 
 	public static String getTag() {
 		return TAG;
+	}
+	
+	public void destroy() {
+		this.destroy();
 	}
 }
