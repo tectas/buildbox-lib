@@ -1,35 +1,55 @@
 package at.tectas.buildbox;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Calendar;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
 import at.tectas.buildbox.communication.Communicator;
+import at.tectas.buildbox.communication.DownloadMap;
+import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
+import at.tectas.buildbox.communication.IDownloadProcessFinishedCallback;
+import at.tectas.buildbox.communication.IDownloadProcessProgressCallback;
+import at.tectas.buildbox.communication.Communicator.CallbackType;
 import at.tectas.buildbox.content.DetailItem;
 import at.tectas.buildbox.content.Item;
+import at.tectas.buildbox.content.ItemList;
 import at.tectas.buildbox.fragments.ContentListFragment;
 import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.fragments.DownloadListFragment;
-import at.tectas.buildbox.helpers.JsonParser;
+import at.tectas.buildbox.helpers.JsonItemParser;
+import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.helpers.SharedObjectsHelper;
+import at.tectas.buildbox.service.DownloadService;
 import at.tectas.buildbox.R;
 
 @SuppressLint("DefaultLocale")
-public class MainActivity extends FragmentActivity implements ICommunicatorCallback {
+public class BuildBoxMainActivity extends FragmentActivity implements ICommunicatorCallback, IDownloadProcessProgressCallback, IDownloadProcessFinishedCallback {
 	
 	public static final String TAG = "Main";
 
@@ -42,10 +62,18 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 	private String version = null;
 	private String contentUrl = null;
 	private String downloadDir = null;
-	private ActionBar bar = null;
+	private PropertyHelper helper = new PropertyHelper(this);
+	public ActionBar bar = null;
 	private TabsAdapter adapter = null;
 	private DetailItem romItem = null;
 	private Communicator communicator = new Communicator();
+	public DownloadMap downloads = new DownloadMap();
+	public DownloadPackageAdapter downloadAdapter = null;
+	public ItemList contentItems = null;
+	public int viewPagerIndex = 0;
+	public Fragment fragment = null;
+	
+	public DownloadServiceConnection serviceConnection = new DownloadServiceConnection(this);
 	
 	public Communicator getCommunicator() {
 		return this.communicator;
@@ -71,25 +99,16 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 		return this.downloadDir;
 	}
 	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		setContentView(R.layout.activity_main);
-		
+	public void initialize() {
 		Item.setActivity(this);
 		
-		String rom = System.getProperty(getString(R.string.kitchen_rom_url_property), null);
+		this.romUrl = this.helper.getRomUrl();
+	
+		this.version = this.helper.getVersion();
+	
+		this.contentUrl = this.helper.getContentUrl();
 		
-		String content = System.getProperty(getString(R.string.kitchen_content_url_property), null);
-		
-		this.romUrl = (rom == null? getString(R.string.default_rom_url): rom);
-	
-		this.version = System.getProperty(getString(R.string.kitchen_rom_version_property), null);
-	
-		this.contentUrl = (content == null ? getString(R.string.default_content_url): content);
-	
-		this.downloadDir = System.getProperty(getString(R.string.kitchen_download_dir), null);
+		this.downloadDir = this.helper.getDownloadDirectory();
 		
 		if ((this.romUrl == null || this.version == null) && this.contentUrl == null) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this.getBaseContext());
@@ -106,42 +125,222 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 		}
 		
 		try {
-			if (this.romUrl != null && !this.romUrl.isEmpty())
+			if (this.romUrl != null)
 				this.communicator.executeJSONObjectAsyncCommunicator(this.romUrl, this);			
-
-			if (this.contentUrl != null && !this.contentUrl.isEmpty())
+			
+			if (this.contentUrl != null)
 				this.communicator.executeJSONArrayAsyncCommunicator(this.contentUrl, this);
 		} 
 		catch (Exception e) {
 			if (e != null && e.getMessage() != null)
-				Log.e(MainActivity.TAG, e.getMessage());
+				Log.e(BuildBoxMainActivity.TAG, e.getMessage());
 			
 			for (StackTraceElement element: e.getStackTrace()) {
 				if (element != null)
-					Log.e(MainActivity.TAG, element.toString() + " " + element.getLineNumber());
+					Log.e(BuildBoxMainActivity.TAG, element.toString() + " " + element.getLineNumber());
 			}
 		}
 		
+		this.startUpdateAlarm();
+	}
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.activity_main);
+		
+		this.initialize();
+		
 		this.bar = getActionBar();
-		//this.bar.setDisplayShowTitleEnabled(false);
 		this.bar.setDisplayShowHomeEnabled(false);
 		this.bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		this.bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 		
 		this.adapter = new TabsAdapter(this, (ViewPager)findViewById(R.id.pager));
 	}
-
+	
+	@Override
+	protected void onStop() {
+		this.removeActivityCallbacks();
+		
+		super.onStop();
+	};
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
 	}
-
+	
+	public void startUpdateAlarm() {
+		Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, 1);
+        
+        AlarmManager alarmManager = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, UpdateReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+	}
+	
+	public void bindDownloadService() {
+		Intent downloadServiceIntent = new Intent(this.getApplicationContext(), DownloadService.class);	
+		
+		if (DownloadService.Started == false) {	
+			this.startService(downloadServiceIntent);
+		}
+		
+		this.bindService(downloadServiceIntent, this.serviceConnection, Context.BIND_ADJUST_WITH_ACTIVITY);
+	}
+	
+	public void unbindDownloadService() {
+		if (this.serviceConnection.bound == true) {
+			try {
+				unbindService(this.serviceConnection);
+				this.serviceConnection.bound = false;
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void startDownload() {
+		if (this.serviceConnection.bound == false) {
+			this.serviceConnection.executeStartDownloadCallback = true;
+			this.bindDownloadService();
+		}
+		else {
+			this.startServiceDownload();
+		}
+	}
+	
+	public void stopDownload() {
+		if (this.serviceConnection.bound == false) {
+			this.serviceConnection.executeStopDownloadCallback = true;
+			this.bindDownloadService();
+		}
+		else {
+			this.stopServiceDownload();
+		}
+	}
+	
+	public void getServiceMap() {
+		this.getServiceMap(true);
+	}
+	
+	public void getServiceMap(boolean addListeners) {
+		if (this.serviceConnection.bound == false) {
+			this.serviceConnection.executeGetDownloadMapCallback = true;
+			this.serviceConnection.addListernersAtGetDownloadMapCallback = addListeners;
+			this.bindDownloadService();
+		}
+		else {
+			this.getServiceDownloadMap(false);
+		}
+	}
+	
+	public void removeActivityCallbacks() {
+		if (this.serviceConnection.bound == false) {
+			this.serviceConnection.executeRemoveCallback = true;
+			this.bindDownloadService();
+		}
+		else {
+			this.removeCallbacksAndUnbind();
+		}
+	}
+	
+	public void startServiceDownload() {
+		if (DownloadService.Processing == true) {
+			this.getServiceDownloadMap();
+		}
+		else {
+			this.serviceConnection.service.startDownload(this.downloads);
+			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this);
+		}
+	}
+	
+	public void stopServiceDownload() {
+		this.serviceConnection.service.stopDownloads();
+	}
+	
+	public void getServiceDownloadMap() {
+		this.getServiceDownloadMap(true);
+	}
+	
+	public void getServiceDownloadMap(boolean addListeners) {
+		if (addListeners == true)
+			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this);
+		
+		DownloadMap serviceMap = this.serviceConnection.service.getMap();
+		
+		if (serviceMap != null && serviceMap.size() != 0)
+			this.downloads = serviceMap;
+		
+		if (this.downloads.size() != 0) {
+			if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads")) {
+				this.addDownloadsTab();
+			}
+			
+			if (this.downloadAdapter != null) {
+				this.downloadAdapter.notifyDataSetChanged();
+			}
+		}
+	}
+	
+	public void removeCallbacksAndUnbind() {
+		this.serviceConnection.service.removeDownloadListeners(CallbackType.UI);
+		
+		this.unbindDownloadService();
+	}
+	
+	private void loadDownloadsMapFromCacheFile() {
+		BufferedReader stream = null;
+		
+		String[] files = this.fileList();
+		
+		boolean exists = false;
+		
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].equals(this.getString(R.string.downloads_cach_filename))) {
+				exists = true;
+				break;
+			}
+		}
+		
+		if (exists == true) {
+			try {
+				stream = new BufferedReader(new InputStreamReader(openFileInput(getString(R.string.downloads_cach_filename))));
+		
+				StringBuilder builder = new StringBuilder();
+				String line = "";
+		
+				while ((line = stream.readLine()) != null) 
+				{
+					builder.append(line);
+				}
+				
+		        stream.close();
+		        
+		        JsonParser parser = new JsonParser();
+		        
+		        JsonArray elements = parser.parse(builder.toString()).getAsJsonArray();
+				
+		        this.downloads = DownloadMap.getDownloadMapFromJson(elements);
+		        
+		        this.deleteFile(getString(R.string.downloads_cach_filename));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	@Override
-	public void updateWithJSONObject(JSONObject result) {
+	public void updateWithJsonObject(JsonObject result) {
 		try {
-			this.romItem = (DetailItem) JsonParser.parseJsonToItem(result);
+			this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
 			
 			this.adapter.addTab(
 					this.bar.newTab().setText("Rom"), 
@@ -149,33 +348,28 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 					this.romItem.parseItemToBundle());
 
 		} 
-		catch (JSONException e) {
-			Log.e(MainActivity.TAG, " " + e.getMessage());
-			
-			for (StackTraceElement trace: e.getStackTrace()) {
-				Log.e(MainActivity.TAG, trace.toString());
-			}
-		}
 		catch (NullPointerException e) {
-			Log.e(MainActivity.TAG, " " + e.getMessage());
-			
-			for (StackTraceElement trace: e.getStackTrace()) {
-				Log.e(MainActivity.TAG, trace.toString());
-			}
+			e.printStackTrace();
 		}
+		
+		if (this.contentUrl == null)
+			if (DownloadService.Started) {
+				this.getServiceMap();
+			}
+			else {
+				this.loadDownloadsMapFromCacheFile();
+			}
 	}
-
+	
 	@Override
-	public void updateWithJSONArray(JSONArray result) {
+	public void updateWithJsonArray(JsonArray result) {
 		
 		try {
-			SharedObjectsHelper.contentItems = JsonParser.parseJson(result);
-			
-			Log.e(MainActivity.TAG, ((Boolean)(SharedObjectsHelper.contentItems != null)).toString());
+			this.contentItems = JsonItemParser.parseJson(result);
 			
 			int i = 0;
 			
-			for (Item item : SharedObjectsHelper.contentItems) {
+			for (Item item : this.contentItems) {
 				Bundle bundle = new Bundle();
 				
 				bundle.putInt("index", i);
@@ -188,19 +382,14 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 				i++;
 			}
 		}
-		catch (JSONException e) {
-			Log.e(MainActivity.TAG, " " + e.getMessage());
-			
-			for (StackTraceElement trace: e.getStackTrace()) {
-				Log.e(MainActivity.TAG, trace.toString());
-			}
-		}
 		catch (NullPointerException e) {
-			Log.e(MainActivity.TAG, " " + e.getMessage());
-			
-			for (StackTraceElement trace: e.getStackTrace()) {
-				Log.e(MainActivity.TAG, trace.toString());
-			}
+			e.printStackTrace();
+		}
+		if (DownloadService.Started) {
+			this.getServiceMap();
+		}
+		else {
+			this.loadDownloadsMapFromCacheFile();
 		}
 	}
 
@@ -223,18 +412,15 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 			}
 		}
 		catch (NullPointerException e) {
-			Log.e(MainActivity.TAG, " " + e.getMessage());
-			
-			for (StackTraceElement trace: e.getStackTrace()) {
-				Log.e(MainActivity.TAG, trace.toString());
-			}
+			e.printStackTrace();
 		}
 	}
 	
 	@Override
 	public void onBackPressed() {
-	    if (!SharedObjectsHelper.fragment.getChildFragmentManager().popBackStackImmediate()) {
-	        finish();
+	    if (this.fragment == null || !this.fragment.getChildFragmentManager().popBackStackImmediate()) {
+	    	if (!this.getFragmentManager().popBackStackImmediate())
+	    		finish();
 	    }
 	}
 	
@@ -244,5 +430,28 @@ public class MainActivity extends FragmentActivity implements ICommunicatorCallb
 	
 	public void addDownloadsTab() {
 		this.addTab("Downloads", DownloadListFragment.class, new Bundle());
+	}
+	
+	public void getDownloadsMapandUpdateList () {
+		this.getServiceMap(false);
+		
+		if (this.downloads.size() != 0) {
+			if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads"))
+				this.addDownloadsTab();
+			
+			if (this.downloadAdapter != null) {
+				this.downloadAdapter.notifyDataSetChanged();
+			}
+		}
+	}
+	
+	@Override
+	public void downloadFinished(DownloadResponse response) {
+		this.getDownloadsMapandUpdateList();
+	}
+
+	@Override
+	public void updateDownloadProgess(DownloadResponse response) {
+		this.getDownloadsMapandUpdateList();
 	}
 }
