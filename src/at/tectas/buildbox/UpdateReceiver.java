@@ -152,6 +152,31 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 			}
 		}
 		
+		String[] longerArray = localVersionArray.length > remoteVersionArray.length ? localVersionArray : remoteVersionArray;
+		
+		String[] shorterArray = localVersionArray.length > remoteVersionArray.length ? localVersionArray : remoteVersionArray;
+		
+		for (int i = shorterArray.length - 1; i < longerArray.length; i++) {
+			if (longerArray[i].equals("0")) {
+				continue;
+			}
+			else {
+				if (longerArray[i].length() == 1) {
+					return 1;
+				}
+				else {
+					for (int j = 0; j < longerArray[i].length(); j++) {
+						if (localVersionArray[i].charAt(j) == '0') {
+							continue;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			}
+		}
+		
 		return 0;
 	}
 	
