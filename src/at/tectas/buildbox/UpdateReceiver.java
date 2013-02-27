@@ -65,15 +65,18 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmManager.cancel(pendingIntent);
 	}
-	
-	public void setNewAlarm() {
+	public void setNewAlarm(int calendarProperty, int interval) {
 		Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.HOUR, 6);
+        cal.add(calendarProperty, interval);
         
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, UpdateReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+	}
+	
+	public void setNewAlarm() {
+		this.setNewAlarm(Calendar.HOUR, 6);
 	}
 	
 	@Override
@@ -88,8 +91,13 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 
 	@Override
 	public void updateWithJsonObject(JsonObject result) {
-		this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
-		
+		try {
+			this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
+		}
+		catch (Exception e) {
+			this.setNewAlarm(Calendar.MINUTE, 1);
+			e.printStackTrace();
+		}
 		String version = this.helper.getVersion();
 		
 		int comparsion = this.compareVersions(version, this.romItem.version);
