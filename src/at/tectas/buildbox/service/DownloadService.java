@@ -24,12 +24,13 @@ import at.tectas.buildbox.communication.Communicator.CallbackType;
 import at.tectas.buildbox.communication.DownloadMap;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
+import at.tectas.buildbox.communication.IDownloadCancelledCallback;
 import at.tectas.buildbox.communication.Communicator.DownloadAsyncCommunicator;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
-import at.tectas.buildbox.communication.IDownloadProcessFinishedCallback;
-import at.tectas.buildbox.communication.IDownloadProcessProgressCallback;
+import at.tectas.buildbox.communication.IDownloadFinishedCallback;
+import at.tectas.buildbox.communication.IDownloadProgressCallback;
 
-public class DownloadService extends Service implements IDownloadProcessProgressCallback, IDownloadProcessFinishedCallback {
+public class DownloadService extends Service implements IDownloadProgressCallback, IDownloadFinishedCallback, IDownloadCancelledCallback {
 	
 	public static boolean Started = false;
 	public static boolean Processing = false;
@@ -47,11 +48,11 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 	private DownloadMap map = null;
 	private Hashtable<String, DownloadAsyncCommunicator> downloadCommunicators = new Hashtable<String, DownloadAsyncCommunicator>();
 	
-	public DownloadMap getMap() {
+	public synchronized DownloadMap getMap() {
 		return map;
 	}
 
-	public void setMap(DownloadMap map) {
+	public synchronized void setMap(DownloadMap map) {
 		this.map = map;
 	}
 	
@@ -116,38 +117,41 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 		if (this.clientsConnected == 0) {
 			this.clientsConnected += 1;
 		}
+		
 		super.onRebind(intent);
 	}
 	
 	@Override
 	public boolean onUnbind(Intent intent) {
 		this.clientsConnected -= 1;
+		
 		return super.onUnbind(intent);
 	}
 	
-	public boolean addDownloadListeners (String id, CallbackType type, IDownloadProcessProgressCallback progessListener, IDownloadProcessFinishedCallback resultListener) {
+	public boolean addDownloadListeners (String id, CallbackType type, IDownloadProgressCallback progessListener, IDownloadFinishedCallback resultListener, IDownloadCancelledCallback cancelListener) {
 		DownloadAsyncCommunicator communicator = this.downloadCommunicators.get(id);
 		boolean result = false;
 		
 		if (communicator != null) {
 			result = communicator.addProgressListener(type, progessListener);
 			result &= communicator.addResultListener(type, resultListener);
+			result &= communicator.addCancelledListener(type, cancelListener);
 		}
 		
 		return result;
 	}
 	
-	public boolean addDownloadListeners (CallbackType type, IDownloadProcessProgressCallback progessListener, IDownloadProcessFinishedCallback resultListener) {
+	public boolean addDownloadListeners (CallbackType type, IDownloadProgressCallback progessListener, IDownloadFinishedCallback resultListener, IDownloadCancelledCallback cancelListener) {
 		boolean result = false;
 		
 		int i = 0;
 		
 		for (String id: this.downloadCommunicators.keySet()) {
 			if (i == 0) {
-				result = this.addDownloadListeners(id, type, progessListener, resultListener);
+				result = this.addDownloadListeners(id, type, progessListener, resultListener, cancelListener);
 			}
 			else {
-				result &= this.addDownloadListeners(id, type, progessListener, resultListener);
+				result &= this.addDownloadListeners(id, type, progessListener, resultListener, cancelListener);
 			}
 			i++;
 		}
@@ -175,29 +179,30 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 			}
 	}
 	
-	public boolean removeDownloadListeners (String id, CallbackType type, IDownloadProcessProgressCallback progressListener, IDownloadProcessFinishedCallback resultListener) {
+	public boolean removeDownloadListeners (String id, CallbackType type, IDownloadProgressCallback progressListener, IDownloadFinishedCallback resultListener, IDownloadCancelledCallback cancelListener) {
 		DownloadAsyncCommunicator communicator = this.downloadCommunicators.get(id);
 		boolean result = false;
 		
 		if (communicator != null) {
 			result = communicator.removeProgressListener(type);
 			result &= communicator.removeResultListener(type);
+			result &= communicator.removeCancelledListener(type);
 		}
 		
 		return result;
 	}
 	
-	public boolean removeDownloadListeners (CallbackType type, IDownloadProcessProgressCallback progressListener, IDownloadProcessFinishedCallback resultListener) {
+	public boolean removeDownloadListeners (CallbackType type, IDownloadProgressCallback progressListener, IDownloadFinishedCallback resultListener, IDownloadCancelledCallback cancelCallback) {
 		boolean result = false;
 		
 		int i = 0;
 		
 		for (String id: this.downloadCommunicators.keySet()) {
 			if (i == 0) {
-				result = this.removeDownloadListeners(id, type, progressListener, resultListener);
+				result = this.removeDownloadListeners(id, type, progressListener, resultListener, cancelCallback);
 			}
 			else {
-				result &= this.removeDownloadListeners(id, type, progressListener, resultListener);
+				result &= this.removeDownloadListeners(id, type, progressListener, resultListener, cancelCallback);
 			}
 			i++;
 		}
@@ -225,6 +230,7 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 				
 				pack.addProgressListener(CallbackType.Service, this);
 				pack.addFinishedListener(CallbackType.Service, this);
+				pack.addCancelledListener(CallbackType.Service, this);
 				
 				this.serviceBuilder.setContentText(pack.filename);
 				
@@ -237,7 +243,7 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 				
 				startForeground(this.notificationServieID, this.serviceNotification);
 				
-				this.downloadCommunicators.put(pack.md5sum == null? pack.url : pack.md5sum, this.communicator.executeDownloadAsyncCommunicator(pack.url, pack.directory, pack.filename, pack.md5sum, pack.updateCallbacks, pack.finishedCallbacks));
+				this.downloadCommunicators.put(pack.md5sum == null? pack.url : pack.md5sum, this.communicator.executeDownloadAsyncCommunicator(pack.url, pack.directory, pack.filename, pack.md5sum, pack.updateCallbacks, pack.finishedCallbacks, pack.cancelCallbacks));
 			}
 			
 			return true;
@@ -252,6 +258,10 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 		}
 		
 		this.downloadCommunicators.clear();
+		
+		DownloadService.Processing = false;
+		
+		this.stopForeground(true);
 	}
 	
 	@Override
@@ -334,7 +344,7 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 			
 			DownloadService.Processing = false;
 			
-			if (this.clientsConnected == 0)
+			if (this.clientsConnected <= 0)
 				this.serializeMap();
 		}
 	}
@@ -354,6 +364,11 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 					FileOutputStream stream = openFileOutput(getString(R.string.downloads_cach_filename), Context.MODE_PRIVATE);
 					
 					stream.write(jsonMap.toString().getBytes());
+					
+					stream.flush();
+					
+					if (stream != null)
+						stream.close();
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -361,5 +376,14 @@ public class DownloadService extends Service implements IDownloadProcessProgress
 				}
 			}
 		});
+	}
+
+	@Override
+	public void downloadCancelled(DownloadResponse response) {
+		DownloadPackage pack = this.map.get(response.md5sum == null ? response.url : response.md5sum);
+		
+		if (pack != null) {
+			pack.response = response;
+		}
 	}
 }

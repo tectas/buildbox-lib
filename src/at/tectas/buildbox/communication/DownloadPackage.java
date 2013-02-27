@@ -16,8 +16,9 @@ public class DownloadPackage implements IJsonSerialize {
 	public String directory = null;
 	public String filename = null;
 	public String md5sum = null;
-	public Hashtable<CallbackType, IDownloadProcessProgressCallback> updateCallbacks = new Hashtable<CallbackType, IDownloadProcessProgressCallback>();
-	public Hashtable<CallbackType, IDownloadProcessFinishedCallback> finishedCallbacks = new Hashtable<CallbackType, IDownloadProcessFinishedCallback>();
+	public Hashtable<CallbackType, IDownloadProgressCallback> updateCallbacks = new Hashtable<CallbackType, IDownloadProgressCallback>();
+	public Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallbacks = new Hashtable<CallbackType, IDownloadFinishedCallback>();
+	public Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallbacks = new Hashtable<CallbackType, IDownloadCancelledCallback>();
 	public DownloadResponse response = null;
 	
 	public DownloadPackage() {
@@ -37,7 +38,7 @@ public class DownloadPackage implements IJsonSerialize {
 			this.response = new DownloadResponse(element.getAsJsonObject());
 	}
 	
-	public void addProgressListener (CallbackType type, IDownloadProcessProgressCallback callback) {
+	public void addProgressListener (CallbackType type, IDownloadProgressCallback callback) {
 		if (this.updateCallbacks.containsKey(type)) {
 			this.updateCallbacks.remove(type);
 		}
@@ -45,12 +46,20 @@ public class DownloadPackage implements IJsonSerialize {
 		this.updateCallbacks.put(type, callback);
 	}
 	
-	public void addFinishedListener (CallbackType type, IDownloadProcessFinishedCallback callback) {
+	public void addFinishedListener (CallbackType type, IDownloadFinishedCallback callback) {
 		if (this.finishedCallbacks.containsKey(type)) {
 			this.finishedCallbacks.remove(type);
 		}
 	
 		this.finishedCallbacks.put(type, callback);
+	}
+	
+	public void addCancelledListener (CallbackType type, IDownloadCancelledCallback callback) {
+		if (this.cancelCallbacks.containsKey(type)) {
+			this.cancelCallbacks.remove(type);
+		}
+	
+		this.cancelCallbacks.put(type, callback);
 	}
 	
 	public void removeProgressListener(CallbackType type) {
@@ -62,6 +71,12 @@ public class DownloadPackage implements IJsonSerialize {
 	public void removeFinishedListener(CallbackType type) {
 		if (this.finishedCallbacks.containsKey(type)) {
 			this.finishedCallbacks.remove(type);
+		}
+	}
+	
+	public void removeCancelledListener(CallbackType type) {
+		if (this.cancelCallbacks.containsKey(type)) {
+			this.cancelCallbacks.remove(type);
 		}
 	}
 	

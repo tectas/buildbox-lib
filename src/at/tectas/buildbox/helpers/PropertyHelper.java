@@ -2,12 +2,10 @@ package at.tectas.buildbox.helpers;
 
 import android.content.Context;
 import android.os.Environment;
-import android.util.Log;
 import at.tectas.buildbox.R;
 
 public class PropertyHelper {
 	
-	private static final String TAG = "PropertyHelper";
 	public Context context = null;
 	
 	public PropertyHelper (Context context) {

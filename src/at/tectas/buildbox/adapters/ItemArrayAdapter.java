@@ -3,7 +3,6 @@ package at.tectas.buildbox.adapters;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import android.app.Activity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,14 +22,13 @@ import at.tectas.buildbox.content.Item;
 import at.tectas.buildbox.content.Item.ItemTypes;
 import at.tectas.buildbox.content.ParentItem;
 import at.tectas.buildbox.content.DetailItem;
-import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.listeners.ChildItemListItemListener;
 import at.tectas.buildbox.listeners.ParentItemListItemListener;
 
 public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.Item> {
 	
 	private final static String TAG = "ItemArrayAdapter";
-	private final Activity context;
+	private final BuildBoxMainActivity context;
 	private final ArrayList<Item> items;
 	private FragmentManager manager = null;
 	
@@ -39,14 +37,14 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 		public ImageView image;
 	}
 	
-	public ItemArrayAdapter(Activity context, int textViewResourceId,
+	public ItemArrayAdapter(BuildBoxMainActivity context, int textViewResourceId,
 			Item[] objects) {
 		super(context, textViewResourceId, objects);
 		this.context = context;
 		this.items = new ArrayList<Item>(Arrays.asList(objects));
 	}
 	
-	public ItemArrayAdapter(Activity context, int textViewResourceId,
+	public ItemArrayAdapter(BuildBoxMainActivity context, int textViewResourceId,
 			ArrayList<Item> objects, FragmentManager manager) {
 		this(context, textViewResourceId, objects.toArray(new Item[objects.size()]));
 		
@@ -73,8 +71,8 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 	        
 	        holder.image.setTag(thumbnail);
 	        
-	        if (SharedObjectsHelper.remoteDrawables.containsKey(thumbnail)) {
-	        	holder.image.setImageBitmap(SharedObjectsHelper.remoteDrawables.get(thumbnail));
+	        if (this.context.remoteDrawables.containsKey(thumbnail)) {
+	        	holder.image.setImageBitmap(this.context.remoteDrawables.get(thumbnail));
 	        }
 	        else {
 		        holder.image.setImageResource(R.drawable.spinner);

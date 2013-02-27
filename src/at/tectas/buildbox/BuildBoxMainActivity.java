@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Calendar;
+import java.util.Hashtable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -33,8 +34,9 @@ import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadMap;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
-import at.tectas.buildbox.communication.IDownloadProcessFinishedCallback;
-import at.tectas.buildbox.communication.IDownloadProcessProgressCallback;
+import at.tectas.buildbox.communication.IDownloadCancelledCallback;
+import at.tectas.buildbox.communication.IDownloadFinishedCallback;
+import at.tectas.buildbox.communication.IDownloadProgressCallback;
 import at.tectas.buildbox.communication.Communicator.CallbackType;
 import at.tectas.buildbox.content.DetailItem;
 import at.tectas.buildbox.content.Item;
@@ -44,12 +46,11 @@ import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.fragments.DownloadListFragment;
 import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
-import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.service.DownloadService;
 import at.tectas.buildbox.R;
 
 @SuppressLint("DefaultLocale")
-public class BuildBoxMainActivity extends FragmentActivity implements ICommunicatorCallback, IDownloadProcessProgressCallback, IDownloadProcessFinishedCallback {
+public class BuildBoxMainActivity extends FragmentActivity implements ICommunicatorCallback, IDownloadProgressCallback, IDownloadFinishedCallback, IDownloadCancelledCallback {
 	
 	public static final String TAG = "Main";
 
@@ -67,16 +68,27 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	private TabsAdapter adapter = null;
 	private DetailItem romItem = null;
 	private Communicator communicator = new Communicator();
-	public DownloadMap downloads = new DownloadMap();
+	private DownloadMap downloads = new DownloadMap();
 	public DownloadPackageAdapter downloadAdapter = null;
 	public ItemList contentItems = null;
 	public int viewPagerIndex = 0;
 	public Fragment fragment = null;
+	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
 	
 	public DownloadServiceConnection serviceConnection = new DownloadServiceConnection(this);
 	
 	public Communicator getCommunicator() {
 		return this.communicator;
+	}
+	
+	public synchronized DownloadMap getDownloads() {
+		return this.downloads;
+	}
+	
+	public synchronized void setDownloads(DownloadMap map) {
+		if (map != null) {
+			this.downloads = map;
+		}
 	}
 	
 	public String getRomUrl() {
@@ -255,8 +267,8 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 			this.getServiceDownloadMap();
 		}
 		else {
-			this.serviceConnection.service.startDownload(this.downloads);
-			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this);
+			this.serviceConnection.service.startDownload(this.getDownloads());
+			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this, this);
 		}
 	}
 	
@@ -270,14 +282,14 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	
 	public void getServiceDownloadMap(boolean addListeners) {
 		if (addListeners == true)
-			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this);
+			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this, this);
 		
 		DownloadMap serviceMap = this.serviceConnection.service.getMap();
 		
 		if (serviceMap != null && serviceMap.size() != 0)
-			this.downloads = serviceMap;
+			this.setDownloads(serviceMap);
 		
-		if (this.downloads.size() != 0) {
+		if (this.getDownloads().size() != 0) {
 			if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads")) {
 				this.addDownloadsTab();
 			}
@@ -326,7 +338,7 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 		        
 		        JsonArray elements = parser.parse(builder.toString()).getAsJsonArray();
 				
-		        this.downloads = DownloadMap.getDownloadMapFromJson(elements);
+		        this.setDownloads(DownloadMap.getDownloadMapFromJson(elements));
 		        
 		        this.deleteFile(getString(R.string.downloads_cach_filename));
 			} catch (FileNotFoundException e) {
@@ -401,11 +413,11 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 				if (animation != null && animation.hasStarted())
 					animation.cancel();
 				
-				if (!SharedObjectsHelper.remoteDrawables.containsKey((String)view.getTag())) {
-					SharedObjectsHelper.remoteDrawables.put((String)view.getTag(), bitmap);
+				if (!this.remoteDrawables.containsKey((String)view.getTag())) {
+					this.remoteDrawables.put((String)view.getTag(), bitmap);
 				}
 				else {
-					bitmap = SharedObjectsHelper.remoteDrawables.get((String)view.getTag());
+					bitmap = this.remoteDrawables.get((String)view.getTag());
 				}
 				
 				view.setImageBitmap(bitmap);
@@ -435,7 +447,7 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	public void getDownloadsMapandUpdateList () {
 		this.getServiceMap(false);
 		
-		if (this.downloads.size() != 0) {
+		if (this.getDownloads().size() != 0) {
 			if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads"))
 				this.addDownloadsTab();
 			
@@ -452,6 +464,11 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 
 	@Override
 	public void updateDownloadProgess(DownloadResponse response) {
+		this.getDownloadsMapandUpdateList();
+	}
+
+	@Override
+	public void downloadCancelled(DownloadResponse response) {
 		this.getDownloadsMapandUpdateList();
 	}
 }

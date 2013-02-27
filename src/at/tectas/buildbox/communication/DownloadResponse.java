@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 
 public class DownloadResponse implements IJsonSerialize {
 	public enum DownloadStatus {
-		Pending, Successful, Broken, Md5mismatch, Done
+		Pending, Successful, Broken, Md5mismatch, Done, Aborted
 	}
 	
 	public static JsonHelper helper = new JsonHelper();
@@ -82,6 +82,9 @@ public class DownloadResponse implements IJsonSerialize {
 		else if (status == DownloadStatus.Done) {
 			return "Done";
 		}
+		else if (status == DownloadStatus.Aborted) {
+			return "Aborted";
+		}
 		else {
 			return "Broken";
 		}
@@ -99,6 +102,9 @@ public class DownloadResponse implements IJsonSerialize {
 		}
 		else if (status.equals("Done")) {
 			return DownloadStatus.Done;
+		}
+		else if (status.equals("Aborted")) {
+			return DownloadStatus.Aborted;
 		}
 		else {
 			return DownloadStatus.Broken;

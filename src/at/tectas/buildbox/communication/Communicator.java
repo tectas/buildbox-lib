@@ -138,30 +138,34 @@ public class Communicator {
 		
 		public String ID = null;
 		private Communicator communicator = null;
-		private Hashtable<CallbackType, IDownloadProcessProgressCallback> updateListener = new Hashtable<CallbackType, IDownloadProcessProgressCallback>();
-		private Hashtable<CallbackType, IDownloadProcessFinishedCallback> finishedListener = new Hashtable<CallbackType, IDownloadProcessFinishedCallback>();
+		private Hashtable<CallbackType, IDownloadProgressCallback> updateListener = new Hashtable<CallbackType, IDownloadProgressCallback>();
+		private Hashtable<CallbackType, IDownloadFinishedCallback> finishedListener = new Hashtable<CallbackType, IDownloadFinishedCallback>();
+		private Hashtable<CallbackType, IDownloadCancelledCallback> cancelledListener = new Hashtable<Communicator.CallbackType, IDownloadCancelledCallback>();
 		
 		private DownloadAsyncCommunicator (Communicator communicator, String ID) {
 			this.ID = ID;
 			this.communicator = communicator;
 		}
 		
-		public DownloadAsyncCommunicator (Communicator communicator, String ID, IDownloadProcessProgressCallback updateCallback, IDownloadProcessFinishedCallback finishedCallback) {
+		public DownloadAsyncCommunicator (Communicator communicator, String ID, IDownloadProgressCallback updateCallback, IDownloadFinishedCallback finishedCallback, IDownloadCancelledCallback cancelCallback) {
 			this(communicator, ID);
 			this.updateListener.put(CallbackType.Service, updateCallback);
 			
 			this.finishedListener.put(CallbackType.Service, finishedCallback);
+			
+			this.cancelledListener.put(CallbackType.Service, cancelCallback);
 		}
 		
-		public DownloadAsyncCommunicator (Communicator communicator, String ID, Hashtable<CallbackType, IDownloadProcessProgressCallback> updateCallback, Hashtable<CallbackType, IDownloadProcessFinishedCallback> finishedCallback) {
+		public DownloadAsyncCommunicator (Communicator communicator, String ID, Hashtable<CallbackType, IDownloadProgressCallback> updateCallback, Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallback, Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallback) {
 			this(communicator, ID);
 			this.updateListener = updateCallback;
 			this.finishedListener = finishedCallback;
+			this.cancelledListener = cancelCallback;
 		}
 		
 		public synchronized boolean removeProgressListener (CallbackType type) {
 			if (this.updateListener.containsKey(type)) {
-				IDownloadProcessProgressCallback removedCallback = this.updateListener.remove(type);
+				IDownloadProgressCallback removedCallback = this.updateListener.remove(type);
 				if (removedCallback != null) {
 					return true;
 				}
@@ -174,12 +178,12 @@ public class Communicator {
 			}
 		}
 		
-		public synchronized boolean addProgressListener (CallbackType type, IDownloadProcessProgressCallback callback) {
+		public synchronized boolean addProgressListener (CallbackType type, IDownloadProgressCallback callback) {
 			if (this.updateListener.containsKey(type)) {
 				this.updateListener.remove(type);
 			}
 			
-			IDownloadProcessProgressCallback newCallback = this.updateListener.put(type, callback);
+			IDownloadProgressCallback newCallback = this.updateListener.put(type, callback);
 			
 			if (newCallback != null) {
 				return true;
@@ -192,7 +196,7 @@ public class Communicator {
 		public synchronized boolean removeResultListener(CallbackType type) {
 			if (this.finishedListener.containsKey(type)) {
 				
-				IDownloadProcessFinishedCallback removedCallback = this.finishedListener.remove(type);
+				IDownloadFinishedCallback removedCallback = this.finishedListener.remove(type);
 				
 				if (removedCallback != null) {
 					return true;
@@ -206,11 +210,11 @@ public class Communicator {
 			}
 		}
 		
-		public synchronized boolean addResultListener(CallbackType type, IDownloadProcessFinishedCallback callback) {
+		public synchronized boolean addResultListener(CallbackType type, IDownloadFinishedCallback callback) {
 			if (this.finishedListener.containsKey(type))
 				this.finishedListener.remove(type);
 			
-			IDownloadProcessFinishedCallback newCallback = this.finishedListener.put(type, callback);
+			IDownloadFinishedCallback newCallback = this.finishedListener.put(type, callback);
 				
 			if (newCallback != null) {
 				return true;
@@ -219,6 +223,36 @@ public class Communicator {
 				return false;
 			}
 			
+		}
+		
+		public synchronized boolean removeCancelledListener (CallbackType type) {
+			if (this.cancelledListener.containsKey(type)) {
+				IDownloadCancelledCallback removedCallback = this.cancelledListener.remove(type);
+				if (removedCallback != null) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		
+		public synchronized boolean addCancelledListener (CallbackType type, IDownloadCancelledCallback callback) {
+			if (this.cancelledListener.containsKey(type)) {
+				this.cancelledListener.remove(type);
+			}
+			
+			IDownloadCancelledCallback newCallback = this.cancelledListener.put(type, callback);
+			
+			if (newCallback != null) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		
 		@Override
@@ -239,7 +273,7 @@ public class Communicator {
 			if (this.updateListener != null && this.updateListener.size() != 0)
 				for (CallbackType callbackKey: this.updateListener.keySet()) {
 					
-					IDownloadProcessProgressCallback listener = this.updateListener.get(callbackKey);
+					IDownloadProgressCallback listener = this.updateListener.get(callbackKey);
 					
 					if (listener != null) {
 						listener.updateDownloadProgess(response[0]);
@@ -252,7 +286,7 @@ public class Communicator {
 			if (this.finishedListener != null && this.finishedListener.size() != 0) {
 				for (CallbackType callbackKey: this.finishedListener.keySet()) {
 					
-					IDownloadProcessFinishedCallback listener = this.finishedListener.get(callbackKey);
+					IDownloadFinishedCallback listener = this.finishedListener.get(callbackKey);
 					
 					if (listener != null) {
 						listener.downloadFinished(result);
@@ -261,18 +295,55 @@ public class Communicator {
 			}
 			super.onPostExecute(result);
 		}
+		
+		@Override
+		protected void onCancelled(DownloadResponse result) {
+			if (result != null) {
+				result.status = DownloadStatus.Aborted;
+			}
+			else {
+				result = new DownloadResponse();
+				result.status = DownloadStatus.Aborted;
+				result.md5sum = this.ID;
+			}
+			
+			for (CallbackType callbackKey: this.cancelledListener.keySet()) {
+				
+				IDownloadCancelledCallback listener = this.cancelledListener.get(callbackKey);
+				
+				if (listener != null) {
+					listener.downloadCancelled(result);
+				}
+			}
+		}
 	}
 	
-	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(String url, String directory, String filename, String md5sum, IDownloadProcessProgressCallback updateCallback, IDownloadProcessFinishedCallback finishedCallback) {
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback);
+	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(
+			String url, 
+			String directory, 
+			String filename, 
+			String md5sum, 
+			IDownloadProgressCallback updateCallback, 
+			IDownloadFinishedCallback finishedCallback,
+			IDownloadCancelledCallback cancelCallback
+			) {
+		
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback, cancelCallback);
 		
 		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new String[] { url, directory, filename, md5sum });
 		
 		return communicator;
 	}
 	
-	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(String url, String directory, String filename, String md5sum, Hashtable<CallbackType, IDownloadProcessProgressCallback> updateCallback, Hashtable<CallbackType, IDownloadProcessFinishedCallback> finishedCallback) {
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback);
+	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(
+			String url, 
+			String directory, 
+			String filename, 
+			String md5sum, 
+			Hashtable<CallbackType, IDownloadProgressCallback> updateCallback, 
+			Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallback,
+			Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallback) {
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback, cancelCallback);
 		
 		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new String[] { url, directory, filename, md5sum });
 		

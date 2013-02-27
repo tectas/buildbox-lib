@@ -99,6 +99,8 @@ public final class R {
         public static final int developers_property=0x7f040017;
         public static final int download_all_button_text=0x7f040030;
         public static final int download_checkbox_label=0x7f04002b;
+        public static final int download_detail_button_text=0x7f040032;
+        public static final int download_stop_button_text=0x7f040031;
         public static final int downloads_cach_filename=0x7f04002c;
         public static final int id_property=0x7f04001d;
         public static final int imageurls_property=0x7f04001e;

@@ -13,7 +13,6 @@ import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.ItemArrayAdapter;
 import at.tectas.buildbox.content.ParentItem;
 import at.tectas.buildbox.content.Item;
-import android.app.Activity;
 
 public class ContentListFragment extends Fragment {
 	private ItemArrayAdapter adapter = null;
@@ -43,7 +42,7 @@ public class ContentListFragment extends Fragment {
 		list.setAdapter(
 				adapter == null ? 
 						new ItemArrayAdapter(
-								(Activity)this.getActivity(), 
+								(BuildBoxMainActivity)this.getActivity(), 
 								R.id.ListItemTextView, 
 								new ArrayList<Item>(
 										((ParentItem)((BuildBoxMainActivity)this.getActivity()).contentItems

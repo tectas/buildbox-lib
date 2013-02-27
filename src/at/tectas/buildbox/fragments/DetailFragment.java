@@ -18,7 +18,6 @@ import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadPackage;
-import at.tectas.buildbox.helpers.SharedObjectsHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
 import at.tectas.buildbox.service.DownloadService;
@@ -31,6 +30,8 @@ public class DetailFragment extends Fragment implements OnClickListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.relatedView = (ViewGroup) inflater.inflate(R.layout.detail_fragment, container, false);
+		
+		BuildBoxMainActivity activity = (BuildBoxMainActivity) getActivity();
 		
 		DownloadPackage pack = new DownloadPackage();
 		
@@ -146,8 +147,8 @@ public class DetailFragment extends Fragment implements OnClickListener {
 					
 					imageView.setTag(url);
 					
-					if (SharedObjectsHelper.remoteDrawables.containsKey((String) url)) {
-						imageView.setImageBitmap(SharedObjectsHelper.remoteDrawables.get((String)url));
+					if (activity.remoteDrawables.containsKey((String) url)) {
+						imageView.setImageBitmap(activity.remoteDrawables.get((String)url));
 					}
 					else {
 						imageView.setImageResource(R.drawable.spinner);
@@ -190,7 +191,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				
 				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
 				
-				downloadButton.setText("Download");
+				downloadButton.setText(R.string.download_detail_button_text);
 				
 				downloadButton.setTag(pack);
 				
@@ -219,7 +220,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 			activity.downloadAdapter.add(pack);
 		}
 		else {
-			activity.downloads.put(pack);
+			activity.getDownloads().put(pack);
 		}
 	}
 }

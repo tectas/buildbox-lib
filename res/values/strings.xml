@@ -48,5 +48,7 @@
     <string name="default_sd_directory">BuildBox</string>
     <string name="update_notification_title">Rom update found</string>
     <string name="update_notification_text">There is an update for your Rom available!</string>
-    <string name="download_all_button_text">Download</string>
+    <string name="download_all_button_text">Start Download</string>
+    <string name="download_stop_button_text">Stop Download</string>
+    <string name="download_detail_button_text">Add to Downloadqueue</string>
 </resources>

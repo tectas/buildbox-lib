@@ -3,6 +3,7 @@ package at.tectas.buildbox.fragments;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
+import at.tectas.buildbox.service.DownloadService;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -30,6 +31,12 @@ public class DownloadListFragment extends Fragment implements OnClickListener{
 		
 		Button button = (Button) view.findViewById(R.id.download_all_button);
 		
+		if (DownloadService.Processing == true) {
+			button.setText(R.string.download_stop_button_text);
+		}
+		else {
+			button.setText(R.string.download_all_button_text);
+		}
 		button.setOnClickListener(this);
 		
 		return view;
@@ -39,6 +46,15 @@ public class DownloadListFragment extends Fragment implements OnClickListener{
 	public void onClick(View v) {		
 		BuildBoxMainActivity activity = (BuildBoxMainActivity) this.getActivity();
 		
-		activity.startDownload();
+		Button button = (Button)v;
+		
+		if (DownloadService.Processing == true) {
+			activity.stopDownload();
+			button.setText(R.string.download_all_button_text);
+		}
+		else {
+			activity.startDownload();
+			button.setText(R.string.download_stop_button_text);
+		}
 	}
 }
