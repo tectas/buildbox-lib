@@ -1,3 +1,6 @@
+Author: Adrian Stöckl (aka tectas)
+email: adrian.stoeckl@gmail.com
+
 ---------------------------------
 All content inside this application is licensed under GNU LESSER GENERAL PUBLIC LICENSE described below,
 except of res/values*, res/layout*, res/drawable* and AndroidManifest.xml files and folders, 
