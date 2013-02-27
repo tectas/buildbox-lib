@@ -93,22 +93,22 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 	public void updateWithJsonObject(JsonObject result) {
 		try {
 			this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
+		
+			String version = this.helper.getVersion();
+			
+			int comparsion = this.compareVersions(version, this.romItem.version);
+			
+			if (comparsion == 1) {
+				this.notifyUpdate();
+			}
+			else {
+				this.setNewAlarm();
+			}
 		}
 		catch (Exception e) {
 			this.setNewAlarm(Calendar.MINUTE, 1);
 			e.printStackTrace();
 		}
-		String version = this.helper.getVersion();
-		
-		int comparsion = this.compareVersions(version, this.romItem.version);
-		
-		if (comparsion == 1) {
-			this.notifyUpdate();
-		}
-		else {
-			this.setNewAlarm();
-		}
-		
 		wakelock.release();
 	}
 	
