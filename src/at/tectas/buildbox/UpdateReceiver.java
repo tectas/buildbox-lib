@@ -16,15 +16,18 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.ImageView;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
 import at.tectas.buildbox.content.DetailItem;
+import at.tectas.buildbox.content.Item;
 import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCallback {
 	
+	private static final String TAG = "UpdateReceiver";
 	private final int updateNotificationID = 5494;
 	private Communicator communicator = new Communicator();
 	private PropertyHelper helper = null;
@@ -91,7 +94,11 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 
 	@Override
 	public void updateWithJsonObject(JsonObject result) {
-		try {
+		try {			
+			if (Item.getActivity() == null) {
+				Item.setActivity(this.context);
+			}
+			
 			this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
 		
 			String version = this.helper.getVersion();

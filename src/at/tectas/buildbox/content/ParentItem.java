@@ -21,9 +21,9 @@ public class ParentItem extends Item {
 	public ParentItem(Item parent, JsonObject json) {
 		super(parent, json);
 		
-		this.thumbnailUrl = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.thumbnailurl_property), json);
+		this.thumbnailUrl = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.thumbnailurl_property), json);
 		
-		JsonArray children = Item.helper.tryGetJsonArrayFromJson(Item.activity.getString(R.string.children_property), json);
+		JsonArray children = Item.helper.tryGetJsonArrayFromJson(Item.context.getString(R.string.children_property), json);
 		
 		if (children != null)
 			for (int i = 0; i < children.size(); i++) {	
@@ -43,9 +43,9 @@ public class ParentItem extends Item {
 	public Bundle parseItemToBundle() {
 		Bundle result = super.parseItemToBundle();
 		
-		result.putString(Item.activity.getString(R.string.item_type_property), Item.activity.getString(R.string.item_parent_type));
+		result.putString(Item.context.getString(R.string.item_type_property), Item.context.getString(R.string.item_parent_type));
 		
-		result.putString(Item.activity.getString(R.string.thumbnailurl_property), this.thumbnailUrl);
+		result.putString(Item.context.getString(R.string.thumbnailurl_property), this.thumbnailUrl);
 		
 		ArrayList<String> children = new ArrayList<String>();
 		
@@ -53,7 +53,7 @@ public class ParentItem extends Item {
 			children.add(this.childs.get(i).ID.toString());
 		}
 		
-		result.putStringArrayList(Item.activity.getString(R.string.children_property), children);
+		result.putStringArrayList(Item.context.getString(R.string.children_property), children);
 		
 		return result;
 	}

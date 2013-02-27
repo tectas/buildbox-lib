@@ -17,7 +17,7 @@ public class ChildItem extends ParentItem {
 	public ChildItem(Item parent, JsonObject json) throws NullPointerException {
 		super(parent, json);
 		
-		JsonElement detail = json.get(Item.activity.getString(R.string.detail_property));
+		JsonElement detail = json.get(Item.context.getString(R.string.detail_property));
 		
 		JsonObject children = null;
 		
@@ -36,9 +36,9 @@ public class ChildItem extends ParentItem {
 	public Bundle parseItemToBundle() {
 		Bundle result = super.parseItemToBundle();
 		
-		result.putString(Item.activity.getString(R.string.item_type_property), Item.activity.getString(R.string.item_child_type));
+		result.putString(Item.context.getString(R.string.item_type_property), Item.context.getString(R.string.item_child_type));
 		
-		result.putString(Item.activity.getString(R.string.detailurl_property), this.detailUrl);
+		result.putString(Item.context.getString(R.string.detailurl_property), this.detailUrl);
 		
 		return result;
 	}

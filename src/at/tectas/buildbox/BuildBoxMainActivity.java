@@ -253,12 +253,14 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	}
 	
 	public void removeActivityCallbacks() {
-		if (this.serviceConnection.bound == false) {
-			this.serviceConnection.executeRemoveCallback = true;
-			this.bindDownloadService();
-		}
-		else {
-			this.removeCallbacksAndUnbind();
+		if (DownloadService.Started == true) {
+			if (this.serviceConnection.bound == false) {
+				this.serviceConnection.executeRemoveCallback = true;
+				this.bindDownloadService();
+			}
+			else {
+				this.removeCallbacksAndUnbind();
+			}
 		}
 	}
 	

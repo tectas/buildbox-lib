@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import at.tectas.buildbox.R;
@@ -22,7 +22,7 @@ public class Item {
 	}
 	
 	public static final String TAG = "ITEM";
-	protected static Activity activity;
+	protected static Context context;
 	public static JsonHelper helper = new JsonHelper();
 	
 	public Item parent = null;
@@ -38,23 +38,27 @@ public class Item {
 	public Item (Item parent, JsonObject json) {
 		this.parent = parent;
 
-		this.title = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.title_property), json);
+		this.title = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.title_property), json);
 		
-		this.tryGetArrayFromJson(Item.activity.getString(R.string.dependencies_property), json, ArrayTypes.DEPENDENCIES);
+		this.tryGetArrayFromJson(Item.context.getString(R.string.dependencies_property), json, ArrayTypes.DEPENDENCIES);
 	}
 	
-	public static void setActivity(Activity activity_) {
-		Item.activity = activity_;
+	public static void setActivity(Context activity_) {
+		Item.context = activity_;
+	}
+	
+	public static Context getActivity() {
+		return Item.context;
 	}
 	
 	public Bundle parseItemToBundle() {
 		Bundle result = new Bundle();
 		
-		result.putString(Item.activity.getString(R.string.id_property), this.ID.toString());
+		result.putString(Item.context.getString(R.string.id_property), this.ID.toString());
 		
-		result.putString(Item.activity.getString(R.string.title_property), this.title);
+		result.putString(Item.context.getString(R.string.title_property), this.title);
 		
-		result.putStringArrayList(Item.activity.getString(R.string.dependencies_property), this.dependencies);
+		result.putStringArrayList(Item.context.getString(R.string.dependencies_property), this.dependencies);
 		
 		return result;
 	};

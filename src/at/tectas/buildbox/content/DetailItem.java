@@ -20,21 +20,21 @@ public class DetailItem extends Item {
 	public DetailItem (Item parent, JsonObject json) {
 		super(parent, json);
 
-		this.description = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.description_property), json);
+		this.description = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.description_property), json);
 		
-		this.version = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.version_property), json);
+		this.version = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.version_property), json);
 		
-		this.url = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.url_property), json);
+		this.url = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.url_property), json);
 	
-		this.md5sum = Item.helper.tryGetStringFromJson(Item.activity.getString(R.string.md5sum_property), json);
+		this.md5sum = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.md5sum_property), json);
 		
-		this.tryGetArrayFromJson(Item.activity.getString(R.string.developers_property), json, ArrayTypes.DEVELOPERS);
+		this.tryGetArrayFromJson(Item.context.getString(R.string.developers_property), json, ArrayTypes.DEVELOPERS);
 		
-		this.tryGetArrayFromJson(Item.activity.getString(R.string.webpages_property), json, ArrayTypes.HOMEPAGES);
+		this.tryGetArrayFromJson(Item.context.getString(R.string.webpages_property), json, ArrayTypes.HOMEPAGES);
 		
-		this.tryGetArrayFromJson(Item.activity.getString(R.string.imageurls_property), json, ArrayTypes.IMAGEURLS);
+		this.tryGetArrayFromJson(Item.context.getString(R.string.imageurls_property), json, ArrayTypes.IMAGEURLS);
 		
-		this.tryGetArrayFromJson(Item.activity.getString(R.string.changelog_property), json, ArrayTypes.CHANGELOG);
+		this.tryGetArrayFromJson(Item.context.getString(R.string.changelog_property), json, ArrayTypes.CHANGELOG);
 		
 		this.type = ItemTypes.DetailItem;
 	}
@@ -47,18 +47,18 @@ public class DetailItem extends Item {
 	public Bundle parseItemToBundle() {
 		Bundle result = super.parseItemToBundle();
 		
-		result.putString(Item.activity.getString(R.string.item_type_property), Item.activity.getString(R.string.item_detail_type));
+		result.putString(Item.context.getString(R.string.item_type_property), Item.context.getString(R.string.item_detail_type));
 		
-		result.putString(Item.activity.getString(R.string.description_property), this.description);
-		result.putString(Item.activity.getString(R.string.version_property), this.version);
-		result.putString(Item.activity.getString(R.string.md5sum_property), this.md5sum);
-		result.putString(Item.activity.getString(R.string.url_property), this.url);
+		result.putString(Item.context.getString(R.string.description_property), this.description);
+		result.putString(Item.context.getString(R.string.version_property), this.version);
+		result.putString(Item.context.getString(R.string.md5sum_property), this.md5sum);
+		result.putString(Item.context.getString(R.string.url_property), this.url);
 		
-		result.putStringArrayList(Item.activity.getString(R.string.changelog_property), this.changelog);
+		result.putStringArrayList(Item.context.getString(R.string.changelog_property), this.changelog);
 		
-		result.putStringArrayList(Item.activity.getString(R.string.webpages_property), this.homePages);
+		result.putStringArrayList(Item.context.getString(R.string.webpages_property), this.homePages);
 		
-		result.putStringArrayList(Item.activity.getString(R.string.imageurls_property), this.imageUrls);
+		result.putStringArrayList(Item.context.getString(R.string.imageurls_property), this.imageUrls);
 		
 		if (this.developers.size() > 0) {
 			Bundle developers = new Bundle();
@@ -75,11 +75,11 @@ public class DetailItem extends Item {
 				donation.add(current.DonationUrl == null?"": current.DonationUrl);
 			}
 			
-			developers.putStringArrayList(Item.activity.getString(R.string.developer_names_property), names);
+			developers.putStringArrayList(Item.context.getString(R.string.developer_names_property), names);
 			
-			developers.putStringArrayList(Item.activity.getString(R.string.developers_donationurls_property), donation);
+			developers.putStringArrayList(Item.context.getString(R.string.developers_donationurls_property), donation);
 			
-			result.putBundle(Item.activity.getString(R.string.developers_property), developers);
+			result.putBundle(Item.context.getString(R.string.developers_property), developers);
 		}
 		
 		return result;
