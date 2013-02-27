@@ -1,7 +1,8 @@
 package at.tectas.buildbox.service;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 
@@ -14,9 +15,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
@@ -32,6 +35,7 @@ import at.tectas.buildbox.communication.IDownloadProgressCallback;
 
 public class DownloadService extends Service implements IDownloadProgressCallback, IDownloadFinishedCallback, IDownloadCancelledCallback {
 	
+	private static final String TAG = "DownloadService";
 	public static boolean Started = false;
 	public static boolean Processing = false;
 	
@@ -132,6 +136,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		DownloadAsyncCommunicator communicator = this.downloadCommunicators.get(id);
 		boolean result = false;
 		
+		Log.e(TAG, "communicator " + communicator);
+		
 		if (communicator != null) {
 			result = communicator.addProgressListener(type, progessListener);
 			result &= communicator.addResultListener(type, resultListener);
@@ -226,6 +232,10 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			this.map = map;
 			
 			for (DownloadPackage pack: this.map.values()) {
+				if (pack.response != null && (pack.response.status == DownloadStatus.Successful || pack.response.status == DownloadStatus.Done)) {
+					continue;
+				}
+				
 				DownloadService.Processing = true;
 				
 				pack.addProgressListener(CallbackType.Service, this);
@@ -253,8 +263,11 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 	}
 	
 	public void stopDownloads() {
-		for (DownloadAsyncCommunicator communicator: this.downloadCommunicators.values()) {
-			communicator.cancel(true);
+		Log.e(TAG, String.valueOf(this.downloadCommunicators.size()));
+		
+		for (DownloadAsyncCommunicator communicators: this.downloadCommunicators.values()) {
+			Log.e(TAG, "cancel called");
+			communicators.cancel(true);
 		}
 		
 		this.downloadCommunicators.clear();
@@ -292,6 +305,17 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		
 		if (packag != null) {
 			packag.response = response;
+			
+			if (packag.directory != null && response.mime == "apk" && (response.status == DownloadStatus.Successful || response.status == DownloadStatus.Done)) {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				
+				if (!packag.directory.endsWith("/")) {
+					packag.directory += "/";
+				}
+				
+				intent.setDataAndType(Uri.fromFile(new File(packag.directory + response.fileName)), "application/vnd.android.package-archive");
+				startActivity(intent); 
+			}
 		}
 		
 		this.resultBuilder.setSmallIcon(R.drawable.buildbox);
@@ -361,7 +385,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 				JsonArray jsonMap = map.serializeToJsonArray();
 				
 				try {
-					FileOutputStream stream = openFileOutput(getString(R.string.downloads_cach_filename), Context.MODE_PRIVATE);
+					BufferedOutputStream stream = new BufferedOutputStream(openFileOutput(getString(R.string.downloads_cach_filename), Context.MODE_PRIVATE));
 					
 					stream.write(jsonMap.toString().getBytes());
 					

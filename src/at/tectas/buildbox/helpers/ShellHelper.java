@@ -7,6 +7,10 @@ import java.io.InputStreamReader;
 
 public class ShellHelper {
 
+	public enum RebootType {
+		Recovery, Bootloader, System
+	}
+	
 	public static void executeSingleCommand(String command) {
 		DataOutputStream shellIn = null;
 		
@@ -34,7 +38,7 @@ public class ShellHelper {
 		}
 	}
 	
-	public static void executeSingleRootCommand(String command) {
+	public static void executeRootCommands(String[] commands) {
 		DataOutputStream shellIn = null;
 		
 		try {
@@ -42,7 +46,9 @@ public class ShellHelper {
 			
 		    shellIn = new DataOutputStream(process.getOutputStream());
 		    
-		    shellIn.writeBytes(command + "\n");
+		    for (String command: commands) {
+		    	shellIn.writeBytes(command + "\n");
+		    }
 		    
 		    shellIn.writeBytes("exit \n");
 		    
@@ -65,6 +71,10 @@ public class ShellHelper {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void executeSingleRootCommand(String command) {
+		ShellHelper.executeRootCommands(new String[] { command });
 	}
 	
 	public static String executeSingleRootCommandWithSingleLineOutput(String command) {
@@ -164,5 +174,63 @@ public class ShellHelper {
 	
 	public static String getBuildPropProperty(String property) {
 		return ShellHelper.executeSingleCommandWithOutput("getprop " + property);
+	}
+	
+	public static String getEchoCommand(String input) {
+		StringBuffer buffer = new StringBuffer();
+		
+		buffer.append("echo ");
+		buffer.append("\"");
+		buffer.append(input);
+		buffer.append("\"");
+		
+		return buffer.toString();
+	}
+	
+	public static String getAppendStringToFileOperator() {
+		return " >> ";
+	}
+	
+	public static String getStringToFileOperator() {
+		return " > ";
+	}
+	
+	public static String getThreePartCommand(String firstCommand, String operator, String secondCommand) {
+		StringBuffer buffer = new StringBuffer();
+		
+		buffer.append(firstCommand);
+		buffer.append(operator);
+		buffer.append(secondCommand);
+		
+		return buffer.toString();
+	}
+	
+	public static String getAppendStringToFileCommand(String command, String fullFilePath) {
+		return ShellHelper.getThreePartCommand(ShellHelper.getEchoCommand(command), ShellHelper.getAppendStringToFileOperator(), fullFilePath);
+	}
+	
+	public static String getStringToFileCommand(String command, String fullFilePath) {
+		return ShellHelper.getThreePartCommand(ShellHelper.getEchoCommand(command), ShellHelper.getStringToFileOperator(), fullFilePath);
+	}
+	
+	public static String getCdCommand(String directory) {
+		return "cd " + directory;
+	}
+	
+	public static String getMkdirCommand(String directoryname) {
+		return "mkdir " + directoryname;
+	}
+	
+	public static String getRebootCommand(RebootType type) {
+		if (type == RebootType.Recovery) {
+			return "reboot recovery";
+		}
+		else if (type == RebootType.Bootloader) {
+			return "reboot bootloader";
+		}
+		else {
+			return "reboot";
+		}
+		
 	}
 }

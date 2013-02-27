@@ -178,7 +178,15 @@ public class DetailFragment extends Fragment implements OnClickListener {
 			
 			String url = arguments.getString(getString(R.string.url_property));
 			
-			if (url != null && !url.isEmpty() && DownloadService.Processing == false) {				
+			String downloadType = arguments.getString(getString(R.string.item_download_type_property));
+			
+			if ((downloadType.equals(getString(R.string.item_download_type_zip)) || 
+					downloadType.equals(getString(R.string.item_download_type_apk)) ||
+					downloadType.equals(getString(R.string.item_download_type_other))) && 
+					url != null &&
+					url.length() != 0 &&
+					DownloadService.Processing == false) {
+				
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
 
 				pack.url = url;
@@ -198,6 +206,30 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				downloadButton.setOnClickListener(this);
 				
 				buttonLayout.addView(downloadButton);
+			}
+			else {
+				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
+				
+				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
+				
+				downloadButton.setText(R.string.item_web_button_text);
+				
+				downloadButton.setOnClickListener(new BrowserUrlListener());
+				
+				String page = null;
+				
+				if (url != null && !url.isEmpty()) {
+					page = url;
+				}
+				else if (homePages != null && homePages.size() != 0) {
+					page = homePages.get(0);
+				}
+				
+				if (page != null) {
+					downloadButton.setTag(page);
+					
+					buttonLayout.addView(downloadButton);
+				}
 			}
 		}
 		

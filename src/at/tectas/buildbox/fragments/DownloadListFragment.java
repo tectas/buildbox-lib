@@ -48,7 +48,11 @@ public class DownloadListFragment extends Fragment implements OnClickListener{
 		
 		Button button = (Button)v;
 		
-		if (DownloadService.Processing == true) {
+		if (button.getText().equals(this.getString(R.string.download_flash_text))) {
+			FlashConfigurationDialog dialog = new FlashConfigurationDialog();
+			dialog.show(activity.getFragmentManager(), this.getString(R.string.download_flash_options_title));
+		}
+		else if (DownloadService.Processing == true) {
 			activity.stopDownload();
 			button.setText(R.string.download_all_button_text);
 		}

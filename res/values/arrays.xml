@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="download_flash_options">
+        <item >Backup first</item>
+        <item >Wipe /data</item>
+        <item >Include Md5mismatch</item>
+    </string-array>
+    <integer-array name="download_flash_default_options">
+        <item >1</item>
+        <item >0</item>
+        <item >0</item>
+    </integer-array>
+</resources>

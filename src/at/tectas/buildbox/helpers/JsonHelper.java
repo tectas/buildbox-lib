@@ -1,5 +1,8 @@
 package at.tectas.buildbox.helpers;
 
+import android.content.Context;
+import at.tectas.buildbox.R;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -48,5 +51,23 @@ public class JsonHelper {
 			dummyArray = dummy.getAsJsonObject();
 		
 		return dummyArray;
+	}
+	
+	public String tryGetDownloadType(Context context, JsonObject json) {
+		String result = null;
+		JsonElement dummy = json.get(context.getString(R.string.item_download_type_property));
+		
+		if (dummy != null && dummy.isJsonPrimitive()) {
+			result = dummy.getAsString();
+		}
+		else {
+			result = ShellHelper.getBuildPropProperty(context.getString(R.string.item_download_default_type));
+			
+			if (result == null || !result.isEmpty() || result.length() == 0) {
+				result = "zip";
+			}
+		}
+		
+		return result;
 	}
 }

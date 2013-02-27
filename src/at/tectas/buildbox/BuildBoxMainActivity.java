@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Hashtable;
 
@@ -20,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -31,8 +33,11 @@ import android.widget.ImageView;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
 import at.tectas.buildbox.communication.Communicator;
+import at.tectas.buildbox.communication.DownloadKey;
 import at.tectas.buildbox.communication.DownloadMap;
+import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
+import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
 import at.tectas.buildbox.communication.IDownloadCancelledCallback;
 import at.tectas.buildbox.communication.IDownloadFinishedCallback;
@@ -46,6 +51,8 @@ import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.fragments.DownloadListFragment;
 import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
+import at.tectas.buildbox.recovery.OpenRecoveryScript;
+import at.tectas.buildbox.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.service.DownloadService;
 import at.tectas.buildbox.R;
 
@@ -183,6 +190,48 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
+	}
+	
+	public boolean allDownloadsFinished() {
+		int finishedDownloads = 0;
+		
+		for (DownloadPackage pack: this.getDownloads().values()) {
+			if (pack.response != null && pack.response.status != DownloadStatus.Pending) {
+				finishedDownloads++;
+			}
+		}
+		
+		if (finishedDownloads == this.getDownloads().size()) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public boolean downloadMapContainsBrokenOrAborted() {
+		
+		for (DownloadPackage pack: this.getDownloads().values()) {
+			if (pack.response.status == DownloadStatus.Broken || pack.response.status == DownloadStatus.Aborted) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public void removeBrokenAndAbortedFromMap() {
+		DownloadMap map = new DownloadMap();
+		
+		for (DownloadKey key: this.getDownloads().keySet()) {
+			DownloadPackage pack = this.getDownloads().get(key);
+			
+			if (pack.response != null && pack.response.status != DownloadStatus.Broken && pack.response.status != DownloadStatus.Aborted) {
+				map.put(key, pack);
+			}
+		}
+		
+		this.setDownloads(map);
 	}
 	
 	public void startUpdateAlarm() {
@@ -471,6 +520,31 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 
 	@Override
 	public void downloadCancelled(DownloadResponse response) {
+		
+		Log.e(TAG, "cancelled md5 " + response.md5sum);
 		this.getDownloadsMapandUpdateList();
+	}
+	
+	public void setupFlashProcess(ArrayList<Integer> list) {
+		OpenRecoveryScriptConfiguration config = new OpenRecoveryScriptConfiguration(this.downloadDir, this.getDownloads());
+		
+		for (Integer option: list){			
+			if (option.equals(Integer.valueOf(0))) {
+				config.backupFirst = true;
+			}
+			if (option.equals(Integer.valueOf(1))) {
+				config.wipeData = true;
+			}
+			if (option.equals(Integer.valueOf(2))) {
+				config.includeMd5mismatch = true;
+			}
+		}
+		
+		if (!list.contains(Integer.valueOf(0))) {
+			config.backupFirst = false;
+		}
+		
+		OpenRecoveryScript script = new OpenRecoveryScript(config);
+		script.writeScriptFile();
 	}
 }

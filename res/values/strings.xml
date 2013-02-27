@@ -51,4 +51,16 @@
     <string name="download_all_button_text">Start Download</string>
     <string name="download_stop_button_text">Stop Download</string>
     <string name="download_detail_button_text">Add to Downloadqueue</string>
+    <string name="download_retry_broken">Restart missing Downloads</string>
+    <string name="download_flash_text">Flash</string>
+    <string name="download_clear_broken">Clear Broken/Aborted</string>
+    <string name="download_flash_options_title">Flash Options</string>
+    <string name="download_flash_dialog_cancel_text">Cancel</string>
+    <string name="item_download_type_zip">zip</string>
+    <string name="item_download_type_external">web</string>
+    <string name="item_download_type_other">other</string>
+    <string name="item_download_type_apk">apk</string>
+    <string name="item_download_type_property">type</string>
+    <string name="item_download_default_type">buildbox.download.type</string>
+    <string name="item_web_button_text">Open in Browser</string>
 </resources>

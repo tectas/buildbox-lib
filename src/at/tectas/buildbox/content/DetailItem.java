@@ -7,11 +7,13 @@ import com.google.gson.JsonObject;
 import android.os.Bundle;
 import at.tectas.buildbox.R;
 
-public class DetailItem extends Item {	
+public class DetailItem extends Item {
+	
 	public String description;
 	public String version;
 	public String url;
 	public String md5sum;
+	public String downloadType;
 	public ArrayList<Developer> developers = new ArrayList<Developer>();
 	public ArrayList<String> homePages = new ArrayList<String>();
 	public ArrayList<String> imageUrls = new ArrayList<String>();
@@ -23,6 +25,8 @@ public class DetailItem extends Item {
 		this.description = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.description_property), json);
 		
 		this.version = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.version_property), json);
+		
+		this.downloadType = Item.helper.tryGetDownloadType(Item.context, json);
 		
 		this.url = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.url_property), json);
 	
@@ -48,6 +52,8 @@ public class DetailItem extends Item {
 		Bundle result = super.parseItemToBundle();
 		
 		result.putString(Item.context.getString(R.string.item_type_property), Item.context.getString(R.string.item_detail_type));
+		
+		result.putString(Item.context.getString(R.string.item_download_type_property), this.downloadType);
 		
 		result.putString(Item.context.getString(R.string.description_property), this.description);
 		result.putString(Item.context.getString(R.string.version_property), this.version);

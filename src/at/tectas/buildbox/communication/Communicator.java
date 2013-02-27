@@ -298,8 +298,10 @@ public class Communicator {
 		
 		@Override
 		protected void onCancelled(DownloadResponse result) {
+			
 			if (result != null) {
 				result.status = DownloadStatus.Aborted;
+				result.md5sum = this.ID;
 			}
 			else {
 				result = new DownloadResponse();

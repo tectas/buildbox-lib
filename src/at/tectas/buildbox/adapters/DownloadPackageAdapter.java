@@ -1,8 +1,10 @@
 package at.tectas.buildbox.adapters;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -15,8 +17,10 @@ import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 
-public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickListener {
+public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickListener, OnClickListener {
+	private static final String TAG = "DownloadPackageAdapter";
 	private final BuildBoxMainActivity context;
+	private boolean clearButtonAttached = false;
 	
 	public DownloadPackageAdapter(Activity context) {
 		super();
@@ -88,21 +92,30 @@ public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickLi
 	    
 	    rowView.setTag(position);
 	    
-	    int finishedDownload = 0;
-	    
-	    for (DownloadPackage pack: this.context.getDownloads().values()) {
-			if(pack.response != null && pack.response.status != DownloadStatus.Pending) {
-				finishedDownload++;
-			}
-	    }
-	    
-	    if (finishedDownload == this.context.getDownloads().size()) {
-	    	ViewGroup outerParent = (ViewGroup) parent.getParent();
+	    if (this.context.allDownloadsFinished() == true) {
+	    	ViewGroup outerParent = (ViewGroup) parent.getParent().getParent();
 	    	
 	    	Button button = (Button) outerParent.findViewById(R.id.download_all_button);
 	    	
 	    	if (button != null) {
-				button.setText(R.string.download_all_button_text);
+	    		if (this.context.downloadMapContainsBrokenOrAborted() == true) {
+	    			button.setText(R.string.download_retry_broken);
+	    			
+	    			if (this.clearButtonAttached == false) {
+	    				ViewGroup buttonLayout = (ViewGroup) outerParent.findViewById(R.id.download_button_layout);
+	    				
+	    				Button clearButton = (Button) inflater.inflate(R.layout.download_clear_button, buttonLayout, false);
+	    				
+	    				clearButton.setText(R.string.download_clear_broken);
+	    				
+	    				clearButton.setOnClickListener(this);
+	    				
+	    				buttonLayout.addView(clearButton);
+	    			}
+	    		}
+	    		else {
+	    			button.setText(R.string.download_flash_text);
+	    		}
 	    	}
 	    }
 	    
@@ -133,5 +146,12 @@ public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickLi
 		this.notifyDataSetChanged();
 		
 		return true;
+	}
+
+	@Override
+	public void onClick(View v) {
+		this.context.removeBrokenAndAbortedFromMap();
+		
+		this.notifyDataSetChanged();
 	}
 }

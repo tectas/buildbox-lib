@@ -57,7 +57,7 @@ public class DownloadResponse implements IJsonSerialize {
 		int index = -1;
 		
 		if (offset <= 0) {
-			return index;
+			return filename.indexOf(substring, 0);
 		}
 		else {
 			index = filename.indexOf(substring, offset);
