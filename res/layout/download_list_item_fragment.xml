@@ -4,18 +4,21 @@
     android:id="@+id/download_item_layout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:columnCount="2">
+    android:columnCount="2"
+    android:focusable="false">
 
     <TextView
         android:id="@+id/download_text"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_gravity="left" />
+        android:layout_gravity="left"
+        android:focusable="false" />
     
     <LinearLayout 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right">
+        android:layout_gravity="right"
+        android:focusable="false">
         
 	    <TextView
 	        android:id="@+id/download_md5sum_title"
@@ -24,13 +27,15 @@
 	        android:layout_height="wrap_content"
 	        android:textSize="15sp"
 	        android:layout_marginRight="5sp"
-	        android:layout_gravity="right|center_vertical"/>
+	        android:layout_gravity="right|center_vertical"
+	        android:focusable="false"/>
 	
 	    <CheckBox
 	        android:id="@+id/download_md5sum_check"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:layout_gravity="right|center_vertical" />
+	        android:layout_gravity="right|center_vertical"
+	        android:focusable="false" />
     
     </LinearLayout>
     
@@ -38,12 +43,14 @@
         android:id="@+id/download_subtext"
         android:textSize="15sp"
         android:layout_marginBottom="8sp"
-        android:layout_gravity="left|center_vertical" />
+        android:layout_gravity="left|center_vertical"
+        android:focusable="false" />
     
     <TextView
         android:id="@+id/download_textprogress"
         android:textSize="15sp"
-        android:layout_gravity="right|bottom" />
+        android:layout_gravity="right|bottom"
+        android:focusable="false" />
     
     <ProgressBar
         android:id="@+id/download_progress"
@@ -51,14 +58,18 @@
         android:layout_width="fill_parent"
         android:layout_gravity="top|center_horizontal"
         android:layout_columnSpan="2"
-        android:max="100" />
+        android:max="100"
+        android:focusable="false"
+        android:paddingLeft="8sp"
+        android:paddingRight="8sp" />
     
     <TextView 
         android:id="@+id/download_result_status"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_columnSpan="2"
-        android:layout_marginBottom="5sp"
-        android:layout_gravity="center_vertical|center_horizontal"/>
+        android:paddingBottom="5sp"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:focusable="false"/>
 
 </GridLayout>

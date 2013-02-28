@@ -21,14 +21,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Animation;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
@@ -196,7 +201,7 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 		int finishedDownloads = 0;
 		
 		for (DownloadPackage pack: this.getDownloads().values()) {
-			if (pack.response != null && pack.response.status != DownloadStatus.Pending) {
+			if (pack.getResponse() != null && pack.getResponse().status != DownloadStatus.Pending && pack.getResponse().status != DownloadStatus.Aborted) {
 				finishedDownloads++;
 			}
 		}
@@ -212,7 +217,7 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	public boolean downloadMapContainsBrokenOrAborted() {
 		
 		for (DownloadPackage pack: this.getDownloads().values()) {
-			if (pack.response.status == DownloadStatus.Broken || pack.response.status == DownloadStatus.Aborted) {
+			if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Broken || pack.getResponse().status == DownloadStatus.Aborted)) {
 				return true;
 			}
 		}
@@ -221,17 +226,17 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	}
 	
 	public void removeBrokenAndAbortedFromMap() {
-		DownloadMap map = new DownloadMap();
-		
 		for (DownloadKey key: this.getDownloads().keySet()) {
 			DownloadPackage pack = this.getDownloads().get(key);
 			
-			if (pack.response != null && pack.response.status != DownloadStatus.Broken && pack.response.status != DownloadStatus.Aborted) {
-				map.put(key, pack);
+			if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Broken || pack.getResponse().status == DownloadStatus.Aborted)) {
+				this.getDownloads().remove(key);
 			}
 		}
 		
-		this.setDownloads(map);
+		if (this.downloadAdapter != null) {
+			this.downloadAdapter.notifyDataSetChanged();
+		}
 	}
 	
 	public void startUpdateAlarm() {
@@ -520,8 +525,6 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 
 	@Override
 	public void downloadCancelled(DownloadResponse response) {
-		
-		Log.e(TAG, "cancelled md5 " + response.md5sum);
 		this.getDownloadsMapandUpdateList();
 	}
 	

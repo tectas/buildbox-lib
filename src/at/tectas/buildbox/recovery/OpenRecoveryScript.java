@@ -45,13 +45,13 @@ public class OpenRecoveryScript {
 		}
 		
 		for (DownloadPackage pack: this.configuration.downloads.values()) {
-			DownloadResponse response = pack.response;
+			DownloadResponse response = pack.getResponse();
 			
 			if ((response.status == DownloadStatus.Successful || 
 				response.status == DownloadStatus.Done ||
 				(response.status == DownloadStatus.Md5mismatch && this.configuration.includeMd5mismatch == true)) &&
 				response.mime == "zip") {
-				shellCommands.add(ShellHelper.getAppendStringToFileCommand("install " + this.configuration.directoryPath + pack.response.fileName, filePath));
+				shellCommands.add(ShellHelper.getAppendStringToFileCommand("install " + this.configuration.directoryPath + pack.getFilename(), filePath));
 			}
 		}
 		

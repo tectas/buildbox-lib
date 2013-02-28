@@ -6,13 +6,13 @@ import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import at.tectas.buildbox.BuildBoxMainActivity;
 
-public class TabsAdapter extends FragmentStatePagerAdapter implements
+public class TabsAdapter extends FragmentPagerAdapter implements
 		ActionBar.TabListener, ViewPager.OnPageChangeListener {
 	private static final String TAG = "TabsAdapter";
 	private final BuildBoxMainActivity mContext;

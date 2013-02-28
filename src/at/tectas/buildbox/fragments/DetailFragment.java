@@ -122,10 +122,10 @@ public class DetailFragment extends Fragment implements OnClickListener {
 						
 						String url = urls.get(i);
 						
-						childView.setTag(url);
-						
 						if (url != null && !url.isEmpty()) {
 							textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.donate_button, 0);
+							
+							textView.setTag(url);
 							
 							textView.setOnClickListener(new BrowserUrlListener());
 						}
@@ -193,7 +193,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				
 				String[] splittedFilename = url.split("/");
 				
-				pack.filename = splittedFilename[splittedFilename.length - 1];
+				pack.setFilename(splittedFilename[splittedFilename.length - 1]);
 				
 				pack.directory = ((BuildBoxMainActivity)getActivity()).getDownloadDir();
 				

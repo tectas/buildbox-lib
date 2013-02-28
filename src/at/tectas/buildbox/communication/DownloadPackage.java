@@ -12,14 +12,39 @@ import at.tectas.buildbox.helpers.JsonHelper;
 public class DownloadPackage implements IJsonSerialize {
 	public static JsonHelper helper = new JsonHelper();
 	public String url = null;
+	public String type = null;
 	public String title = null;
 	public String directory = null;
-	public String filename = null;
+	protected String filename = null;
 	public String md5sum = null;
 	public Hashtable<CallbackType, IDownloadProgressCallback> updateCallbacks = new Hashtable<CallbackType, IDownloadProgressCallback>();
 	public Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallbacks = new Hashtable<CallbackType, IDownloadFinishedCallback>();
 	public Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallbacks = new Hashtable<CallbackType, IDownloadCancelledCallback>();
-	public DownloadResponse response = null;
+	protected DownloadResponse response = null;
+	
+	public void setFilename(String filename) {
+		if (response != null) {
+			response.mime = response.getMimeType(this.filename, this.filename.length() - 3);
+		}
+		
+		this.filename = filename;
+	}
+	
+	public String getFilename() {
+		return this.filename;
+	}
+	
+	public void setResponse(DownloadResponse response) {
+		if (response != null) {
+			response.pack = this;
+		}
+		
+		this.response = response;
+	}
+	
+	public DownloadResponse getResponse() {
+		return this.response;
+	}
 	
 	public DownloadPackage() {
 		
@@ -35,7 +60,7 @@ public class DownloadPackage implements IJsonSerialize {
 		JsonElement element = json.get("response");
 		
 		if (element != null && element.isJsonObject())
-			this.response = new DownloadResponse(element.getAsJsonObject());
+			this.response = new DownloadResponse(this, element.getAsJsonObject());
 	}
 	
 	public void addProgressListener (CallbackType type, IDownloadProgressCallback callback) {

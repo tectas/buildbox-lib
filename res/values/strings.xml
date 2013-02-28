@@ -63,4 +63,5 @@
     <string name="item_download_type_property">type</string>
     <string name="item_download_default_type">buildbox.download.type</string>
     <string name="item_web_button_text">Open in Browser</string>
+    <string name="service_download_aborted">aborted</string>
 </resources>

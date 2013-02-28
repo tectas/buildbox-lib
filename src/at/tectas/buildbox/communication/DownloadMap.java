@@ -2,12 +2,15 @@ package at.tectas.buildbox.communication;
 
 import java.util.Hashtable;
 
+import android.util.Log;
+
 import com.google.gson.JsonArray;
 
 
 public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 
 	private static final long serialVersionUID = 1L;
+	private static final String TAG = "DownloadMap";
 
 	public synchronized DownloadPackage get (String md5sum) {
 		for (DownloadKey key: this.keySet()) {
@@ -95,7 +98,7 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 				newKey.md5sum = md5sum;
 				
 				for (int i = index; i < this.size(); i++) {
-					this.ChangeIndex(index, index + 1);
+					this.ChangeIndex(i, i + 1);
 				}
 				
 				this.put(newKey, object);
@@ -111,10 +114,21 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 		return this.remove(key);
 	}
 	
+	
 	public synchronized DownloadPackage remove(String md5sum) {
 		DownloadKey key = this.getKey(md5sum);
 		
 		return this.remove(key);
+	}
+	
+	@Override
+	public synchronized DownloadPackage remove(Object key) {
+		DownloadKey downloadKey = (DownloadKey) key;
+		
+		for (int i = downloadKey.index + 1; i < this.size(); i++) {
+			this.ChangeIndex(i, i - 1);
+		}
+		return super.remove(key);
 	}
 	
 	public synchronized boolean containsKey(String md5sum) {

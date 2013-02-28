@@ -13,34 +13,27 @@ public class DownloadResponse implements IJsonSerialize {
 	public static JsonHelper helper = new JsonHelper();
 	
 	public DownloadStatus status = DownloadStatus.Pending;
-	public String fileName = null;
+	public DownloadPackage pack = null;
 	public String mime = null;
-	public String md5sum = null;
-	public String url = null;
 	public int progress = 0;
 	
 	public DownloadResponse () {
 		
 	}
 	
-	public DownloadResponse (JsonObject json) {
+	public DownloadResponse (DownloadPackage pack, JsonObject json) {
 		this.status = this.getStatusFromString(DownloadResponse.helper.tryGetStringFromJson("status", json));
-		this.fileName = DownloadResponse.helper.tryGetStringFromJson("filename", json);
 		this.mime = DownloadResponse.helper.tryGetStringFromJson("mime", json);
-		this.md5sum = DownloadResponse.helper.tryGetStringFromJson("md5sum", json);
-		this.url = DownloadResponse.helper.tryGetStringFromJson("url", json);
 		this.progress = json.get("progress").getAsInt();
 	}
 	
-	public DownloadResponse (DownloadStatus status, String filename, String url, String md5sum) {
+	public DownloadResponse (DownloadPackage pack, DownloadStatus status) {
 		this.status = status;
-		this.fileName = filename;
-		this.mime = this.getMimeType(filename, filename.length() - 3);
-		this.url = url;
-		this.md5sum = md5sum;
+		this.pack = pack;
+		this.mime = this.getMimeType(pack.getFilename(), pack.getFilename().length() - 3);
 	}
 	
-	private String getMimeType (String filename, int offset) {
+	public String getMimeType (String filename, int offset) {
 		int index = this.getIndex(filename, ".", offset);
 		
 		if (index == -1) {
@@ -115,10 +108,7 @@ public class DownloadResponse implements IJsonSerialize {
 		JsonObject json = new JsonObject();
 		
 		json.addProperty("status", this.getStatusString(this.status));
-		json.addProperty("filename", this.fileName);
 		json.addProperty("mime", this.mime);
-		json.addProperty("md5sum", this.md5sum);
-		json.addProperty("url", this.url);
 		json.addProperty("progress", this.progress);
 		
 		return json;

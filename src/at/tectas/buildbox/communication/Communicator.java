@@ -256,9 +256,9 @@ public class Communicator {
 		}
 		
 		@Override
-		protected DownloadResponse doInBackground(String... params) {
+		protected DownloadResponse doInBackground(DownloadPackage... params) {
 			try {
-				return this.communicator.downloadFileToSd(params[0], params[1], params[2], params[3], this);
+				return this.communicator.downloadFileToSd(params[0], this);
 			}
 			catch (Exception e) {
 				return new DownloadResponse();
@@ -299,14 +299,28 @@ public class Communicator {
 		@Override
 		protected void onCancelled(DownloadResponse result) {
 			
-			if (result != null) {
-				result.status = DownloadStatus.Aborted;
-				result.md5sum = this.ID;
+			if (result == null) {
+				result = new DownloadResponse(new DownloadPackage(), DownloadStatus.Aborted);
+				
+				if (this.ID.contains("/")) {
+					result.pack.url = this.ID;
+				}
+				else {
+					result.pack.md5sum = this.ID;
+				}
 			}
 			else {
-				result = new DownloadResponse();
-				result.status = DownloadStatus.Aborted;
-				result.md5sum = this.ID;
+				if (result.pack == null) {
+					result.status = DownloadStatus.Aborted;
+					result.pack = new DownloadPackage();
+					
+					if (this.ID.contains("/")) {
+						result.pack.url = this.ID;
+					}
+					else {
+						result.pack.md5sum = this.ID;
+					}
+				}
 			}
 			
 			for (CallbackType callbackKey: this.cancelledListener.keySet()) {
@@ -321,33 +335,27 @@ public class Communicator {
 	}
 	
 	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(
-			String url, 
-			String directory, 
-			String filename, 
-			String md5sum, 
+			DownloadPackage pack, 
 			IDownloadProgressCallback updateCallback, 
 			IDownloadFinishedCallback finishedCallback,
 			IDownloadCancelledCallback cancelCallback
 			) {
 		
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback, cancelCallback);
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, pack.md5sum == null? pack.url: pack.md5sum, updateCallback, finishedCallback, cancelCallback);
 		
-		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new String[] { url, directory, filename, md5sum });
+		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pack);
 		
 		return communicator;
 	}
 	
 	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(
-			String url, 
-			String directory, 
-			String filename, 
-			String md5sum, 
+			DownloadPackage pack, 
 			Hashtable<CallbackType, IDownloadProgressCallback> updateCallback, 
 			Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallback,
 			Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallback) {
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, md5sum == null? url: md5sum, updateCallback, finishedCallback, cancelCallback);
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, pack.md5sum == null? pack.url: pack.md5sum, updateCallback, finishedCallback, cancelCallback);
 		
-		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new String[] { url, directory, filename, md5sum });
+		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pack);
 		
 		return communicator;
 	}
@@ -528,16 +536,16 @@ public class Communicator {
         return json;
 	}
 	
-	public DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler) {
-		DownloadResponse result = new DownloadResponse(DownloadStatus.Pending, filename, url, md5sum);
+	public DownloadResponse downloadFileToSd(DownloadPackage pack, IDownloadAsyncCommunicator progressHandler) {
+		DownloadResponse result = new DownloadResponse(pack, DownloadStatus.Pending);
 		
-		if (url != null) {
+		if (pack.url != null) {
 			
 			InputStream in = null;
 		    FileOutputStream out = null;
 		    
 		    try {
-		    	HttpURLConnection connection = Communicator.getConnection(url);
+		    	HttpURLConnection connection = Communicator.getConnection(pack.url);
 		        
 		        boolean statusOk = Communicator.checkHttpStatus(connection);
 		        
@@ -553,13 +561,15 @@ public class Communicator {
 			        
 			        in = new DigestInputStream(in, md);
 			        
-			        File dir = new File(directory);
+			        File dir = new File(pack.directory);
 			        
 			        if (!dir.exists()) {
 			        	dir.mkdir();
 			        }
 			        
-			        File file = new File(directory, responseFilename == null? filename : responseFilename);
+			        pack.setFilename(responseFilename == null? pack.getFilename() : responseFilename);
+			        
+			        File file = new File(pack.directory, pack.getFilename());
 			        
 			        if (file.exists()) {
 			        	file.delete();
@@ -573,10 +583,18 @@ public class Communicator {
 			        
 			        Integer processed = 0;
 			        
+			        result.progress = (int)((100d / fileSize) * processed);
+	            	progressHandler.indirectPublishProgress(result);
+			        
 			        while ((len = in.read(buffer)) != -1) {
 			            out.write(buffer, 0, len);
 			            
 			            processed += len;
+			            
+			            if (progressHandler.isCancelled()) {
+			            	result.status = DownloadStatus.Aborted;
+			            	return result;
+			            }
 			            
 			            if (processed % 2097152 <= 512) {
 			            	out.flush();
@@ -601,10 +619,10 @@ public class Communicator {
 			        		out = null;
 			        	}
 			        	
-			        	result = this.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
+			        	result = this.downloadFileToSd(pack, progressHandler, processed, 1);
 			        }
 			        else {
-			        	if (md5sum != null) {
+			        	if (pack.md5sum != null) {
 					        byte[] sumBytes = md.digest();
 					        
 					        StringBuffer hexString = new StringBuffer();
@@ -623,13 +641,11 @@ public class Communicator {
 					        
 					        String sum = hexString.toString();
 					        
-					        if (sum.equals(md5sum)) 
+					        if (sum.equals(pack.md5sum)) 
 					        	result.status = DownloadStatus.Successful;
 					        else {
 					        	
 					        	result.status = DownloadStatus.Md5mismatch;
-					        	
-					        	result = this.downloadFileToSd(url, directory, responseFilename == null? filename : responseFilename, md5sum, progressHandler, processed, 1);
 					        }
 			        	}
 			        	else {
@@ -663,16 +679,16 @@ public class Communicator {
 		return result;
 	}
 	
-	public DownloadResponse downloadFileToSd(String url, String directory, String filename, String md5sum, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) {
+	public DownloadResponse downloadFileToSd(DownloadPackage pack, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) {
 		
-		DownloadResponse result = new DownloadResponse(DownloadStatus.Pending, filename, url, md5sum);
+		DownloadResponse result = new DownloadResponse(pack, DownloadStatus.Pending);
 		
-		if (url != null && !url.isEmpty() && retries <= 5) {
+		if (pack.url != null && !pack.url.isEmpty() && retries <= 5) {
 			InputStream in = null;
 		    FileOutputStream out = null;
 		    
 		    try {
-		        HttpURLConnection connection = Communicator.getConnection(url, alreadyDownloaded);
+		        HttpURLConnection connection = Communicator.getConnection(pack.url, alreadyDownloaded);
 		        
 		        boolean statusOk = Communicator.checkHttpStatus(connection);
 		        
@@ -688,7 +704,7 @@ public class Communicator {
 			        
 			        in = new DigestInputStream(in, md);
 			        
-			        File file = new File(directory, filename);
+			        File file = new File(pack.directory, pack.getFilename());
 			        
 			        if (!ranges && file.exists()) {
 			        	file.delete();
@@ -702,9 +718,17 @@ public class Communicator {
 			        
 			        Integer processed = ranges ? alreadyDownloaded : 0;
 			        
+			        result.progress = (int)((100d / fileSize) * processed);
+	            	progressHandler.indirectPublishProgress(result);
+			        
 			        while ((len = in.read(buffer)) != -1) {
 			            out.write(buffer, 0, len);
 			            processed += len;
+			            
+			            if (progressHandler.isCancelled()) {
+			            	result.status = DownloadStatus.Aborted;
+			            	return result;
+			            }
 			            
 			            if (processed % 2097152 <= 128) {
 			            	out.flush();
@@ -729,10 +753,10 @@ public class Communicator {
 			        		out = null;
 			        	}
 			        	
-			        	result = this.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, 1);
+			        	result = this.downloadFileToSd(pack, progressHandler, processed, retries + 1);
 			        }
 			        else {
-			        	if (md5sum != null) {
+			        	if (pack.md5sum != null) {
 					        byte[] sumBytes = md.digest();
 					        
 					        StringBuffer hexString = new StringBuffer();
@@ -751,13 +775,11 @@ public class Communicator {
 					        
 					        String sum = hexString.toString();
 					        
-					        if (sum.equals(md5sum)) 
+					        if (sum.equals(pack.md5sum)) 
 					        	result.status = DownloadStatus.Successful;
 					        else {
 					        	
 					        	result.status = DownloadStatus.Md5mismatch;
-					        	
-					        	result = this.downloadFileToSd(url, directory, filename, md5sum, progressHandler, processed, 1);
 					        }
 			        	}
 			        	else {
