@@ -1,11 +1,9 @@
 package at.tectas.buildbox.adapters;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -15,12 +13,13 @@ import android.widget.TextView;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.DownloadPackage;
+import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
+import at.tectas.buildbox.service.DownloadService;
 
-public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickListener, OnClickListener {
-	private static final String TAG = "DownloadPackageAdapter";
+public class DownloadPackageAdapter extends BaseAdapter implements OnClickListener {
 	private final BuildBoxMainActivity context;
-	private boolean clearButtonAttached = false;
+	private Button downloadButton = null;
 	
 	public DownloadPackageAdapter(Activity context) {
 		super();
@@ -48,11 +47,9 @@ public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickLi
 		
 		DownloadPackage item = this.context.getDownloads().get(position);
 		
-		rowView.setOnLongClickListener(this);
-		
 		try {
 			text.setText(item.title == null?"": item.title);
-			subText.setText(item.filename);
+			subText.setText(item.getFilename());
 		    checkbox.setChecked(false);
 		    checkbox.setClickable(false);
 		}
@@ -60,31 +57,33 @@ public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickLi
 			e.printStackTrace();
 		}
 	    
-	    if (item != null && item.response != null) {	    	
+	    if (item != null && item.getResponse() != null) {
+	    	DownloadResponse response = item.getResponse();
+	    	
 	    	progressbar.setEnabled(true);
 	    	progressbar.setMax(100);
 	    	progressbar.setIndeterminate(false);
-	    	progressbar.setProgress(item.response.progress);
-	    	progressText.setText(String.valueOf(item.response.progress) + "%");
+	    	progressbar.setProgress(response.progress);
+	    	progressText.setText(String.valueOf(response.progress) + "%");
 	    	
-	    	if (item.response.status == DownloadStatus.Successful) {
+	    	if (response.status == DownloadStatus.Successful) {
 	    		checkbox.setChecked(true);
 	    		statusText.setText("Successful");
 	    	}
-	    	else if (item.response.status == DownloadStatus.Done) {
+	    	else if (response.status == DownloadStatus.Done) {
 	    		checkbox.setChecked(false);
 	    		statusText.setText("Done");
 	    	}
-	    	else if (item.response.status == DownloadStatus.Broken) {
+	    	else if (response.status == DownloadStatus.Broken) {
 	    		checkbox.setChecked(false);
 	    		text.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_dark));
 	    		statusText.setText("Broken");
 	    	}
-	    	else if (item.response.status == DownloadStatus.Md5mismatch) {
+	    	else if (response.status == DownloadStatus.Md5mismatch) {
 	    		checkbox.setChecked(false);
 	    		statusText.setText("Md5sum mismatch");
 	    	}
-	    	else if (item.response.status == DownloadStatus.Aborted) {
+	    	else if (response.status == DownloadStatus.Aborted) {
 	    		checkbox.setChecked(false);
 	    		statusText.setText("Aborted");
 	    	}
@@ -92,32 +91,24 @@ public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickLi
 	    
 	    rowView.setTag(position);
 	    
-	    if (this.context.allDownloadsFinished() == true) {
-	    	ViewGroup outerParent = (ViewGroup) parent.getParent().getParent();
-	    	
-	    	Button button = (Button) outerParent.findViewById(R.id.download_all_button);
-	    	
-	    	if (button != null) {
-	    		if (this.context.downloadMapContainsBrokenOrAborted() == true) {
-	    			button.setText(R.string.download_retry_broken);
-	    			
-	    			if (this.clearButtonAttached == false) {
-	    				ViewGroup buttonLayout = (ViewGroup) outerParent.findViewById(R.id.download_button_layout);
-	    				
-	    				Button clearButton = (Button) inflater.inflate(R.layout.download_clear_button, buttonLayout, false);
-	    				
-	    				clearButton.setText(R.string.download_clear_broken);
-	    				
-	    				clearButton.setOnClickListener(this);
-	    				
-	    				buttonLayout.addView(clearButton);
-	    			}
-	    		}
-	    		else {
-	    			button.setText(R.string.download_flash_text);
-	    		}
-	    	}
-	    }
+    	ViewGroup buttonLayout = (ViewGroup) ((ViewGroup) parent.getParent().getParent()).findViewById(R.id.download_button_layout);
+    	
+    	this.downloadButton = (Button) buttonLayout.findViewById(R.id.download_all_button);
+    	
+    	if (this.downloadButton != null) {
+    		if (this.context.downloadMapContainsBrokenOrAborted() == true && DownloadService.Processing == false) {
+    			this.downloadButton.setText(R.string.download_retry_broken);
+    		}
+    		else if (this.context.allDownloadsFinished() == true) {
+    			this.downloadButton.setText(R.string.download_flash_text);
+    		}
+    		else if (DownloadService.Processing == true) {
+    			this.downloadButton.setText(this.context.getString(R.string.download_stop_button_text));
+    		}
+    		else {
+    			this.downloadButton.setText(this.context.getString(R.string.download_all_button_text));
+    		}
+    	}
 	    
 		return rowView;
 	}
@@ -136,21 +127,12 @@ public class DownloadPackageAdapter extends BaseAdapter implements OnLongClickLi
 	public long getItemId(int position) {
 		return position;
 	}
-
-	@Override
-	public boolean onLongClick(View v) {
-		int position = (Integer) v.getTag();
-		
-		this.context.getDownloads().remove(position);
-		
-		this.notifyDataSetChanged();
-		
-		return true;
-	}
-
+	
 	@Override
 	public void onClick(View v) {
 		this.context.removeBrokenAndAbortedFromMap();
+		
+		v.setVisibility(Button.GONE);
 		
 		this.notifyDataSetChanged();
 	}

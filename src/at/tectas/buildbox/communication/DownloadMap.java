@@ -2,15 +2,12 @@ package at.tectas.buildbox.communication;
 
 import java.util.Hashtable;
 
-import android.util.Log;
-
 import com.google.gson.JsonArray;
 
 
 public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 
 	private static final long serialVersionUID = 1L;
-	private static final String TAG = "DownloadMap";
 
 	public synchronized DownloadPackage get (String md5sum) {
 		for (DownloadKey key: this.keySet()) {
