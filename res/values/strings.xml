@@ -34,7 +34,7 @@
     <string name="item_detail_type">detail</string>
     <string name="webpages_property">webpages</string>
     <string name="developers_head">Developers</string>
-    <string name="webpages_head">Webpages</string>
+    <string name="webpages_head">Webpages/Support:</string>
     <string name="service_notification_title">BuildBox Download Service</string>
     <string name="service_notification_text"> </string>
     <string name="service_result_notification_title">BuildBox Finished Downloads</string>
@@ -64,4 +64,5 @@
     <string name="item_download_default_type">buildbox.download.type</string>
     <string name="item_web_button_text">Open in Browser</string>
     <string name="service_download_aborted">aborted</string>
+    <string name="description_head_text">Description:</string>
 </resources>

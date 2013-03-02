@@ -86,18 +86,19 @@ public class ShellHelper {
 			Process process = Runtime.getRuntime().exec("su -c 'system/bin/sh'");
 			
 		    shellIn = new DataOutputStream(process.getOutputStream());
-		    
-		    shellIn.writeBytes(command + "\n");
-		    
 		    shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	        
+		    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
 		    
-	        StringBuffer output = new StringBuffer();
-	        	
-	        output.append(shellOut.readLine());
+		    outWorker.start();
+		    
+	        shellIn.writeBytes(command + "\n");
 	        
 	        shellIn.writeBytes("exit\n");
 	        
 		    process.waitFor();
+		    
+		    String output = outWorker.result.toString();
 		    
 		    process.destroy();
 		    
@@ -126,24 +127,27 @@ public class ShellHelper {
 		return null;
 	}
 	
-	public static String executeSingleCommandWithOutput(String command) {
+	public static String executeSingleCommandWithSingleLineOutput(String command) {
 		
 		DataOutputStream shellIn = null;
 		BufferedReader shellOut = null;
 		
 		try {
-			Process process = Runtime.getRuntime().exec(command);
+			Process process = Runtime.getRuntime().exec("/system/bin/sh");
 		    shellIn = new DataOutputStream(process.getOutputStream());
 		    shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		    
-	        StringBuffer output = new StringBuffer();
-	        String line = "";
 	        
-	        while ((line = shellOut.readLine()) != null) {
-	            output.append(line);
-	        }
+		    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
 		    
+		    outWorker.start();
+		    
+	        shellIn.writeBytes(command + "\n");
+	        
+	        shellIn.writeBytes("exit\n");
+	        
 		    process.waitFor();
+		    
+		    String output = outWorker.result.toString();
 		    
 		    process.destroy();
 		    
@@ -173,7 +177,7 @@ public class ShellHelper {
 	}
 	
 	public static String getBuildPropProperty(String property) {
-		return ShellHelper.executeSingleCommandWithOutput("getprop " + property);
+		return ShellHelper.executeSingleCommandWithSingleLineOutput("getprop " + property);
 	}
 	
 	public static String getEchoCommand(String input) {

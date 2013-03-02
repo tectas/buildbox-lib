@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="@string/md5sum_head"
         android:textSize="15sp"
-        android:textStyle="bold"
+        android:textStyle="bold|italic"
         android:paddingTop="0dp" />
 
     <TextView

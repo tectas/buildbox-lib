@@ -3,6 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
+    android:paddingTop="5sp"
+    android:paddingBottom="5sp"
     android:layout_gravity="center_vertical" >
 
     <ImageView
@@ -11,15 +13,19 @@
         android:layout_height="40sp"
         android:layout_marginLeft="5sp"
         android:layout_marginRight="5sp"
+		android:paddingTop="5sp"
+		android:paddingBottom="5sp"
         android:contentDescription="@string/thumbnail_description"
         android:src="@android:drawable/alert_dark_frame" />
     
     <TextView
         android:id="@+id/ListItemTextView"
         android:layout_width="wrap_content"
-        android:layout_height="40sp"
+        android:layout_height="wrap_content"
         android:textSize="20sp"
         android:layout_marginLeft="5sp"
+		android:paddingTop="5sp"
+		android:paddingBottom="5sp"
         android:ems="10" >
 
         <requestFocus />

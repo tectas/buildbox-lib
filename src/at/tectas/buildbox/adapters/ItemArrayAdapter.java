@@ -71,10 +71,10 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 	        
 	        holder.image.setTag(thumbnail);
 	        
-	        if (this.context.remoteDrawables.containsKey(thumbnail)) {
+	        if (thumbnail != null && this.context.remoteDrawables.containsKey(thumbnail)) {
 	        	holder.image.setImageBitmap(this.context.remoteDrawables.get(thumbnail));
 	        }
-	        else {
+	        else if (thumbnail != null){
 		        holder.image.setImageResource(R.drawable.spinner);
 				
 				RotateAnimation animation = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
@@ -92,6 +92,9 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 				Communicator communicator = ((BuildBoxMainActivity)this.context).getCommunicator();
 				
 				communicator.executeBitmapAsyncCommunicator(thumbnail, holder.image, ((BuildBoxMainActivity)this.context));
+	        }
+	        else {
+	        	holder.image.setVisibility(ImageView.GONE);
 	        }
 	    }
 	    catch (Exception e) {

@@ -2,7 +2,6 @@ package at.tectas.buildbox.recovery;
 
 import java.util.ArrayList;
 
-import at.tectas.buildbox.communication.DownloadMap;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
@@ -10,7 +9,6 @@ import at.tectas.buildbox.helpers.ShellHelper;
 import at.tectas.buildbox.helpers.ShellHelper.RebootType;
 
 public class OpenRecoveryScript {
-	public DownloadMap downloads = new DownloadMap();
 	public OpenRecoveryScriptConfiguration configuration = null;
 	
 	public OpenRecoveryScript (OpenRecoveryScriptConfiguration config) {
@@ -44,23 +42,40 @@ public class OpenRecoveryScript {
 			shellCommands.add(ShellHelper.getStringToFileCommand("backup SDR123BO", filePath));
 		}
 		
-		for (DownloadPackage pack: this.configuration.downloads.values()) {
+		for (int i = 0; i < this.configuration.downloads.size(); i++) {
+			DownloadPackage pack = this.configuration.downloads.get(i);
+			
 			DownloadResponse response = pack.getResponse();
 			
 			if ((response.status == DownloadStatus.Successful || 
 				response.status == DownloadStatus.Done ||
 				(response.status == DownloadStatus.Md5mismatch && this.configuration.includeMd5mismatch == true)) &&
-				response.mime == "zip") {
-				shellCommands.add(ShellHelper.getAppendStringToFileCommand("install " + this.configuration.directoryPath + pack.getFilename(), filePath));
+				response.mime.equals("zip")) {
+				
+				if (shellCommands.size() == 1) {
+					shellCommands.add(ShellHelper.getStringToFileCommand("install " + this.configuration.directoryPath + pack.getFilename(), filePath));
+				}
+				else {
+					shellCommands.add(ShellHelper.getAppendStringToFileCommand("install " + this.configuration.directoryPath + pack.getFilename(), filePath));
+				}
 			}
 		}
 		
 		if (this.configuration.wipeData == true) {
-			shellCommands.add(ShellHelper.getAppendStringToFileCommand("wipe data", filePath));
+			if (shellCommands.size() == 1) {
+				shellCommands.add(ShellHelper.getStringToFileCommand("wipe data", filePath));
+			}
+			else {
+				shellCommands.add(ShellHelper.getAppendStringToFileCommand("wipe data", filePath));
+			}
 		}
 		
-		shellCommands.add(ShellHelper.getAppendStringToFileCommand("wipe cache", filePath));
-		
+		if (shellCommands.size() == 1) {
+			shellCommands.add(ShellHelper.getStringToFileCommand("wipe cache", filePath));
+		}
+		else {
+			shellCommands.add(ShellHelper.getAppendStringToFileCommand("wipe cache", filePath));			
+		}
 		shellCommands.add(ShellHelper.getAppendStringToFileCommand("wipe dalvik", filePath));
 		
 		shellCommands.add(ShellHelper.getRebootCommand(RebootType.Recovery));

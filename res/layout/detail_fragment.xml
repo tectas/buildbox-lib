@@ -35,16 +35,31 @@
 			        android:layout_width="fill_parent"
 			        android:layout_height="wrap_content"
 			        android:layout_weight="1"
+			        android:textStyle="bold"
 			        android:paddingTop="5sp" />
-			
+			    
+				<TextView
+			        android:id="@+id/description_head"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:layout_weight="1"
+			        android:textSize="15sp"
+			        android:textStyle="bold|italic"
+			        android:paddingLeft="5sp"
+			        android:paddingTop="10sp"
+			        android:paddingBottom="5sp"
+			        android:text="@string/description_head_text" />
+				
 			    <TextView
 			        android:id="@+id/description"
 			        android:layout_width="fill_parent"
 			        android:layout_height="wrap_content"
 			        android:layout_weight="1"
 			        android:textSize="15sp"
+			        android:textStyle="bold"
 			        android:paddingLeft="5sp"
-			        android:paddingTop="10sp" />
+			        android:paddingTop="10sp"
+			        android:paddingBottom="10sp" />
 				
 		    </LinearLayout>
 		    

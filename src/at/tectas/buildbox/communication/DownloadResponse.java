@@ -16,6 +16,7 @@ public class DownloadResponse implements IJsonSerialize {
 	public DownloadPackage pack = null;
 	public String mime = null;
 	public int progress = 0;
+	public int fileSize = 0;
 	
 	public DownloadResponse () {
 		

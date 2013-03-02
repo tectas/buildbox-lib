@@ -15,7 +15,7 @@ public class PropertyHelper {
 	public String getRomUrl() {
 		String rom = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_rom_url_property));
 		
-		rom = (rom == null? context.getString(R.string.default_rom_url): rom);
+		rom = (rom == null || rom.isEmpty() || rom.length() == 0? context.getString(R.string.default_rom_url): rom);
 		
 		return rom;
 	}
@@ -23,7 +23,7 @@ public class PropertyHelper {
 	public String getContentUrl() {
 		String content = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_content_url_property));
 		
-		content = (content == null ? context.getString(R.string.default_content_url): content);
+		content = (content == null || content.isEmpty() || content.length() == 0 ? context.getString(R.string.default_content_url): content);
 		
 		return content;
 	}
@@ -37,7 +37,7 @@ public class PropertyHelper {
 	public String getDownloadDirectory() {
 		String downloadDir = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_download_dir));
 		
-		if (downloadDir == null) {
+		if (downloadDir == null || downloadDir.isEmpty() || downloadDir.length() == 0) {
 			downloadDir = Environment.getExternalStorageDirectory().getPath() + "/" + context.getString(R.string.default_sd_directory);
 		}
 		

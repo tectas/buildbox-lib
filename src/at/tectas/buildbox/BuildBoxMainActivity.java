@@ -26,14 +26,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Animation;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
@@ -226,12 +220,18 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	}
 	
 	public void removeBrokenAndAbortedFromMap() {
+		ArrayList<DownloadKey> keys = new ArrayList<DownloadKey>();
+		
 		for (DownloadKey key: this.getDownloads().keySet()) {
 			DownloadPackage pack = this.getDownloads().get(key);
 			
 			if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Broken || pack.getResponse().status == DownloadStatus.Aborted)) {
-				this.getDownloads().remove(key);
+				keys.add(key);
 			}
+		}
+		
+		for (DownloadKey key: keys) {
+			this.getDownloads().remove(key);
 		}
 		
 		if (this.downloadAdapter != null) {

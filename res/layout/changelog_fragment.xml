@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="@string/changelog_head"
         android:textSize="15sp"
-        android:textStyle="bold" />
+        android:textStyle="bold|italic" />
 
         <TextView
         android:id="@+id/changelog_text"

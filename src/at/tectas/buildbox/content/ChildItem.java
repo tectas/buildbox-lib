@@ -9,6 +9,7 @@ import at.tectas.buildbox.helpers.JsonItemParser;
 
 public class ChildItem extends ParentItem {
 	public String detailUrl;
+	public String version = null;
 	
 	public ChildItem(JsonObject json) throws NullPointerException {
 		this(null, json);
@@ -25,6 +26,8 @@ public class ChildItem extends ParentItem {
 			this.detailUrl = detail.getAsString();
 		else if (detail.isJsonObject())
 			children = detail.getAsJsonObject();
+		
+		this.version = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.version_property), json);
 		
 		if (children != null)
 			this.childs.add(JsonItemParser.parseJsonToItem(this, children));

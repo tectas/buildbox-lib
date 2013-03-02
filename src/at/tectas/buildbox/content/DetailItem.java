@@ -21,10 +21,18 @@ public class DetailItem extends Item {
 	
 	public DetailItem (Item parent, JsonObject json) {
 		super(parent, json);
-
+		
+		if (this.title == null && parent != null) {
+			this.title = parent.title;
+		}
+		
 		this.description = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.description_property), json);
 		
 		this.version = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.version_property), json);
+		
+		if (this.version == null && ((ChildItem)this.parent).version != null) {
+			this.version = ((ChildItem)this.parent).version;
+		}
 		
 		this.downloadType = Item.helper.tryGetDownloadType(Item.context, json);
 		

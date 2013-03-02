@@ -49,9 +49,29 @@ public class DetailFragment extends Fragment implements OnClickListener {
 			
 			helper.changeTextViewText(R.id.title, title);
 			
-			helper.changeTextViewText(R.id.version, arguments.getString(getString(R.string.version_property), ""));
+			String version = arguments.getString(getString(R.string.version_property));
 			
-			helper.changeTextViewText(R.id.description, arguments.getString(getString(R.string.description_property)));
+			if (version != null) {
+				helper.changeTextViewText(R.id.version, arguments.getString(getString(R.string.version_property), null));
+			}
+			else {
+				TextView view = (TextView) layoutView.findViewById(R.id.version);
+				
+				view.setVisibility(TextView.GONE);
+			}
+				
+			String description = arguments.getString(getString(R.string.description_property));
+			
+			if (description == null) {
+				helper.changeTextViewText(R.id.description, arguments.getString(getString(R.string.description_property)));
+			}
+			else {
+				TextView head = (TextView) layoutView.findViewById(R.id.description_head);
+				TextView view = (TextView) layoutView.findViewById(R.id.description);
+				
+				head.setVisibility(TextView.GONE);
+				view.setVisibility(TextView.GONE);
+			}
 			
 			ArrayList<String> changelog = arguments.getStringArrayList(getString(R.string.changelog_property));
 			
