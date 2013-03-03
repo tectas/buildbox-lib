@@ -6,7 +6,6 @@ import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.service.DownloadService;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;

@@ -2,11 +2,12 @@ package at.tectas.buildbox.helpers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ShellStreamWorker extends Thread {
 	
 	private BufferedReader stream = null;
-	public StringBuffer result = new StringBuffer();
+	public ArrayList<String> result = new ArrayList<String>();
 	
 	public ShellStreamWorker(BufferedReader stream) {
 		this.stream = stream;
@@ -18,7 +19,7 @@ public class ShellStreamWorker extends Thread {
 			String line = null;
 		
 			while ((line = this.stream.readLine()) != null) {
-				result.append(line);
+				result.add(line);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -53,10 +53,10 @@ public class OpenRecoveryScript {
 				response.mime.equals("zip")) {
 				
 				if (shellCommands.size() == 1) {
-					shellCommands.add(ShellHelper.getStringToFileCommand("install " + this.configuration.directoryPath + pack.getFilename(), filePath));
+					shellCommands.add(ShellHelper.getStringToFileCommand("install " + pack.getDirectory() + pack.getFilename(), filePath));
 				}
 				else {
-					shellCommands.add(ShellHelper.getAppendStringToFileCommand("install " + this.configuration.directoryPath + pack.getFilename(), filePath));
+					shellCommands.add(ShellHelper.getAppendStringToFileCommand("install " + pack.getDirectory() + pack.getFilename(), filePath));
 				}
 			}
 		}

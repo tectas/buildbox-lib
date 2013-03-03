@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.ImageView;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
@@ -26,6 +27,7 @@ import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCallback {
 	
+	private static final String TAG = null;
 	private final int updateNotificationID = 5494;
 	private Communicator communicator = new Communicator();
 	private PropertyHelper helper = null;
@@ -105,6 +107,8 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 			
 			int comparsion = this.compareVersions(version, this.romItem.version);
 			
+			Log.e(TAG, String.valueOf(comparsion));
+			
 			if (comparsion == 1) {
 				this.notifyUpdate();
 			}
@@ -120,19 +124,37 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 	}
 	
 	public int compareVersions(String localVersion, String remoteVersion) {
-		if ((localVersion == null) && (remoteVersion == null))
+		if ((PropertyHelper.stringIsNullOrEmpty(localVersion) == true) && (PropertyHelper.stringIsNullOrEmpty(remoteVersion) == true))
 			return 0;
 			
-		if (localVersion == null)
+		if (PropertyHelper.stringIsNullOrEmpty(localVersion) == true)
 			return 1;
 		
-		if (remoteVersion == null)
+		if (PropertyHelper.stringIsNullOrEmpty(remoteVersion) == true)
 			return -1;
+		
+		if (localVersion.equals(remoteVersion))
+			return 0;
 		
 		String[] localVersionArray = localVersion.split("\\.");
 		String[] remoteVersionArray = remoteVersion.split("\\.");
 		
 		for (int i = 0; i < localVersionArray.length && i < remoteVersionArray.length; i++) {
+			boolean localIsLonger = localVersionArray[i].length() > remoteVersionArray[i].length();
+			
+			String longer = localIsLonger == true ? localVersionArray[i] : remoteVersionArray[i];
+			String shorter = localIsLonger == false ? localVersionArray[i] : remoteVersionArray[i];
+			
+			for (int k = shorter.length(); k < longer.length(); k++) {
+				
+				if (localIsLonger == true) {
+					remoteVersionArray[i] = "0" + remoteVersionArray[i];
+				}
+				else {
+					localVersionArray[i] = "0" + localVersionArray[i];
+				}
+			}
+			
 			if (localVersionArray[i].equals(remoteVersionArray[i])) {
 				continue;
 			}
@@ -159,11 +181,13 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 			}
 		}
 		
-		String[] longerArray = localVersionArray.length > remoteVersionArray.length ? localVersionArray : remoteVersionArray;
+		boolean localIsLonger = localVersionArray.length > remoteVersionArray.length;
 		
-		String[] shorterArray = localVersionArray.length > remoteVersionArray.length ? localVersionArray : remoteVersionArray;
+		String[] longerArray = localIsLonger == true ? localVersionArray : remoteVersionArray;
+		String[] shorterArray = localIsLonger == false ? localVersionArray : remoteVersionArray;
 		
-		for (int i = shorterArray.length - 1; i < longerArray.length; i++) {
+		for (int i = shorterArray.length; i < longerArray.length; i++) {
+			
 			if (longerArray[i].equals("0")) {
 				continue;
 			}
@@ -173,11 +197,16 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 				}
 				else {
 					for (int j = 0; j < longerArray[i].length(); j++) {
-						if (localVersionArray[i].charAt(j) == '0') {
+						if (longerArray[i].charAt(j) == '0') {
 							continue;
 						}
 						else {
-							return 1;
+							if (localIsLonger == true) {
+								return -1;
+							}
+							else {
+								return 1;
+							}
 						}
 					}
 				}

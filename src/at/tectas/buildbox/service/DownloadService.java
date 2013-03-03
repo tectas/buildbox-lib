@@ -31,6 +31,7 @@ import at.tectas.buildbox.communication.Communicator.DownloadAsyncCommunicator;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 import at.tectas.buildbox.communication.IDownloadFinishedCallback;
 import at.tectas.buildbox.communication.IDownloadProgressCallback;
+import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class DownloadService extends Service implements IDownloadProgressCallback, IDownloadFinishedCallback, IDownloadCancelledCallback {
 	
@@ -228,7 +229,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			this.map = map;
 			
 			for (DownloadPackage pack: this.map.values()) {
-				if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Successful || pack.getResponse().status == DownloadStatus.Done)) {
+				if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Pending || pack.getResponse().status == DownloadStatus.Successful || pack.getResponse().status == DownloadStatus.Done)) {
 					continue;
 				}
 				
@@ -301,7 +302,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			packag.setResponse(response);
 			
 			if (
-					packag.directory != null && (
+					PropertyHelper.stringIsNullOrEmpty(packag.getDirectory()) == true && (
 						(response.mime != null && response.mime.equals("apk")) || 
 						(packag.type != null && packag.type.equals("apk"))
 					) && (
@@ -311,11 +312,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 				
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				
-				if (!packag.directory.endsWith("/")) {
-					packag.directory += "/";
-				}
-				
-				intent.setDataAndType(Uri.fromFile(new File(packag.directory + response.pack.getFilename())), "application/vnd.android.package-archive");
+				intent.setDataAndType(Uri.fromFile(new File(packag.getDirectory() + response.pack.getFilename())), "application/vnd.android.package-archive");
 				startActivity(intent); 
 			}
 		}

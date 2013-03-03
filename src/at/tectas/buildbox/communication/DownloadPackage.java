@@ -14,13 +14,25 @@ public class DownloadPackage implements IJsonSerialize {
 	public String url = null;
 	public String type = null;
 	public String title = null;
-	public String directory = null;
+	protected String directory = null;
 	protected String filename = null;
 	public String md5sum = null;
 	public Hashtable<CallbackType, IDownloadProgressCallback> updateCallbacks = new Hashtable<CallbackType, IDownloadProgressCallback>();
 	public Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallbacks = new Hashtable<CallbackType, IDownloadFinishedCallback>();
 	public Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallbacks = new Hashtable<CallbackType, IDownloadCancelledCallback>();
 	protected DownloadResponse response = null;
+	
+	public void setDirectory(String directory) {
+		if (directory.endsWith("/") == false) {
+			directory += "/";
+		}
+		
+		this.directory = directory;
+	}
+	
+	public String getDirectory() {
+		return this.directory;
+	}
 	
 	public void setFilename(String filename) {
 		if (response != null) {

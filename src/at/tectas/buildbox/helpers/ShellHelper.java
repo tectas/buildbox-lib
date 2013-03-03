@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class ShellHelper {
 
@@ -11,129 +12,25 @@ public class ShellHelper {
 		Recovery, Bootloader, System
 	}
 	
-	public static void executeSingleCommand(String command) {
-		DataOutputStream shellIn = null;
+	public static String[] addRootPrefix(String[] commands) {
+		String[] rootCommands = new String[commands.length + 1];
 		
-		try {
-			Process process = Runtime.getRuntime().exec(command);
-		    
-		    process.waitFor();
-		    
-		    process.destroy();
+		rootCommands[0] = "su -c 'system/bin/sh'";
+		
+		for (int i = 0; i < commands.length; i++) {
+			rootCommands[i + 1] = commands[i];
 		}
-		catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		finally {
-			try {
-				if (shellIn != null) {
-					shellIn.close();
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		
+		return rootCommands;
 	}
 	
-	public static void executeRootCommands(String[] commands) {
-		DataOutputStream shellIn = null;
-		
-		try {
-			Process process = Runtime.getRuntime().exec("su -c 'system/bin/sh'");
-			
-		    shellIn = new DataOutputStream(process.getOutputStream());
-		    
-		    for (String command: commands) {
-		    	shellIn.writeBytes(command + "\n");
-		    }
-		    
-		    shellIn.writeBytes("exit \n");
-		    
-		    process.waitFor();
-		    
-		    process.destroy();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		finally {
-			try {
-				if (shellIn != null) {
-					shellIn.close();
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public static void executeSingleRootCommand(String command) {
-		ShellHelper.executeRootCommands(new String[] { command });
-	}
-	
-	public static String executeSingleRootCommandWithSingleLineOutput(String command) {
-
-		DataOutputStream shellIn = null;
-		BufferedReader shellOut = null;
-		
-		try {
-			Process process = Runtime.getRuntime().exec("su -c 'system/bin/sh'");
-			
-		    shellIn = new DataOutputStream(process.getOutputStream());
-		    shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
-	        
-		    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
-		    
-		    outWorker.start();
-		    
-	        shellIn.writeBytes(command + "\n");
-	        
-	        shellIn.writeBytes("exit\n");
-	        
-		    process.waitFor();
-		    
-		    String output = outWorker.result.toString();
-		    
-		    process.destroy();
-		    
-		    return output.toString();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		finally {
-			try {
-				if (shellIn != null) {
-					shellIn.close();
-				}
-				
-				if (shellOut != null) {
-					shellOut.close();
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return null;
-	}
-	
-	public static String executeSingleCommandWithSingleLineOutput(String command) {
-		
+	public static ArrayList<String> executeCommand(String[] commands) {
 		DataOutputStream shellIn = null;
 		BufferedReader shellOut = null;
 		
 		try {
 			Process process = Runtime.getRuntime().exec("/system/bin/sh");
+			
 		    shellIn = new DataOutputStream(process.getOutputStream());
 		    shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
 	        
@@ -141,17 +38,19 @@ public class ShellHelper {
 		    
 		    outWorker.start();
 		    
-	        shellIn.writeBytes(command + "\n");
+		    for (String command: commands) {
+		    	shellIn.writeBytes(command + "\n");
+		    }
 	        
 	        shellIn.writeBytes("exit\n");
 	        
 		    process.waitFor();
 		    
-		    String output = outWorker.result.toString();
+		    ArrayList<String> output = outWorker.result;
 		    
 		    process.destroy();
 		    
-		    return output.toString();
+		    return output;
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -174,6 +73,29 @@ public class ShellHelper {
 		}
 		
 		return null;
+	}
+	
+	public static ArrayList<String> executeSingleCommand(String command) {
+		return ShellHelper.executeCommand(new String[] { command });
+	}
+	
+	public static ArrayList<String> executeRootCommands(String[] commands) {
+		return ShellHelper.executeCommand(ShellHelper.addRootPrefix(commands));
+	}
+	
+	public static ArrayList<String> executeSingleRootCommand(String command) {
+		return ShellHelper.executeRootCommands(new String[] { command });
+	}
+	
+	public static String executeSingleCommandWithSingleLineOutput(String command) {
+		ArrayList<String> result = ShellHelper.executeSingleCommand(command);
+		
+		if (result.size() == 0) {
+			return null;
+		}
+		else {
+			return result.get(0);
+		}
 	}
 	
 	public static String getBuildPropProperty(String property) {
@@ -235,6 +157,5 @@ public class ShellHelper {
 		else {
 			return "reboot";
 		}
-		
 	}
 }

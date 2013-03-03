@@ -18,6 +18,7 @@ import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadPackage;
+import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
 import at.tectas.buildbox.service.DownloadService;
@@ -62,20 +63,20 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				
 			String description = arguments.getString(getString(R.string.description_property));
 			
-			if (description == null) {
-				helper.changeTextViewText(R.id.description, arguments.getString(getString(R.string.description_property)));
-			}
-			else {
+			if (PropertyHelper.stringIsNullOrEmpty(description) == true) {
 				TextView head = (TextView) layoutView.findViewById(R.id.description_head);
 				TextView view = (TextView) layoutView.findViewById(R.id.description);
 				
 				head.setVisibility(TextView.GONE);
 				view.setVisibility(TextView.GONE);
 			}
+			else {
+				helper.changeTextViewText(R.id.description, arguments.getString(getString(R.string.description_property)));
+			}
 			
 			ArrayList<String> changelog = arguments.getStringArrayList(getString(R.string.changelog_property));
 			
-			if (changelog != null && !changelog.isEmpty()) {
+			if (PropertyHelper.stringIsNullOrEmpty(description) == false) {
 				View childView = inflater.inflate(R.layout.changelog_fragment, layoutView, false);
 				
 				StringBuilder builder = new StringBuilder();
@@ -95,7 +96,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 			
 			String md5sum = arguments.getString(getString(R.string.md5sum_property));
 			
-			if (md5sum != null && !md5sum.isEmpty()) {
+			if (PropertyHelper.stringIsNullOrEmpty(description) == false) {
 				pack.md5sum = md5sum;
 				
 				View childView = inflater.inflate(R.layout.md5sum_fragment, layoutView, false);
@@ -142,7 +143,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 						
 						String url = urls.get(i);
 						
-						if (url != null && !url.isEmpty()) {
+						if (PropertyHelper.stringIsNullOrEmpty(url) == false) {
 							textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.donate_button, 0);
 							
 							textView.setTag(url);
@@ -203,8 +204,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 			if ((downloadType.equals(getString(R.string.item_download_type_zip)) || 
 					downloadType.equals(getString(R.string.item_download_type_apk)) ||
 					downloadType.equals(getString(R.string.item_download_type_other))) && 
-					url != null &&
-					url.length() != 0 &&
+					PropertyHelper.stringIsNullOrEmpty(url) == false &&
 					DownloadService.Processing == false) {
 				
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
@@ -215,7 +215,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				
 				pack.setFilename(splittedFilename[splittedFilename.length - 1]);
 				
-				pack.directory = ((BuildBoxMainActivity)getActivity()).getDownloadDir();
+				pack.setDirectory(((BuildBoxMainActivity)getActivity()).getDownloadDir());
 				
 				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
 				
@@ -238,14 +238,14 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				
 				String page = null;
 				
-				if (url != null && !url.isEmpty()) {
+				if (PropertyHelper.stringIsNullOrEmpty(url) == false) {
 					page = url;
 				}
 				else if (homePages != null && homePages.size() != 0) {
 					page = homePages.get(0);
 				}
 				
-				if (page != null) {
+				if (PropertyHelper.stringIsNullOrEmpty(page) == false) {
 					downloadButton.setTag(page);
 					
 					buttonLayout.addView(downloadButton);
