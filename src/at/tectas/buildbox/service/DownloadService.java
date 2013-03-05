@@ -19,7 +19,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import at.tectas.buildbox.BuildBoxMainActivity;
+import at.tectas.buildbox.DownloadActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.Communicator.CallbackType;
@@ -63,7 +63,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 	public void onCreate() {
 		this.getPackageManager().setApplicationEnabledSetting(this.getPackageName(), PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
 		
-		Intent intent = new Intent(this, BuildBoxMainActivity.class);
+		Intent intent = new Intent(this, DownloadActivity.class);
 		
 		this.contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		

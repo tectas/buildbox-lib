@@ -27,6 +27,7 @@
             	<category android:name="android.intent.category.LAUNCHER" />
         	</intent-filter>
         </activity>
+        <activity android:name="at.tectas.buildbox.BuildBoxPreferenceActivity" />
         <service android:name="at.tectas.buildbox.service.DownloadService"
             android:label="BuildBox Download Service">
         </service>

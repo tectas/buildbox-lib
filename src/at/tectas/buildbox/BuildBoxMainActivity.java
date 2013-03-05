@@ -1,16 +1,11 @@
 package at.tectas.buildbox;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Hashtable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -23,25 +18,14 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
-import at.tectas.buildbox.communication.Communicator;
-import at.tectas.buildbox.communication.DownloadKey;
-import at.tectas.buildbox.communication.DownloadMap;
-import at.tectas.buildbox.communication.DownloadPackage;
-import at.tectas.buildbox.communication.DownloadResponse;
-import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
-import at.tectas.buildbox.communication.ICommunicatorCallback;
-import at.tectas.buildbox.communication.IDownloadCancelledCallback;
-import at.tectas.buildbox.communication.IDownloadFinishedCallback;
-import at.tectas.buildbox.communication.IDownloadProgressCallback;
-import at.tectas.buildbox.communication.Communicator.CallbackType;
 import at.tectas.buildbox.content.DetailItem;
 import at.tectas.buildbox.content.Item;
 import at.tectas.buildbox.content.ItemList;
@@ -50,52 +34,29 @@ import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.fragments.DownloadListFragment;
 import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
+import at.tectas.buildbox.listeners.BuildBoxDownloadCallback;
 import at.tectas.buildbox.recovery.OpenRecoveryScript;
 import at.tectas.buildbox.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.service.DownloadService;
 import at.tectas.buildbox.R;
 
 @SuppressLint("DefaultLocale")
-public class BuildBoxMainActivity extends FragmentActivity implements ICommunicatorCallback, IDownloadProgressCallback, IDownloadFinishedCallback, IDownloadCancelledCallback {
-	
-	public static final String TAG = "Main";
-
-	/**
-	 * The {@link ViewPager} that will host the section contents.
-	 */
+public class BuildBoxMainActivity extends DownloadActivity {
 	ViewPager mViewPager;
 	
 	private String romUrl = null;
 	private String version = null;
 	private String contentUrl = null;
 	private String downloadDir = null;
-	private PropertyHelper helper = new PropertyHelper(this);
+	private PropertyHelper helper = null;
 	public ActionBar bar = null;
 	private TabsAdapter adapter = null;
 	private DetailItem romItem = null;
-	private Communicator communicator = new Communicator();
-	private DownloadMap downloads = new DownloadMap();
 	public DownloadPackageAdapter downloadAdapter = null;
 	public ItemList contentItems = null;
 	public int viewPagerIndex = 0;
 	public Fragment fragment = null;
 	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
-	
-	public DownloadServiceConnection serviceConnection = new DownloadServiceConnection(this);
-	
-	public Communicator getCommunicator() {
-		return this.communicator;
-	}
-	
-	public synchronized DownloadMap getDownloads() {
-		return this.downloads;
-	}
-	
-	public synchronized void setDownloads(DownloadMap map) {
-		if (map != null) {
-			this.downloads = map;
-		}
-	}
 	
 	public String getRomUrl() {
 		return this.romUrl;
@@ -119,6 +80,8 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 	
 	public void initialize() {
 		Item.setActivity(this);
+		
+		this.helper = new PropertyHelper(this.getApplicationContext());
 		
 		this.romUrl = this.helper.getRomUrl();
 	
@@ -151,11 +114,11 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 		} 
 		catch (Exception e) {
 			if (e != null && e.getMessage() != null)
-				Log.e(BuildBoxMainActivity.TAG, e.getMessage());
+				Log.e(DownloadActivity.TAG, e.getMessage());
 			
 			for (StackTraceElement element: e.getStackTrace()) {
 				if (element != null)
-					Log.e(BuildBoxMainActivity.TAG, element.toString() + " " + element.getLineNumber());
+					Log.e(DownloadActivity.TAG, element.toString() + " " + element.getLineNumber());
 			}
 		}
 		
@@ -191,52 +154,16 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 		return true;
 	}
 	
-	public boolean allDownloadsFinished() {
-		int finishedDownloads = 0;
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
 		
-		for (DownloadPackage pack: this.getDownloads().values()) {
-			if (pack.getResponse() != null && pack.getResponse().status != DownloadStatus.Pending && pack.getResponse().status != DownloadStatus.Aborted) {
-				finishedDownloads++;
-			}
+		switch (item.getItemId()) {
+			case R.id.settings:
+				Intent i = new Intent(this, BuildBoxPreferenceActivity.class);
+	            startActivity(i);
 		}
 		
-		if (finishedDownloads == this.getDownloads().size()) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	public boolean downloadMapContainsBrokenOrAborted() {
-		
-		for (DownloadPackage pack: this.getDownloads().values()) {
-			if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Broken || pack.getResponse().status == DownloadStatus.Aborted)) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	public void removeBrokenAndAbortedFromMap() {
-		ArrayList<DownloadKey> keys = new ArrayList<DownloadKey>();
-		
-		for (DownloadKey key: this.getDownloads().keySet()) {
-			DownloadPackage pack = this.getDownloads().get(key);
-			
-			if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Broken || pack.getResponse().status == DownloadStatus.Aborted)) {
-				keys.add(key);
-			}
-		}
-		
-		for (DownloadKey key: keys) {
-			this.getDownloads().remove(key);
-		}
-		
-		if (this.downloadAdapter != null) {
-			this.downloadAdapter.notifyDataSetChanged();
-		}
+		return super.onOptionsItemSelected(item);
 	}
 	
 	public void startUpdateAlarm() {
@@ -249,101 +176,18 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 	}
 	
-	public void bindDownloadService() {
-		Intent downloadServiceIntent = new Intent(this.getApplicationContext(), DownloadService.class);	
+	@Override
+	public void removeBrokenAndAbortedFromMap() {
+		super.removeBrokenAndAbortedFromMap();
 		
-		if (DownloadService.Started == false) {	
-			this.startService(downloadServiceIntent);
-		}
-		
-		this.bindService(downloadServiceIntent, this.serviceConnection, Context.BIND_ADJUST_WITH_ACTIVITY);
-	}
-	
-	public void unbindDownloadService() {
-		if (this.serviceConnection.bound == true) {
-			try {
-				unbindService(this.serviceConnection);
-				this.serviceConnection.bound = false;
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
+		if (this.downloadAdapter != null) {
+			this.downloadAdapter.notifyDataSetChanged();
 		}
 	}
 	
-	public void startDownload() {
-		if (this.serviceConnection.bound == false) {
-			this.serviceConnection.executeStartDownloadCallback = true;
-			this.bindDownloadService();
-		}
-		else {
-			this.startServiceDownload();
-		}
-	}
-	
-	public void stopDownload() {
-		if (this.serviceConnection.bound == false) {
-			this.serviceConnection.executeStopDownloadCallback = true;
-			this.bindDownloadService();
-		}
-		else {
-			this.stopServiceDownload();
-		}
-	}
-	
-	public void getServiceMap() {
-		this.getServiceMap(true);
-	}
-	
-	public void getServiceMap(boolean addListeners) {
-		if (this.serviceConnection.bound == false) {
-			this.serviceConnection.executeGetDownloadMapCallback = true;
-			this.serviceConnection.addListernersAtGetDownloadMapCallback = addListeners;
-			this.bindDownloadService();
-		}
-		else {
-			this.getServiceDownloadMap(false);
-		}
-	}
-	
-	public void removeActivityCallbacks() {
-		if (DownloadService.Started == true) {
-			if (this.serviceConnection.bound == false) {
-				this.serviceConnection.executeRemoveCallback = true;
-				this.bindDownloadService();
-			}
-			else {
-				this.removeCallbacksAndUnbind();
-			}
-		}
-	}
-	
-	public void startServiceDownload() {
-		if (DownloadService.Processing == true) {
-			this.getServiceDownloadMap();
-		}
-		else {
-			this.serviceConnection.service.startDownload(this.getDownloads());
-			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this, this);
-		}
-	}
-	
-	public void stopServiceDownload() {
-		this.serviceConnection.service.stopDownloads();
-	}
-	
+	@Override
 	public void getServiceDownloadMap() {
-		this.getServiceDownloadMap(true);
-	}
-	
-	public void getServiceDownloadMap(boolean addListeners) {
-		if (addListeners == true)
-			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, this, this, this);
-		
-		DownloadMap serviceMap = this.serviceConnection.service.getMap();
-		
-		if (serviceMap != null && serviceMap.size() != 0)
-			this.setDownloads(serviceMap);
+		super.getServiceDownloadMap();
 		
 		if (this.getDownloads().size() != 0) {
 			if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads")) {
@@ -356,52 +200,17 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 		}
 	}
 	
-	public void removeCallbacksAndUnbind() {
-		this.serviceConnection.service.removeDownloadListeners(CallbackType.UI);
-		
-		this.unbindDownloadService();
-	}
-	
-	private void loadDownloadsMapFromCacheFile() {
-		BufferedReader stream = null;
-		
-		String[] files = this.fileList();
-		
-		boolean exists = false;
-		
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].equals(this.getString(R.string.downloads_cach_filename))) {
-				exists = true;
-				break;
+	@Override
+	public void getServiceDownloadMap(boolean addListeners) {
+		if (addListeners == true) {
+			if (this.callback == null) {
+				this.callback = new BuildBoxDownloadCallback(this);
 			}
+			
+			super.getServiceDownloadMap(this.callback, this.callback, this.callback);
 		}
-		
-		if (exists == true) {
-			try {
-				stream = new BufferedReader(new InputStreamReader(openFileInput(getString(R.string.downloads_cach_filename))));
-		
-				StringBuilder builder = new StringBuilder();
-				String line = "";
-		
-				while ((line = stream.readLine()) != null) 
-				{
-					builder.append(line);
-				}
-				
-		        stream.close();
-		        
-		        JsonParser parser = new JsonParser();
-		        
-		        JsonArray elements = parser.parse(builder.toString()).getAsJsonArray();
-				
-		        this.setDownloads(DownloadMap.getDownloadMapFromJson(elements));
-		        
-		        this.deleteFile(getString(R.string.downloads_cach_filename));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		else {
+			super.getServiceDownloadMap();
 		}
 	}
 	
@@ -513,21 +322,6 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 		}
 	}
 	
-	@Override
-	public void downloadFinished(DownloadResponse response) {
-		this.getDownloadsMapandUpdateList();
-	}
-
-	@Override
-	public void updateDownloadProgess(DownloadResponse response) {
-		this.getDownloadsMapandUpdateList();
-	}
-
-	@Override
-	public void downloadCancelled(DownloadResponse response) {
-		this.getDownloadsMapandUpdateList();
-	}
-	
 	public void setupFlashProcess(ArrayList<Integer> list) {
 		OpenRecoveryScriptConfiguration config = new OpenRecoveryScriptConfiguration(this.downloadDir, this.getDownloads());
 		
@@ -549,5 +343,14 @@ public class BuildBoxMainActivity extends FragmentActivity implements ICommunica
 		
 		OpenRecoveryScript script = new OpenRecoveryScript(config);
 		script.writeScriptFile();
+	}
+
+	@Override
+	public void startServiceDownload() {
+		if (this.callback == null) {
+			this.callback = new BuildBoxDownloadCallback(this);
+		}
+		
+		super.startServiceDownload(this.callback, this.callback, this.callback);
 	}
 }

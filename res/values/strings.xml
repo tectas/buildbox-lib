@@ -65,4 +65,13 @@
     <string name="item_web_button_text">Open in Browser</string>
     <string name="service_download_aborted">aborted</string>
     <string name="description_head_text">Description:</string>
+    <string name="preference_dir_title">Downloaddirectory</string>
+    <string name="preference_dir_property">dir</string>
+    <string name="preference_dir_summary">Define the directory content is downloaded to.</string>
+    <string name="preference_interval_property">interval</string>
+    <string name="preference_interval_title">Update check interval</string>
+    <string name="preference_interval_summary">Set the interval in which the client checks if rom updates are present.</string>
+    <string name="preference_common_title">Common</string>
+    <string name="preference_update_title">Updatesettings</string>
+    <string name="preference_last_checked_version">last_version</string>
 </resources>

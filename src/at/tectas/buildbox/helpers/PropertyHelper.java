@@ -1,15 +1,21 @@
 package at.tectas.buildbox.helpers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import at.tectas.buildbox.R;
 
 public class PropertyHelper {
 	
 	public Context context = null;
 	
+	public SharedPreferences pref = null;
+	
 	public PropertyHelper (Context context) {
 		this.context = context;
+		this.pref = PreferenceManager.getDefaultSharedPreferences(this.context);
 	}
 	
 	public String getRomUrl() {
@@ -35,10 +41,20 @@ public class PropertyHelper {
 	}
 	
 	public String getDownloadDirectory() {
-		String downloadDir = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_download_dir));
+		String downloadDir = pref.getString(context.getString(R.string.preference_dir_property), null);
 		
-		if (PropertyHelper.stringIsNullOrEmpty(downloadDir) == true) {
-			downloadDir = Environment.getExternalStorageDirectory().getPath() + "/" + context.getString(R.string.default_sd_directory);
+		if (downloadDir == null) {		
+			downloadDir = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_download_dir));
+			
+			if (PropertyHelper.stringIsNullOrEmpty(downloadDir) == true) {
+				downloadDir = Environment.getExternalStorageDirectory().getPath() + "/" + context.getString(R.string.default_sd_directory);
+			}
+			
+			Editor editor = pref.edit();
+			
+			editor.putString(context.getString(R.string.preference_dir_property), downloadDir);
+			
+			editor.commit();
 		}
 		
 		return downloadDir;

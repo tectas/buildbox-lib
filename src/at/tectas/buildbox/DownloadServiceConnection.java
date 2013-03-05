@@ -9,7 +9,7 @@ import at.tectas.buildbox.service.DownloadService;
 public class DownloadServiceConnection implements ServiceConnection {
 	
 	public DownloadService service = null;
-	public BuildBoxMainActivity activity = null;
+	public DownloadActivity activity = null;
 	public boolean bound = false;
 	public boolean downloadStarted = false;
 	public boolean executeStartDownloadCallback = false;
@@ -18,7 +18,7 @@ public class DownloadServiceConnection implements ServiceConnection {
 	public boolean executeRemoveCallback = false;
 	public boolean addListernersAtGetDownloadMapCallback = false;
 	
-	public DownloadServiceConnection (BuildBoxMainActivity activity) {
+	public DownloadServiceConnection (DownloadActivity activity) {
 		this.activity = activity;
 	}
 	

@@ -13,10 +13,12 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.ImageView;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
@@ -27,18 +29,19 @@ import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCallback {
 	
-	private static final String TAG = null;
 	private final int updateNotificationID = 5494;
 	private Communicator communicator = new Communicator();
 	private PropertyHelper helper = null;
 	private DetailItem romItem = null;
 	private Context context = null;
+	private SharedPreferences pref = null;
 	private PowerManager.WakeLock wakelock = null; 
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		this.context = context;
 		this.helper = new PropertyHelper(context);
+		this.pref = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext());;
 		
 		this.getRomItem();
 	}
@@ -101,19 +104,46 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 				Item.setActivity(this.context);
 			}
 			
-			this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
-		
-			String version = this.helper.getVersion();
+			String updateInterval = this.pref.getString(this.context.getString(R.string.preference_interval_property), null);
 			
-			int comparsion = this.compareVersions(version, this.romItem.version);
-			
-			Log.e(TAG, String.valueOf(comparsion));
-			
-			if (comparsion == 1) {
-				this.notifyUpdate();
+			if (updateInterval == null) {
+				Editor editor = this.pref.edit();
+				
+				editor.putString(this.context.getString(R.string.preference_interval_property), "6");
+				
+				editor.commit();
+				
+				updateInterval = "6";
 			}
-			else {
-				this.setNewAlarm();
+			
+			if (updateInterval.equals("-1") == false) {
+				this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
+				
+				String lastCheckedVersion = this.pref.getString(this.context.getString(R.string.preference_last_checked_version), null);
+				
+				if (PropertyHelper.stringIsNullOrEmpty(lastCheckedVersion)) {
+					Editor editor = this.pref.edit();
+					
+					editor.putString(this.context.getString(R.string.preference_last_checked_version), this.romItem.version);
+					
+					editor.commit();
+				}
+				
+				if (this.compareVersions(this.romItem.version, lastCheckedVersion) != 0) {
+					String version = this.helper.getVersion();
+					
+					int comparsion = this.compareVersions(version, this.romItem.version);
+					
+					if (comparsion == 1) {
+						this.notifyUpdate();
+					}
+					else {
+						this.setNewAlarm();
+					}
+				}
+				else {
+					this.setNewAlarm();
+				}
 			}
 		}
 		catch (Exception e) {
@@ -225,7 +255,7 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 		
 		builder.setContentText(this.context.getString(R.string.update_notification_text));
 		
-		Intent intent = new Intent(this.context, BuildBoxMainActivity.class);
+		Intent intent = new Intent(this.context, DownloadActivity.class);
 		
 		PendingIntent pendingIntent = PendingIntent.getActivity(this.context, 0, intent, 0);
 		

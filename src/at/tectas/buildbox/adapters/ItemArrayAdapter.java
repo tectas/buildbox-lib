@@ -89,9 +89,9 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.It
 				
 				holder.image.startAnimation(animation);
 				
-				Communicator communicator = ((BuildBoxMainActivity)this.context).getCommunicator();
+				Communicator communicator = this.context.getCommunicator();
 				
-				communicator.executeBitmapAsyncCommunicator(thumbnail, holder.image, ((BuildBoxMainActivity)this.context));
+				communicator.executeBitmapAsyncCommunicator(thumbnail, holder.image, this.context);
 	        }
 	        else {
 	        	holder.image.setVisibility(ImageView.GONE);

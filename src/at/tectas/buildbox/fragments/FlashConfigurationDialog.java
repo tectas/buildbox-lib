@@ -29,7 +29,9 @@ public class FlashConfigurationDialog extends DialogFragment {
 				checked[i] = false;
 		}
 		
-		FlashdialogOnClickListener listener = new FlashdialogOnClickListener((BuildBoxMainActivity)getActivity());
+		BuildBoxMainActivity activity = (BuildBoxMainActivity) getActivity();
+		
+		FlashdialogOnClickListener listener = new FlashdialogOnClickListener(activity);
 		
 		builder.setMultiChoiceItems(
 				R.array.download_flash_options, 

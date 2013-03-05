@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -21,9 +20,10 @@ import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
+import at.tectas.buildbox.listeners.ItemDownloadButtonListener;
 import at.tectas.buildbox.service.DownloadService;
 
-public class DetailFragment extends Fragment implements OnClickListener {
+public class DetailFragment extends Fragment {
 	public static final String TAG = "DetailFragment";
 	
 	private ViewGroup relatedView = null;
@@ -186,9 +186,9 @@ public class DetailFragment extends Fragment implements OnClickListener {
 						
 						imageView.startAnimation(animation);
 						
-						Communicator communicator = ((BuildBoxMainActivity)this.getActivity()).getCommunicator();
+						Communicator communicator = activity.getCommunicator();
 						
-						communicator.executeBitmapAsyncCommunicator(url, imageView, ((BuildBoxMainActivity)this.getActivity()));
+						communicator.executeBitmapAsyncCommunicator(url, imageView, activity);
 					}
 					
 					childView.addView(imageView);
@@ -215,7 +215,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				
 				pack.setFilename(splittedFilename[splittedFilename.length - 1]);
 				
-				pack.setDirectory(((BuildBoxMainActivity)getActivity()).getDownloadDir());
+				pack.setDirectory(activity.getDownloadDir());
 				
 				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
 				
@@ -223,7 +223,7 @@ public class DetailFragment extends Fragment implements OnClickListener {
 				
 				downloadButton.setTag(pack);
 				
-				downloadButton.setOnClickListener(this);
+				downloadButton.setOnClickListener(new ItemDownloadButtonListener(activity));
 				
 				buttonLayout.addView(downloadButton);
 			}
@@ -255,24 +255,5 @@ public class DetailFragment extends Fragment implements OnClickListener {
 		
 		return this.relatedView;
 	}
-	
-	@Override
-	public void onClick(View v) {
-		BuildBoxMainActivity activity = (BuildBoxMainActivity) getActivity();
-		
-		final View button = v;
-		
-		if (!activity.bar.getTabAt(activity.bar.getTabCount() - 1).getText().equals("Downloads")) {
-			activity.addDownloadsTab();
-		}
-		
- 		DownloadPackage pack = (DownloadPackage) button.getTag();
- 		
-		if (activity.downloadAdapter != null) {
-			activity.downloadAdapter.add(pack);
-		}
-		else {
-			activity.getDownloads().put(pack);
-		}
-	}
+
 }

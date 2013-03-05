@@ -39,13 +39,15 @@ public class ContentListFragment extends Fragment {
 			arrayIndex = arguments.getInt("index");
 		}
 		
+		BuildBoxMainActivity activity = (BuildBoxMainActivity) getActivity();
+		
 		list.setAdapter(
 				adapter == null ? 
 						new ItemArrayAdapter(
-								(BuildBoxMainActivity)this.getActivity(), 
+								activity, 
 								R.id.ListItemTextView, 
 								new ArrayList<Item>(
-										((ParentItem)((BuildBoxMainActivity)this.getActivity()).contentItems
+										((ParentItem)activity.contentItems
 												.get(arrayIndex))
 												.childs), 
 								getChildFragmentManager()) : 

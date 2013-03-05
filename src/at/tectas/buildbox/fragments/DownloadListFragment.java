@@ -3,6 +3,7 @@ package at.tectas.buildbox.fragments;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
+import at.tectas.buildbox.listeners.ListDownloadButtonListener;
 import at.tectas.buildbox.service.DownloadService;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,13 +13,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-public class DownloadListFragment extends Fragment implements OnClickListener{
+public class DownloadListFragment extends Fragment {
 
 	private ListView list = null;
 	private BuildBoxMainActivity activity = null;
@@ -52,7 +52,7 @@ public class DownloadListFragment extends Fragment implements OnClickListener{
 		else {
 			button.setText(R.string.download_all_button_text);
 		}
-		button.setOnClickListener(this);
+		button.setOnClickListener(new ListDownloadButtonListener(activity));
 	
 		registerForContextMenu(list);
 		
@@ -82,25 +82,5 @@ public class DownloadListFragment extends Fragment implements OnClickListener{
 		}
 		
 		return super.onContextItemSelected(item);
-	}
-	
-	@Override
-	public void onClick(View v) {		
-		BuildBoxMainActivity activity = (BuildBoxMainActivity) this.getActivity();
-		
-		Button button = (Button)v;
-		
-		if (button.getText().equals(this.getString(R.string.download_flash_text))) {
-			FlashConfigurationDialog dialog = new FlashConfigurationDialog();
-			dialog.show(activity.getFragmentManager(), this.getString(R.string.download_flash_options_title));
-		}
-		else if (DownloadService.Processing == true) {
-			activity.stopDownload();
-			button.setText(R.string.download_all_button_text);
-		}
-		else {
-			activity.startDownload();
-			button.setText(R.string.download_stop_button_text);
-		}
 	}
 }

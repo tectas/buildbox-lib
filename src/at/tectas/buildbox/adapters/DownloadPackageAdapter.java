@@ -3,27 +3,26 @@ package at.tectas.buildbox.adapters;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import at.tectas.buildbox.BuildBoxMainActivity;
+import at.tectas.buildbox.DownloadActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 import at.tectas.buildbox.service.DownloadService;
 
-public class DownloadPackageAdapter extends BaseAdapter implements OnClickListener {
-	private final BuildBoxMainActivity context;
+public class DownloadPackageAdapter extends BaseAdapter {
+	private final DownloadActivity context;
 	private Button downloadButton = null;
 	
 	public DownloadPackageAdapter(Activity context) {
 		super();
-		this.context = (BuildBoxMainActivity) context;
+		this.context = (DownloadActivity) context;
 	}
 	
 	public void add(DownloadPackage object) {		
@@ -126,14 +125,5 @@ public class DownloadPackageAdapter extends BaseAdapter implements OnClickListen
 	@Override
 	public long getItemId(int position) {
 		return position;
-	}
-	
-	@Override
-	public void onClick(View v) {
-		this.context.removeBrokenAndAbortedFromMap();
-		
-		v.setVisibility(Button.GONE);
-		
-		this.notifyDataSetChanged();
 	}
 }
