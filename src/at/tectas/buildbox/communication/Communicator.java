@@ -495,7 +495,7 @@ public class Communicator {
 		        BitmapFactory.Options options = new BitmapFactory.Options();
 		        
 		        if (boundsOptions.outWidth != 0 && width != 0)
-		        	options.inSampleSize = (int)Math.floor(boundsOptions.outWidth / (((double)width / 4) * 3));
+		        	options.inSampleSize = (int)Math.floor(boundsOptions.outWidth / (double)width);
 		        
 		        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 	        }

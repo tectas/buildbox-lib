@@ -144,6 +144,9 @@ public final class R {
         public static final int preference_dir_property=0x7f060042;
         public static final int preference_dir_summary=0x7f060043;
         public static final int preference_dir_title=0x7f060041;
+        public static final int preference_ignore_build_prop=0x7f06004a;
+        public static final int preference_ignore_build_prop_summary=0x7f06004c;
+        public static final int preference_ignore_build_prop_title=0x7f06004b;
         public static final int preference_interval_property=0x7f060044;
         public static final int preference_interval_summary=0x7f060046;
         public static final int preference_interval_title=0x7f060045;

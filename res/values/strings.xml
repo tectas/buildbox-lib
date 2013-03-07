@@ -74,4 +74,7 @@
     <string name="preference_common_title">Common</string>
     <string name="preference_update_title">Updatesettings</string>
     <string name="preference_last_checked_version">last_version</string>
+    <string name="preference_ignore_build_prop">ignore_build_prop</string>
+    <string name="preference_ignore_build_prop_title">Ignore build.prop urls</string>
+    <string name="preference_ignore_build_prop_summary">If checked the build.prop properties for the rom and content will be ignored and the resource values will be taken</string>
 </resources>

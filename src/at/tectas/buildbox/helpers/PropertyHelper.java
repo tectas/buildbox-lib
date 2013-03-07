@@ -19,15 +19,23 @@ public class PropertyHelper {
 	}
 	
 	public String getRomUrl() {
-		String rom = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_rom_url_property));
+		String rom = null;
 		
+		if (pref.getBoolean(this.context.getString(R.string.preference_ignore_build_prop), false) == false) {
+			rom = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_rom_url_property));
+		}
+			
 		rom = (PropertyHelper.stringIsNullOrEmpty(rom) == true? context.getString(R.string.default_rom_url): rom);
 		
 		return rom;
 	}
 	
 	public String getContentUrl() {
-		String content = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_content_url_property));
+		String content = null;
+		
+		if (pref.getBoolean(this.context.getString(R.string.preference_ignore_build_prop), false) == false) {
+			content = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_content_url_property));
+		}
 		
 		content = (PropertyHelper.stringIsNullOrEmpty(content) == true? context.getString(R.string.default_content_url): content);
 		
