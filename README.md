@@ -7,7 +7,7 @@ This approach is used to get highly modular configuration capabilities with as l
 
 The used backend for BuildBox can be a simple json file or a webservice, basicaly every server with direct link capabilities (or simple redirects to the real content) can be used.
 
-To configure where the applications backend is reachable (and which is the current ROM version if the update notification feature is used) build.prop properties can be set or the given resource strings within the app can be altered.
+To configure where the applications backend is reachable (and which is the current ROM version if the update notification feature is used) can be set by build.prop properties or the given resource strings within the app can be altered.
 
 Main features
 ------------------------------------------------------
