@@ -45,9 +45,7 @@
 			        android:layout_weight="1"
 			        android:textSize="15sp"
 			        android:textStyle="bold|italic"
-			        android:paddingLeft="5sp"
 			        android:paddingTop="10sp"
-			        android:paddingBottom="5sp"
 			        android:text="@string/description_head_text" />
 				
 			    <TextView
@@ -58,7 +56,6 @@
 			        android:textSize="15sp"
 			        android:textStyle="bold"
 			        android:paddingLeft="5sp"
-			        android:paddingTop="10sp"
 			        android:paddingBottom="10sp" />
 				
 		    </LinearLayout>

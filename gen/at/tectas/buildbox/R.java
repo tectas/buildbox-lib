@@ -96,6 +96,7 @@ public final class R {
     public static final class string {
         public static final int app_cancel_message=0x7f060006;
         public static final int app_name=0x7f060000;
+        public static final int cancel_button_text=0x7f06004f;
         public static final int changelog_head=0x7f06000a;
         public static final int changelog_property=0x7f06000d;
         public static final int children_property=0x7f060012;
@@ -119,6 +120,8 @@ public final class R {
         public static final int download_flash_options_title=0x7f060036;
         public static final int download_flash_text=0x7f060034;
         public static final int download_retry_broken=0x7f060033;
+        public static final int download_running_alert_text=0x7f06004d;
+        public static final int download_running_alert_title=0x7f06004e;
         public static final int download_stop_button_text=0x7f060031;
         public static final int downloads_cach_filename=0x7f06002c;
         public static final int id_property=0x7f06001d;

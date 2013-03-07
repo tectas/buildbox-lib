@@ -21,7 +21,6 @@ import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
 import at.tectas.buildbox.listeners.ItemDownloadButtonListener;
-import at.tectas.buildbox.service.DownloadService;
 
 public class DetailFragment extends Fragment {
 	public static final String TAG = "DetailFragment";
@@ -76,7 +75,7 @@ public class DetailFragment extends Fragment {
 			
 			ArrayList<String> changelog = arguments.getStringArrayList(getString(R.string.changelog_property));
 			
-			if (PropertyHelper.stringIsNullOrEmpty(description) == false) {
+			if (changelog != null && changelog.isEmpty() == false && changelog.size() > 0) {
 				View childView = inflater.inflate(R.layout.changelog_fragment, layoutView, false);
 				
 				StringBuilder builder = new StringBuilder();
@@ -96,7 +95,7 @@ public class DetailFragment extends Fragment {
 			
 			String md5sum = arguments.getString(getString(R.string.md5sum_property));
 			
-			if (PropertyHelper.stringIsNullOrEmpty(description) == false) {
+			if (PropertyHelper.stringIsNullOrEmpty(md5sum) == false) {
 				pack.md5sum = md5sum;
 				
 				View childView = inflater.inflate(R.layout.md5sum_fragment, layoutView, false);
@@ -109,7 +108,7 @@ public class DetailFragment extends Fragment {
 			
 			ArrayList<String> homePages = arguments.getStringArrayList(getString(R.string.webpages_property));
 			
-			if (homePages != null && !homePages.isEmpty()) {
+			if (homePages != null && !homePages.isEmpty() && homePages.size() > 0) {
 				ViewGroup childView = (ViewGroup) inflater.inflate(R.layout.webpages_base_fragment, layoutView, false);
 				
 				for (String url: homePages) {
@@ -129,7 +128,7 @@ public class DetailFragment extends Fragment {
 			
 			Bundle developers = arguments.getBundle(getString(R.string.developers_property));
 			
-			if (developers != null && !developers.isEmpty()) {
+			if (developers != null && !developers.isEmpty() && homePages.size() > 0) {
 				ArrayList<String> names = developers.getStringArrayList(getString(R.string.developer_names_property));
 				ArrayList<String> urls = developers.getStringArrayList(getString(R.string.developers_donationurls_property));
 				
@@ -160,7 +159,7 @@ public class DetailFragment extends Fragment {
 			
 			ArrayList<String> images = arguments.getStringArrayList(getString(R.string.imageurls_property));
 
-			if (images != null && !images.isEmpty()) {
+			if (images != null && !images.isEmpty() && homePages.size() > 0) {
 				ViewGroup childView = (ViewGroup) inflater.inflate(R.layout.images_base_fragment, layoutView, false);
 				
 				for (String url: images) {
@@ -204,9 +203,7 @@ public class DetailFragment extends Fragment {
 			if ((downloadType.equals(getString(R.string.item_download_type_zip)) || 
 					downloadType.equals(getString(R.string.item_download_type_apk)) ||
 					downloadType.equals(getString(R.string.item_download_type_other))) && 
-					PropertyHelper.stringIsNullOrEmpty(url) == false &&
-					DownloadService.Processing == false) {
-				
+					PropertyHelper.stringIsNullOrEmpty(url) == false) {
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
 
 				pack.url = url;
@@ -226,6 +223,7 @@ public class DetailFragment extends Fragment {
 				downloadButton.setOnClickListener(new ItemDownloadButtonListener(activity));
 				
 				buttonLayout.addView(downloadButton);
+				
 			}
 			else {
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);

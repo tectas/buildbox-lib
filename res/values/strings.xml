@@ -77,4 +77,7 @@
     <string name="preference_ignore_build_prop">ignore_build_prop</string>
     <string name="preference_ignore_build_prop_title">Ignore build.prop urls</string>
     <string name="preference_ignore_build_prop_summary">If checked the build.prop properties for the rom and content will be ignored and the resource values will be taken</string>
+    <string name="download_running_alert_text">It isn\'t possible to add the item to the download queue, the current queue is processing at the moment, please finish those downloads first and add the item afterwards.</string>
+    <string name="download_running_alert_title">Already processing!!</string>
+    <string name="cancel_button_text">Cancel</string>
 </resources>
