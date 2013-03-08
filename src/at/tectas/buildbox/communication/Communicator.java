@@ -341,7 +341,7 @@ public class Communicator {
 			IDownloadCancelledCallback cancelCallback
 			) {
 		
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, pack.md5sum == null? pack.url: pack.md5sum, updateCallback, finishedCallback, cancelCallback);
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, pack.getKey(), updateCallback, finishedCallback, cancelCallback);
 		
 		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pack);
 		
@@ -353,7 +353,7 @@ public class Communicator {
 			Hashtable<CallbackType, IDownloadProgressCallback> updateCallback, 
 			Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallback,
 			Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallback) {
-		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, pack.md5sum == null? pack.url: pack.md5sum, updateCallback, finishedCallback, cancelCallback);
+		DownloadAsyncCommunicator communicator = new DownloadAsyncCommunicator(this, pack.getKey(), updateCallback, finishedCallback, cancelCallback);
 		
 		communicator = (DownloadAsyncCommunicator) communicator.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pack);
 		

@@ -34,6 +34,15 @@ public class DownloadResponse implements IJsonSerialize {
 		this.mime = this.getMimeType(pack.getFilename(), pack.getFilename().length() - 3);
 	}
 	
+	public String getKey() {
+		if (this.pack != null) {
+			return this.pack.getKey();
+		}
+		else {
+			return null;
+		}
+	}
+	
 	public String getMimeType (String filename, int offset) {
 		int index = this.getIndex(filename, ".", offset);
 		

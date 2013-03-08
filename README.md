@@ -17,7 +17,7 @@ Main features
 3.  Tabbed UI
 4.  Nested lists within the tabs (in theory infinite levels of nesting)
 5.  Download queue
-6.  Concurrent downloads
+6.  Concurrent downloads (how many can be configured)
 7.  OpenRecoveryScript support
 8.  Redirect support for download urls (up to 5 times)
 9.  Queue filter to only flash successful downloads

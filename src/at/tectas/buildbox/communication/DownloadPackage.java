@@ -34,6 +34,10 @@ public class DownloadPackage implements IJsonSerialize {
 		return this.directory;
 	}
 	
+	public String getKey() {
+		return this.md5sum == null ? this.url : this.md5sum;
+	}
+	
 	public void setFilename(String filename) {
 		if (response != null) {
 			response.mime = response.getMimeType(this.filename, this.filename.length() - 3);

@@ -109,11 +109,11 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 			if (updateInterval == null) {
 				Editor editor = this.pref.edit();
 				
-				editor.putString(this.context.getString(R.string.preference_interval_property), "6");
+				updateInterval = "6";
+				
+				editor.putString(this.context.getString(R.string.preference_interval_property), updateInterval);
 				
 				editor.commit();
-				
-				updateInterval = "6";
 			}
 			
 			if (updateInterval.equals("-1") == false) {

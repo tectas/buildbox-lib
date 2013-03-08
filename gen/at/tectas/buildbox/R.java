@@ -11,6 +11,8 @@ public final class R {
     public static final class array {
         public static final int download_flash_default_options=0x7f050001;
         public static final int download_flash_options=0x7f050000;
+        public static final int download_queue_size=0x7f050004;
+        public static final int download_queue_size_values=0x7f050005;
         public static final int update_interval=0x7f050002;
         public static final int update_interval_values=0x7f050003;
     }
@@ -147,6 +149,7 @@ public final class R {
         public static final int preference_dir_property=0x7f060042;
         public static final int preference_dir_summary=0x7f060043;
         public static final int preference_dir_title=0x7f060041;
+        public static final int preference_download_title=0x7f060051;
         public static final int preference_ignore_build_prop=0x7f06004a;
         public static final int preference_ignore_build_prop_summary=0x7f06004c;
         public static final int preference_ignore_build_prop_title=0x7f06004b;
@@ -154,6 +157,9 @@ public final class R {
         public static final int preference_interval_summary=0x7f060046;
         public static final int preference_interval_title=0x7f060045;
         public static final int preference_last_checked_version=0x7f060049;
+        public static final int preference_queue_size=0x7f060050;
+        public static final int preference_queue_size_summary=0x7f060053;
+        public static final int preference_queue_size_title=0x7f060052;
         public static final int preference_update_title=0x7f060048;
         public static final int service_download_aborted=0x7f06003f;
         public static final int service_download_failed=0x7f060028;

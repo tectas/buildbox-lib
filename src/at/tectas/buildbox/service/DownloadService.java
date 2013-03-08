@@ -14,10 +14,13 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import at.tectas.buildbox.DownloadActivity;
 import at.tectas.buildbox.R;
@@ -50,6 +53,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 	private IBinder binder = new DonwloadServiceBinder(this);
 	private DownloadMap map = null;
 	private Hashtable<String, DownloadAsyncCommunicator> downloadCommunicators = new Hashtable<String, DownloadAsyncCommunicator>();
+	private int downloadQueueSize = 0;
+	private int currentDownloadIndex = 0;
 	
 	public synchronized DownloadMap getMap() {
 		return map;
@@ -224,34 +229,82 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		return this.startDownload(this.map);
 	}
 	
+	public void fillQueueAndStartDownload() {
+		int i = this.currentDownloadIndex;
+		
+		for (; i < this.currentDownloadIndex + this.downloadQueueSize && i < this.map.size(); i++) {
+			
+			DownloadPackage pack = this.map.get(i);
+			
+			if (pack.getResponse() != null && (
+						pack.getResponse().status == DownloadStatus.Pending || 
+						pack.getResponse().status == DownloadStatus.Successful || 
+						pack.getResponse().status == DownloadStatus.Done
+					)
+				) {
+				this.currentDownloadIndex++;
+				continue;
+			}
+			
+			DownloadService.Processing = true;
+			
+			pack.addProgressListener(CallbackType.Service, this);
+			pack.addFinishedListener(CallbackType.Service, this);
+			pack.addCancelledListener(CallbackType.Service, this);
+			
+			this.serviceBuilder.setContentText(pack.getFilename());
+			
+			this.serviceBuilder.setProgress(100, 0, true);
+			
+			this.serviceNotification = serviceBuilder.build();
+			
+			this.serviceNotification.flags |= Notification.FLAG_FOREGROUND_SERVICE
+					| Notification.FLAG_NO_CLEAR;
+			
+			startForeground(this.notificationServieID, this.serviceNotification);
+			
+			this.downloadCommunicators.put(
+				pack.getKey(), 
+				this.communicator.executeDownloadAsyncCommunicator(
+					pack, 
+					pack.updateCallbacks, 
+					pack.finishedCallbacks, 
+					pack.cancelCallbacks
+				)
+			);
+		}
+		
+		this.currentDownloadIndex = i;
+	}
+	
 	public boolean startDownload(DownloadMap map) {
 		if (map != null && DownloadService.Processing == false) {
 			this.map = map;
 			
-			for (DownloadPackage pack: this.map.values()) {
-				if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Pending || pack.getResponse().status == DownloadStatus.Successful || pack.getResponse().status == DownloadStatus.Done)) {
-					continue;
-				}
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+			
+			String downloadQueueSizeString = pref.getString(getString(R.string.preference_queue_size), null);
+			
+			if (PropertyHelper.stringIsNullOrEmpty(downloadQueueSizeString)) {
+				Editor editor = pref.edit();
 				
-				DownloadService.Processing = true;
+				downloadQueueSizeString = "4";
 				
-				pack.addProgressListener(CallbackType.Service, this);
-				pack.addFinishedListener(CallbackType.Service, this);
-				pack.addCancelledListener(CallbackType.Service, this);
+				editor.putString(getString(R.string.preference_queue_size), downloadQueueSizeString);
 				
-				this.serviceBuilder.setContentText(pack.getFilename());
-				
-				this.serviceBuilder.setProgress(100, 0, true);
-				
-				this.serviceNotification = serviceBuilder.build();
-				
-				this.serviceNotification.flags |= Notification.FLAG_FOREGROUND_SERVICE
-						| Notification.FLAG_NO_CLEAR;
-				
-				startForeground(this.notificationServieID, this.serviceNotification);
-				
-				this.downloadCommunicators.put(pack.md5sum == null? pack.url : pack.md5sum, this.communicator.executeDownloadAsyncCommunicator(pack, pack.updateCallbacks, pack.finishedCallbacks, pack.cancelCallbacks));
+				editor.commit();
 			}
+			
+			int downloadQueueSizePreference = Integer.valueOf(downloadQueueSizeString);
+			
+			if (downloadQueueSizePreference == 0) {
+				this.downloadQueueSize = this.map.size();
+			}
+			else {
+				this.downloadQueueSize = downloadQueueSizePreference; 
+			}
+			
+			this.fillQueueAndStartDownload();
 			
 			return true;
 		}
@@ -274,7 +327,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 	public void updateDownloadProgess(DownloadResponse response) {
 		
 		if (response != null) {
-			DownloadPackage pack = this.map.get(response.pack.md5sum == null ? response.pack.url : response.pack.md5sum);
+			DownloadPackage pack = this.map.get(response.getKey());
 			pack.setResponse(response);
 		}
 		
@@ -294,7 +347,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 
 	@Override
 	public void downloadFinished(DownloadResponse response) {
-		String key = response.pack.md5sum == null ? response.pack.url : response.pack.md5sum;
+		String key = response.getKey();
 		
 		DownloadPackage packag = this.map.get(key);
 		
@@ -305,7 +358,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 					PropertyHelper.stringIsNullOrEmpty(packag.getDirectory()) == true && (
 						(response.mime != null && response.mime.equals("apk")) || 
 						(packag.type != null && packag.type.equals("apk"))
-					) && (
+					)
+					&& (
 						response.status == DownloadStatus.Successful || 
 						response.status == DownloadStatus.Done)
 					) {
@@ -331,7 +385,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		
 		for (DownloadPackage pack: this.map.values()) {
 			if (pack.getResponse() != null) {
-				if (response.status == DownloadStatus.Successful)
+				if (response.status == DownloadStatus.Successful || response.status == DownloadStatus.Done)
 					inbox.addLine(response.pack.getFilename() + " " + getString(R.string.service_download_finished));
 				else if (response.status == DownloadStatus.Broken)
 					inbox.addLine(response.pack.getFilename() + " " + getString(R.string.service_download_failed));
@@ -364,8 +418,11 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		
 		this.downloadCommunicators.remove(key);
 		
-		if (finishedDownloadsCount != this.map.size())
+		if (finishedDownloadsCount != this.map.size()) {
 			startForeground(this.notificationServieID, this.serviceNotification);
+			if (downloadCommunicators.size() == 0)
+				this.fillQueueAndStartDownload();
+		}
 		else {
 			stopForeground(true);
 			
@@ -407,11 +464,9 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 
 	@Override
 	public void downloadCancelled(DownloadResponse response) {
-		String key = response.pack.md5sum == null ? response.pack.url : response.pack.md5sum;
+		String key = response.getKey();
 		
 		DownloadPackage packag = this.map.get(key);
-		
-		this.downloadCommunicators.remove(key);
 		
 		if (packag != null) {
 			packag.setResponse(response);
