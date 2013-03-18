@@ -12,13 +12,14 @@
 	    android:layout_height="fill_parent"
 	    android:orientation="vertical"
 	   	android:layout_weight="10">
-	    <ListView 
+	    <com.mobeta.android.dslv.DragSortListView
+	        xmlns:dslv="http://schemas.android.com/apk/res/com.mobeta.android.demodslv"
 		    android:id="@+id/download_list"
 		    android:layout_width="match_parent"
 		    android:layout_height="fill_parent" >
 		    
 		
-		</ListView>
+		</com.mobeta.android.dslv.DragSortListView>
 	</LinearLayout>
 	<LinearLayout
    	    android:id="@+id/download_button_layout"

@@ -133,7 +133,17 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 			this.bindDownloadService();
 		}
 		else {
-			this.stopServiceDownload();
+			this.serviceConnection.service.stopDownloads();
+		}
+	}
+	
+	public void addDownload(DownloadPackage pack) {
+		if (this.serviceConnection.bound == false) {
+			this.serviceConnection.newPackage = pack;
+			this.bindDownloadService();
+		}
+		else {
+			this.serviceConnection.service.addDownload(pack);
 		}
 	}
 	
@@ -174,10 +184,6 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 			this.serviceConnection.service.startDownload(this.getDownloads());
 			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, progressCallback, finishedCallback, cancelledCallback);
 		}
-	}
-	
-	public void stopServiceDownload() {
-		this.serviceConnection.service.stopDownloads();
 	}
 	
 	public abstract void getServiceDownloadMap(boolean addListener);

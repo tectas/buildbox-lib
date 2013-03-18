@@ -1,5 +1,7 @@
 package at.tectas.buildbox.fragments;
 
+import com.mobeta.android.dslv.DragSortListView;
+
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
@@ -15,12 +17,11 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class DownloadListFragment extends Fragment {
 
-	private ListView list = null;
+	private DragSortListView list = null;
 	private BuildBoxMainActivity activity = null;
 	
 	@Override
@@ -36,13 +37,23 @@ public class DownloadListFragment extends Fragment {
 		
 		activity = (BuildBoxMainActivity) getActivity();
 		
-		list = (ListView) view.findViewById(R.id.download_list);
+		list = (DragSortListView) view.findViewById(R.id.download_list);
 		
-		DownloadPackageAdapter adapter = new DownloadPackageAdapter(getActivity());
+		ViewGroup buttonLayout = (ViewGroup)view.findViewById(R.id.download_button_layout);
+		
+		DownloadPackageAdapter adapter = new DownloadPackageAdapter(getActivity(), buttonLayout);
+		
+		BuildBoxDragSortController controller = new BuildBoxDragSortController(list, adapter);
 		
 		activity.downloadAdapter = adapter;
 		
-		list.setAdapter(activity.downloadAdapter);
+		list.setAdapter(adapter);
+		
+		list.setFloatViewManager(controller);
+		
+		list.setOnTouchListener(controller);
+		
+		list.setDragEnabled(true);
 		
 		Button button = (Button) view.findViewById(R.id.download_all_button);
 		

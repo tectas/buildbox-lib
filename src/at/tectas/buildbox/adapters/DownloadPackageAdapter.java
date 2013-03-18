@@ -1,5 +1,7 @@
 package at.tectas.buildbox.adapters;
 
+import com.mobeta.android.dslv.DragSortListView.DragSortListener;
+
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,13 +18,15 @@ import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 import at.tectas.buildbox.service.DownloadService;
 
-public class DownloadPackageAdapter extends BaseAdapter {
+public class DownloadPackageAdapter extends BaseAdapter implements DragSortListener {
 	private final DownloadActivity context;
 	private Button downloadButton = null;
+	private ViewGroup buttonLayout = null;
 	
-	public DownloadPackageAdapter(Activity context) {
+	public DownloadPackageAdapter(Activity context, ViewGroup buttonLayout) {
 		super();
 		this.context = (DownloadActivity) context;
+		this.buttonLayout = buttonLayout;
 	}
 	
 	public void add(DownloadPackage object) {		
@@ -35,14 +39,17 @@ public class DownloadPackageAdapter extends BaseAdapter {
 
 		View rowView = convertView;
 		
-		LayoutInflater inflater = this.context.getLayoutInflater();
-		rowView = inflater.inflate(R.layout.download_list_item_fragment, parent, false);
+		if (rowView == null) {
+			LayoutInflater inflater = this.context.getLayoutInflater();
+			rowView = inflater.inflate(R.layout.download_list_item_fragment, parent, false);
+		}	
+		
 		TextView text = (TextView) rowView.findViewById(R.id.download_text);
 		TextView subText = (TextView) rowView.findViewById(R.id.download_subtext);
 		CheckBox checkbox = (CheckBox) rowView.findViewById(R.id.download_md5sum_check);
 		ProgressBar progressbar = (ProgressBar) rowView.findViewById(R.id.download_progress);
 		TextView progressText = (TextView) rowView.findViewById(R.id.download_textprogress);
-		TextView statusText = (TextView) rowView.findViewById(R.id.download_result_status);		
+		TextView statusText = (TextView) rowView.findViewById(R.id.download_result_status);
 		
 		DownloadPackage item = this.context.getDownloads().get(position);
 		
@@ -87,10 +94,14 @@ public class DownloadPackageAdapter extends BaseAdapter {
 	    		statusText.setText("Aborted");
 	    	}
 	    }
+	    else {
+	    	progressbar.setProgress(0);
+	    	progressText.setText("");
+	    	checkbox.setChecked(false);
+    		statusText.setText("");
+	    }
 	    
 	    rowView.setTag(position);
-	    
-    	ViewGroup buttonLayout = (ViewGroup) ((ViewGroup) parent.getParent().getParent()).findViewById(R.id.download_button_layout);
     	
     	this.downloadButton = (Button) buttonLayout.findViewById(R.id.download_all_button);
     	
@@ -125,5 +136,28 @@ public class DownloadPackageAdapter extends BaseAdapter {
 	@Override
 	public long getItemId(int position) {
 		return position;
+	}
+
+	@Override
+	public void drop(int from, int to) {
+		if (from != to) {			
+			this.context.getDownloads().move(from, to);
+			
+			this.notifyDataSetChanged();
+		}
+	}
+
+	@Override
+	public void drag(int from, int to) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void remove(int which) {
+		if (which < this.context.getDownloads().size()) {
+			this.context.getDownloads().remove(which);
+			
+			this.notifyDataSetChanged();
+		}
 	}
 }

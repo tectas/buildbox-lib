@@ -47,7 +47,7 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 		return null;
 	}
 	
-	private synchronized void ChangeIndex (int oldIndex, int newIndex) {
+	private synchronized void changeIndex (int oldIndex, int newIndex) {
 		for (DownloadKey key: this.keySet()) {
 			if (key.index == oldIndex) {
 				key.index = newIndex;
@@ -61,12 +61,12 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 		if (md5sum != null) {
 			DownloadKey oldKey = this.getKey(md5sum);
 			
-			if (oldKey != null) {
-				this.remove(oldKey);
-				
-				for (int i = oldKey.index; i < this.size(); i++) {
-					this.ChangeIndex(i, i - 1);
+			if (oldKey != null) {				
+				for (int i = oldKey.index + 1; i < this.size(); i++) {
+					this.changeIndex(i, i - 1);
 				}
+				
+				this.remove(oldKey);
 			}
 			
 			DownloadKey key = new DownloadKey();
@@ -81,21 +81,21 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 	}
 	
 	public synchronized DownloadPackage put (DownloadPackage value) {
-		return this.put(value.md5sum == null || value.md5sum.isEmpty()? value.url: value.md5sum, value);
+		return this.put(value.getKey(), value);
 	}
 	
-	public synchronized boolean insert(int index, String md5sum, DownloadPackage object) {
-		if (md5sum != null) {
+	public synchronized boolean insert(int index, DownloadPackage object) {
+		if (object != null && object.getKey() != null) {
 			if (index > this.size()) {
 				return false;
 			}
 			else {
 				DownloadKey newKey = new DownloadKey();
 				newKey.index = index;
-				newKey.md5sum = md5sum;
+				newKey.md5sum = object.getKey();
 				
-				for (int i = index; i < this.size(); i++) {
-					this.ChangeIndex(i, i + 1);
+				for (int i = index + 1; i < this.size(); i++) {
+					this.changeIndex(i, i + 1);
 				}
 				
 				this.put(newKey, object);
@@ -123,8 +123,9 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 		DownloadKey downloadKey = (DownloadKey) key;
 		
 		for (int i = downloadKey.index + 1; i < this.size(); i++) {
-			this.ChangeIndex(i, i - 1);
+			this.changeIndex(i, i - 1);
 		}
+		
 		return super.remove(key);
 	}
 	
@@ -146,6 +147,28 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 		}
 		
 		return this.containsKey(key);
+	}
+	
+	public synchronized void move(int oldIndex, int newIndex) {
+		if (oldIndex == newIndex)
+			return;
+		
+		boolean moveUp = oldIndex > newIndex? false:true;
+		
+		DownloadKey key = this.getKey(oldIndex);
+		
+		if (moveUp) {
+			for (int i = oldIndex + 1; i <= newIndex; i++) {			
+				this.changeIndex(i, i - 1);
+			}
+		}
+		else {
+			for (int i = oldIndex - 1; i >= newIndex; i--) {			
+				this.changeIndex(i, i + 1);
+			}
+		}
+		
+		key.index = newIndex;
 	}
 	
 	public JsonArray serializeToJsonArray() {

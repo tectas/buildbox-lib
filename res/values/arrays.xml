@@ -33,9 +33,6 @@
         <item name="4">4</item>
         <item name="5">5</item>
         <item name="6">6</item>
-        <item name="7">7</item>
-        <item name="8">8</item>
-        <item name="9">9</item>
         <item name="0">All</item>
     </string-array>
     <string-array name="download_queue_size_values">
@@ -45,9 +42,6 @@
         <item name="4">4</item>
         <item name="5">5</item>
         <item name="6">6</item>
-        <item name="7">7</item>
-        <item name="8">8</item>
-        <item name="9">9</item>
         <item name="0">0</item>
     </string-array>
 </resources>

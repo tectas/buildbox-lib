@@ -80,8 +80,11 @@
     <string name="download_running_alert_text">It isn\'t possible to add the item to the download queue, the current queue is processing at the moment, please finish those downloads first and add the item afterwards.</string>
     <string name="download_running_alert_title">Already processing!!</string>
     <string name="cancel_button_text">Cancel</string>
-    <string name="preference_queue_size">queue_size</string>
     <string name="preference_download_title">Download</string>
     <string name="preference_queue_size_title">Simultaneous download amount</string>
     <string name="preference_queue_size_summary">Set how many downloads will be performed simultaneously</string>
+    <string name="preference_queue_size_default">4</string>
+    <string name="preference_interval_default">6</string>
+    <string name="preference_queue_size_property">queue_size</string>
+    <string name="download_menu_manage_title">Manage</string>
 </resources>

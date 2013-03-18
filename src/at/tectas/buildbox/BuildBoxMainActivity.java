@@ -149,8 +149,14 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	};
 	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_main, menu);
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.clear();
+		if (this.bar.getTabCount() == 0 || !this.bar.getTabAt(this.viewPagerIndex).getText().equals("Downloads")) {
+			getMenuInflater().inflate(R.menu.activity_main, menu);
+		}
+		else {
+			getMenuInflater().inflate(R.menu.download_view_menu, menu);
+		}
 		return true;
 	}
 	
@@ -293,14 +299,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		}
 	}
 	
-	@Override
-	public void onBackPressed() {
-	    if (this.fragment == null || !this.fragment.getChildFragmentManager().popBackStackImmediate()) {
-	    	if (!this.getFragmentManager().popBackStackImmediate())
-	    		finish();
-	    }
-	}
-	
 	public void addTab(String title, Class<?> clss, Bundle bundle) {
 		this.adapter.addTab(this.bar.newTab().setText(title), clss, bundle);
 	}
@@ -352,5 +350,13 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		}
 		
 		super.startServiceDownload(this.callback, this.callback, this.callback);
+	}
+	
+	@Override
+	public void onBackPressed() {
+	    if (this.fragment == null || !this.fragment.getChildFragmentManager().popBackStackImmediate()) {
+	    	if (!this.getFragmentManager().popBackStackImmediate())
+	    		finish();
+	    }
 	}
 }

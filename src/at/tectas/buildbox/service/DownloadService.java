@@ -225,10 +225,6 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		return result;
 	}
 	
-	public boolean startDownload() {
-		return this.startDownload(this.map);
-	}
-	
 	public void fillQueueAndStartDownload() {
 		int i = this.currentDownloadIndex;
 		
@@ -277,20 +273,24 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		this.currentDownloadIndex = i;
 	}
 	
+	public boolean startDownload() {
+		return this.startDownload(this.map);
+	}
+	
 	public boolean startDownload(DownloadMap map) {
 		if (map != null && DownloadService.Processing == false) {
 			this.map = map;
 			
 			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 			
-			String downloadQueueSizeString = pref.getString(getString(R.string.preference_queue_size), null);
+			String downloadQueueSizeString = pref.getString(getString(R.string.preference_queue_size_property), null);
 			
 			if (PropertyHelper.stringIsNullOrEmpty(downloadQueueSizeString)) {
 				Editor editor = pref.edit();
 				
-				downloadQueueSizeString = "4";
+				downloadQueueSizeString = getString(R.string.preference_queue_size_default);
 				
-				editor.putString(getString(R.string.preference_queue_size), downloadQueueSizeString);
+				editor.putString(getString(R.string.preference_queue_size_property), downloadQueueSizeString);
 				
 				editor.commit();
 			}
@@ -321,6 +321,10 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		DownloadService.Processing = false;
 		
 		this.stopForeground(true);
+	}
+	
+	public void addDownload(DownloadPackage pack) {
+		this.map.put(pack);
 	}
 	
 	@Override
@@ -386,13 +390,13 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		for (DownloadPackage pack: this.map.values()) {
 			if (pack.getResponse() != null) {
 				if (response.status == DownloadStatus.Successful || response.status == DownloadStatus.Done)
-					inbox.addLine(response.pack.getFilename() + " " + getString(R.string.service_download_finished));
+					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_finished));
 				else if (response.status == DownloadStatus.Broken)
-					inbox.addLine(response.pack.getFilename() + " " + getString(R.string.service_download_failed));
+					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_failed));
 				else if (response.status == DownloadStatus.Md5mismatch)
-					inbox.addLine(response.pack.getFilename() + " " + getString(R.string.service_download_mismatch));
+					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_mismatch));
 				else if (response.status == DownloadStatus.Aborted)
-					inbox.addLine(response.pack.getFilename() + " " + getString(R.string.service_download_aborted));
+					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_aborted));
 				
 				if(response.status != DownloadStatus.Pending) {
 					finishedDownloadsCount++;
@@ -427,6 +431,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			stopForeground(true);
 			
 			DownloadService.Processing = false;
+			
+			this.currentDownloadIndex = 0;
 			
 			if (this.clientsConnected <= 0)
 				this.serializeMap();
@@ -488,6 +494,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			stopForeground(true);
 			
 			DownloadService.Processing = false;
+			
+			this.currentDownloadIndex = 0;
 			
 			if (this.clientsConnected <= 0)
 				this.serializeMap();

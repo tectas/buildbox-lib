@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ViewHelper {
@@ -34,4 +36,32 @@ public class ViewHelper {
 	public ViewGroup getLayout (int viewId) {
 		return (ViewGroup) view.findViewById(viewId);
 	}
+	
+    public static boolean setAlphaOfView(int alpha, View view)
+    {
+        if (view instanceof ViewGroup)
+        {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++)
+            {
+            	setAlphaOfView(alpha, ((ViewGroup) view).getChildAt(i));
+                if (((ViewGroup) view).getBackground() != null) ((ViewGroup) view).getBackground().setAlpha(alpha);
+            }
+        }
+        else if (view instanceof ImageView)
+        {
+            if (((ImageView) view).getDrawable() != null) ((ImageView) view).getDrawable().setAlpha(alpha);
+            if (((ImageView) view).getBackground() != null) ((ImageView) view).getBackground().setAlpha(alpha);
+        }
+        else if (view instanceof TextView)
+        {
+            ((TextView) view).setTextColor(((TextView) view).getTextColors().withAlpha(alpha));
+            if (((TextView) view).getBackground() != null) ((TextView) view).getBackground().setAlpha(alpha);
+        }
+        else if (view instanceof EditText)
+        {
+            ((EditText) view).setTextColor(((EditText) view).getTextColors().withAlpha(alpha));
+            if (((EditText) view).getBackground() != null) ((EditText) view).getBackground().setAlpha(alpha);
+        }
+        return true;
+    }
 }

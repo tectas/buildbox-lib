@@ -3,6 +3,7 @@ package at.tectas.buildbox;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.service.DonwloadServiceBinder;
 import at.tectas.buildbox.service.DownloadService;
 
@@ -17,6 +18,7 @@ public class DownloadServiceConnection implements ServiceConnection {
 	public boolean executeGetDownloadMapCallback = false;
 	public boolean executeRemoveCallback = false;
 	public boolean addListernersAtGetDownloadMapCallback = false;
+	public DownloadPackage newPackage = null;
 	
 	public DownloadServiceConnection (DownloadActivity activity) {
 		this.activity = activity;
@@ -32,7 +34,7 @@ public class DownloadServiceConnection implements ServiceConnection {
 	    	this.executeStartDownloadCallback = false;
 	    }
 	    else if (this.executeStopDownloadCallback == true) {
-	    	this.activity.stopServiceDownload();
+	    	this.activity.stopDownload();
 	    	this.executeStopDownloadCallback = false;
 	    }
 	    else if (this.executeGetDownloadMapCallback == true) {
@@ -44,6 +46,10 @@ public class DownloadServiceConnection implements ServiceConnection {
 	    	this.activity.removeCallbacksAndUnbind();
 	    	this.executeRemoveCallback = false;
 	    }
+	    else if (this.newPackage != null) {
+	    	this.activity.addDownload(newPackage);
+	    	this.newPackage = null;
+	    }
 	}
 	
     public void startDownload() {
@@ -51,7 +57,7 @@ public class DownloadServiceConnection implements ServiceConnection {
     }
     
     public void stopDownload() {
-    	this.activity.stopServiceDownload();
+    	this.activity.stopDownload();
     }
     
     public void getServiceDownloadMap() {
