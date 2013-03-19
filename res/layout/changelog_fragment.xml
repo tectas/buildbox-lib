@@ -4,7 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingTop="10dp" >
+    android:paddingTop="10sp" 
+    android:gravity="center_horizontal">
 
     <TextView
         android:id="@+id/changelog_head"
@@ -12,11 +13,12 @@
         android:layout_height="wrap_content"
         android:text="@string/changelog_head"
         android:textSize="15sp"
-        android:textStyle="bold|italic" />
+        android:textStyle="bold|italic" 
+        android:gravity="center_horizontal"/>
 
         <TextView
         android:id="@+id/changelog_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="5sp" />
+        android:gravity="center_horizontal"/>
 </LinearLayout>

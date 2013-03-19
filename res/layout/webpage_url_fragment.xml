@@ -8,6 +8,7 @@
     android:textColorHint="@android:color/holo_blue_light"
     android:paddingLeft="5sp"
     android:paddingTop="5sp"
-    android:paddingBottom="5sp" >
+    android:paddingBottom="5sp" 
+    android:gravity="center_horizontal">
 
 </TextView>

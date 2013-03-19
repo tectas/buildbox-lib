@@ -38,7 +38,7 @@ public class BuildBoxDragSortController extends DragSortController {
         int res = super.dragHandleHitPosition(ev);
         int width = dragSortListView.getWidth();
 
-        if ((int) ev.getX() < width / 4) {
+        if ((int) ev.getX() < width / 5) {
             return res;
         } else {
             return DragSortController.MISS;

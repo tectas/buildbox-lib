@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +71,7 @@ public class DetailFragment extends Fragment {
 				view.setVisibility(TextView.GONE);
 			}
 			else {
-				helper.changeTextViewText(R.id.description, arguments.getString(getString(R.string.description_property)));
+				helper.changeTextViewText(R.id.description, description);
 			}
 			
 			ArrayList<String> changelog = arguments.getStringArrayList(getString(R.string.changelog_property));
@@ -81,7 +82,7 @@ public class DetailFragment extends Fragment {
 				StringBuilder builder = new StringBuilder();
 				
 				for (int i = 0; i < changelog.size(); i++) {
-					builder.append(changelog.get(i));
+					builder.append(helper.getSpannedFromHtmlString(changelog.get(i)));
 					
 					if (i < changelog.size())
 						builder.append("\n");
@@ -89,19 +90,6 @@ public class DetailFragment extends Fragment {
 				
 				TextView textView = (TextView) childView.findViewById(R.id.changelog_text);
 				textView.setText(builder.toString());
-				
-				layoutView.addView(childView);
-			}
-			
-			String md5sum = arguments.getString(getString(R.string.md5sum_property));
-			
-			if (PropertyHelper.stringIsNullOrEmpty(md5sum) == false) {
-				pack.md5sum = md5sum;
-				
-				View childView = inflater.inflate(R.layout.md5sum_fragment, layoutView, false);
-				
-				TextView textView = (TextView) childView.findViewById(R.id.md5sum);
-				textView.setText(md5sum);
 				
 				layoutView.addView(childView);
 			}
@@ -114,7 +102,7 @@ public class DetailFragment extends Fragment {
 				for (String url: homePages) {
 					TextView textView = (TextView) inflater.inflate(R.layout.webpage_url_fragment, childView, false);
 					
-					textView.setText(url);
+					textView.setText(helper.getSpannedFromHtmlString("<u>" + url + "</u>"));
 					
 					textView.setTag(url);
 					
@@ -138,16 +126,21 @@ public class DetailFragment extends Fragment {
 					for (int i = 0; i < names.size() && i < urls.size(); i++) {
 						TextView textView = (TextView) inflater.inflate(R.layout.developers_item_fragment, childView, false);
 						
-						textView.setText(names.get(i));
-						
 						String url = urls.get(i);
 						
+						textView.setGravity(Gravity.CENTER_HORIZONTAL);
+						
 						if (PropertyHelper.stringIsNullOrEmpty(url) == false) {
-							textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.donate_button, 0);
+							textView.setTextColor(getResources().getColor(android.R.color.holo_blue_light));
+							
+							textView.setText(helper.getSpannedFromHtmlString("<u>" + names.get(i) + "</u>"));
 							
 							textView.setTag(url);
 							
 							textView.setOnClickListener(new BrowserUrlListener());
+						}
+						else {
+							textView.setText(names.get(i));
 						}
 						
 						childView.addView(textView);

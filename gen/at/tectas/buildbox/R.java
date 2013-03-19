@@ -216,7 +216,6 @@ containing a value of this type.
         public static final int images_base_fragment=0x7f060025;
         public static final int list_layout=0x7f060026;
         public static final int list_view=0x7f060027;
-        public static final int manage=0x7f060033;
         public static final int md5sum=0x7f06002c;
         public static final int md5sum_container=0x7f06002a;
         public static final int md5sum_head=0x7f06002b;
@@ -258,6 +257,7 @@ containing a value of this type.
         public static final int activity_main=0x7f0a0000;
         public static final int download_queue_context=0x7f0a0001;
         public static final int download_view_menu=0x7f0a0002;
+        public static final int download_view_menu_broken=0x7f0a0003;
     }
     public static final class string {
         public static final int app_cancel_message=0x7f080006;

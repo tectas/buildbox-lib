@@ -87,9 +87,6 @@ public class DownloadListFragment extends Fragment {
 				if (activity.downloadAdapter != null)
 					activity.downloadAdapter.notifyDataSetChanged();
 				return true;
-			case R.id.remove_broken:
-				activity.removeBrokenAndAbortedFromMap();
-				return true;
 		}
 		
 		return super.onContextItemSelected(item);

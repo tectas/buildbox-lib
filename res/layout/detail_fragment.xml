@@ -10,17 +10,20 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="0dip"
 	    android:orientation="vertical"
-	    android:layout_weight="10">
+	    android:layout_weight="10"
+	    android:gravity="center_horizontal">
 		<ScrollView 
 		    android:id="@+id/detail_scroll_layout"
 		    android:layout_width="match_parent"
-		    android:layout_height="match_parent" >
+		    android:layout_height="match_parent" 
+		    android:gravity="center_horizontal">
 		
 		    <LinearLayout
 		        android:id="@+id/detail_main_layout"
 		        android:layout_width="fill_parent"
 		        android:layout_height="wrap_content"
-		        android:orientation="vertical" >
+		        android:orientation="vertical"
+		        android:gravity="center_horizontal">
 		
 			    <TextView
 			        android:id="@+id/title"
@@ -28,7 +31,8 @@
 			        android:layout_height="wrap_content"
 			        android:layout_weight="1"
 			        android:ems="10"
-			        android:textSize="35sp" />
+			        android:textSize="35sp"
+			        android:gravity="center_horizontal"/>
 			
 			    <TextView
 			        android:id="@+id/version"
@@ -36,7 +40,8 @@
 			        android:layout_height="wrap_content"
 			        android:layout_weight="1"
 			        android:textStyle="bold"
-			        android:paddingTop="5sp" />
+			        android:paddingTop="5sp" 
+			        android:gravity="center_horizontal"/>
 			    
 				<TextView
 			        android:id="@+id/description_head"
@@ -46,7 +51,8 @@
 			        android:textSize="15sp"
 			        android:textStyle="bold|italic"
 			        android:paddingTop="10sp"
-			        android:text="@string/description_head_text" />
+			        android:text="@string/description_head_text" 
+			        android:gravity="center_horizontal"/>
 				
 			    <TextView
 			        android:id="@+id/description"
@@ -54,9 +60,8 @@
 			        android:layout_height="wrap_content"
 			        android:layout_weight="1"
 			        android:textSize="15sp"
-			        android:textStyle="bold"
-			        android:paddingLeft="5sp"
-			        android:paddingBottom="10sp" />
+			        android:paddingBottom="10sp" 
+			        android:gravity="center_horizontal"/>
 				
 		    </LinearLayout>
 		    
@@ -67,7 +72,8 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="0dip"
 	    android:orientation="vertical"
-	    android:layout_weight="1">
+	    android:layout_weight="1"
+	    android:gravity="center_horizontal">
 	    
 	</LinearLayout>
 </LinearLayout>

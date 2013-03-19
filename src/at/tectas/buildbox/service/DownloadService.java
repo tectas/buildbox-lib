@@ -30,7 +30,7 @@ import at.tectas.buildbox.communication.DownloadMap;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.IDownloadCancelledCallback;
-import at.tectas.buildbox.communication.Communicator.DownloadAsyncCommunicator;
+import at.tectas.buildbox.communication.DownloadAsyncCommunicator;
 import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
 import at.tectas.buildbox.communication.IDownloadFinishedCallback;
 import at.tectas.buildbox.communication.IDownloadProgressCallback;

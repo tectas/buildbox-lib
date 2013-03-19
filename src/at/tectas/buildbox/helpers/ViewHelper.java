@@ -2,6 +2,8 @@ package at.tectas.buildbox.helpers;
 
 import java.util.ArrayList;
 
+import android.text.Html;
+import android.text.Spanned;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -15,9 +17,9 @@ public class ViewHelper {
 		this.view = _view;
 	}
 	
-	public void changeTextViewText(int viewId, String Text) {
+	public void changeTextViewText(int viewId, String text) {
 		TextView dummy = (TextView) this.view.findViewById(viewId);
-		dummy.setText(Text);
+		dummy.setText(this.getSpannedFromHtmlString(text));
 	}
 	
 	public void changeTextViewText(int viewId, ArrayList<String> text) {
@@ -26,8 +28,10 @@ public class ViewHelper {
 		StringBuilder textDummy = new StringBuilder();
 		
 		for (String item: text) {
-			textDummy.append(item);
-			textDummy.append(System.getProperty("line.seperator"));
+			if (!PropertyHelper.stringIsNullOrEmpty(item)) {
+				textDummy.append(this.getSpannedFromHtmlString(item));
+				textDummy.append(System.getProperty("line.seperator"));
+			}
 		}
 		
 		dummy.setText(textDummy.toString());
@@ -35,6 +39,10 @@ public class ViewHelper {
 	
 	public ViewGroup getLayout (int viewId) {
 		return (ViewGroup) view.findViewById(viewId);
+	}
+	
+	public Spanned getSpannedFromHtmlString(String html) {
+		return Html.fromHtml(html);
 	}
 	
     public static boolean setAlphaOfView(int alpha, View view)

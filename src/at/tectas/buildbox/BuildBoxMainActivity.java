@@ -155,7 +155,12 @@ public class BuildBoxMainActivity extends DownloadActivity {
 			getMenuInflater().inflate(R.menu.activity_main, menu);
 		}
 		else {
-			getMenuInflater().inflate(R.menu.download_view_menu, menu);
+			if (this.downloadMapContainsBrokenOrAborted()) {
+				getMenuInflater().inflate(R.menu.download_view_menu_broken, menu);
+			}
+			else {
+				getMenuInflater().inflate(R.menu.download_view_menu, menu);
+			}
 		}
 		return true;
 	}
@@ -167,6 +172,9 @@ public class BuildBoxMainActivity extends DownloadActivity {
 			case R.id.settings:
 				Intent i = new Intent(this, BuildBoxPreferenceActivity.class);
 	            startActivity(i);
+			case R.id.remove_broken:
+				this.removeBrokenAndAbortedFromMap();
+				return true;
 		}
 		
 		return super.onOptionsItemSelected(item);
@@ -279,11 +287,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	@Override
 	public void updateWithImage(ImageView view, Bitmap bitmap) {
 		try {
-			if (view != null) {
-				Animation animation = view.getAnimation();
-				if (animation != null && animation.hasStarted())
-					animation.cancel();
-				
+			if (view != null) {				
 				if (!this.remoteDrawables.containsKey((String)view.getTag())) {
 					this.remoteDrawables.put((String)view.getTag(), bitmap);
 				}
@@ -292,6 +296,10 @@ public class BuildBoxMainActivity extends DownloadActivity {
 				}
 				
 				view.setImageBitmap(bitmap);
+				
+				Animation animation = view.getAnimation();
+				if (animation != null)
+					animation.cancel();
 			}
 		}
 		catch (NullPointerException e) {

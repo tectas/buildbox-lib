@@ -4,7 +4,9 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingTop="10dp" >
+    android:paddingTop="10sp"
+    android:paddingBottom="10sp"  
+	android:gravity="center_horizontal">
 
     <TextView
         android:id="@+id/developers_head"
@@ -12,6 +14,7 @@
         android:layout_height="wrap_content"
         android:textSize="15sp"
         android:textStyle="bold|italic"
-        android:text="@string/developers_head" />
+        android:text="@string/developers_head" 
+        android:gravity="center_horizontal"/>
     
 </LinearLayout>

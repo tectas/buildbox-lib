@@ -5,8 +5,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:columnCount="2"
-    android:focusable="false"
-    android:background="@android:color/background_dark">
+    android:focusable="false">
 
     <TextView
         android:id="@+id/download_text"
