@@ -282,7 +282,9 @@ public class Communicator {
 			        
 			        int len;
 			        
-			        Integer processed = 0;
+			        Integer processed = 0, publishSteps = 0;
+			        
+			        publishSteps = (int)(fileSize / 100);
 			        
 			        result.progress = (int)((100d / fileSize) * processed);
 	            	progressHandler.indirectPublishProgress(result);
@@ -297,7 +299,7 @@ public class Communicator {
 			            	return result;
 			            }
 			            
-			            if (processed % 2097152 <= 512) {
+			            if (processed % (publishSteps < 1048576?1048576:publishSteps) <= 512) {
 			            	out.flush();
 			            	result.progress = (int)((100d / fileSize) * processed);
 			            	progressHandler.indirectPublishProgress(result);
@@ -419,6 +421,8 @@ public class Communicator {
 			        
 			        Integer processed = ranges ? alreadyDownloaded : 0;
 			        
+			        Integer publishSteps = (int)(fileSize / 100);
+			        
 			        result.progress = (int)((100d / fileSize) * processed);
 	            	progressHandler.indirectPublishProgress(result);
 			        
@@ -431,13 +435,13 @@ public class Communicator {
 			            	return result;
 			            }
 			            
-			            if (processed % 2097152 <= 128) {
+			            if (processed % (publishSteps < 1048576?1048576:publishSteps) <= 512) {
 			            	out.flush();
 			            	result.progress = (int)((100d / fileSize) * processed);
 			            	progressHandler.indirectPublishProgress(result);
 			            }
 			        }
-
+			        
 	            	result.progress = (int)((100d / fileSize) * processed);
 	            	progressHandler.indirectPublishProgress(result);
 			        

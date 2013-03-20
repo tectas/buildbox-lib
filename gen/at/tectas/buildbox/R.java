@@ -175,13 +175,14 @@ containing a value of this type.
     public static final class drawable {
         public static final int buildbox=0x7f020000;
         public static final int donate_button=0x7f020001;
-        public static final int ic_launcher=0x7f020002;
-        public static final int spinner=0x7f020003;
-        public static final int spinner_small=0x7f020004;
+        public static final int drag_drop_grid=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
+        public static final int spinner=0x7f020004;
+        public static final int spinner_small=0x7f020005;
     }
     public static final class id {
-        public static final int ListItemImageView=0x7f060028;
-        public static final int ListItemTextView=0x7f060029;
+        public static final int ListItemImageView=0x7f060029;
+        public static final int ListItemTextView=0x7f06002a;
         public static final int changelog_head=0x7f060007;
         public static final int changelog_list=0x7f060006;
         public static final int changelog_text=0x7f060008;
@@ -204,34 +205,35 @@ containing a value of this type.
         public static final int download_item_layout=0x7f06001c;
         public static final int download_list=0x7f060019;
         public static final int download_list_layout=0x7f060018;
-        public static final int download_md5sum_check=0x7f06001f;
-        public static final int download_md5sum_title=0x7f06001e;
-        public static final int download_progress=0x7f060022;
-        public static final int download_result_status=0x7f060023;
-        public static final int download_subtext=0x7f060020;
-        public static final int download_text=0x7f06001d;
-        public static final int download_textprogress=0x7f060021;
+        public static final int download_md5sum_check=0x7f060020;
+        public static final int download_md5sum_title=0x7f06001f;
+        public static final int download_progress=0x7f060023;
+        public static final int download_result_status=0x7f060024;
+        public static final int download_subtext=0x7f060021;
+        public static final int download_text=0x7f06001e;
+        public static final int download_textprogress=0x7f060022;
+        public static final int drag_drop_image=0x7f06001d;
         public static final int flingRemove=0x7f060001;
-        public static final int image_item_fragment=0x7f060024;
-        public static final int images_base_fragment=0x7f060025;
-        public static final int list_layout=0x7f060026;
-        public static final int list_view=0x7f060027;
-        public static final int md5sum=0x7f06002c;
-        public static final int md5sum_container=0x7f06002a;
-        public static final int md5sum_head=0x7f06002b;
+        public static final int image_item_fragment=0x7f060025;
+        public static final int images_base_fragment=0x7f060026;
+        public static final int list_layout=0x7f060027;
+        public static final int list_view=0x7f060028;
+        public static final int md5sum=0x7f06002d;
+        public static final int md5sum_container=0x7f06002b;
+        public static final int md5sum_head=0x7f06002c;
         public static final int onDown=0x7f060002;
         public static final int onLongPress=0x7f060004;
         public static final int onMove=0x7f060003;
         public static final int pager=0x7f060005;
-        public static final int remove=0x7f060031;
-        public static final int remove_all=0x7f060032;
-        public static final int remove_broken=0x7f060033;
-        public static final int settings=0x7f060030;
+        public static final int remove=0x7f060032;
+        public static final int remove_all=0x7f060033;
+        public static final int remove_broken=0x7f060034;
+        public static final int settings=0x7f060031;
         public static final int title=0x7f06000d;
         public static final int version=0x7f06000e;
-        public static final int webpage_url=0x7f06002d;
-        public static final int webpages_base_layout=0x7f06002e;
-        public static final int webpages_head=0x7f06002f;
+        public static final int webpage_url=0x7f06002e;
+        public static final int webpages_base_layout=0x7f06002f;
+        public static final int webpages_head=0x7f060030;
     }
     public static final class integer {
         public static final int download_float_view_alpha=0x7f070000;

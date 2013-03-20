@@ -33,6 +33,6 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
  			activity.addDownload(pack);
  		}
  		
- 		activity.fragment.getChildFragmentManager().popBackStackImmediate();
+ 		while(activity.fragment.getChildFragmentManager().popBackStackImmediate());
 	}
 }

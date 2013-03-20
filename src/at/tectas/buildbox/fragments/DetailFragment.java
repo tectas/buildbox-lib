@@ -94,6 +94,12 @@ public class DetailFragment extends Fragment {
 				layoutView.addView(childView);
 			}
 			
+			 String md5sum = arguments.getString(getString(R.string.md5sum_property));
+			       
+			if (PropertyHelper.stringIsNullOrEmpty(md5sum) == false) {
+				pack.md5sum = md5sum;
+			}
+				
 			ArrayList<String> homePages = arguments.getStringArrayList(getString(R.string.webpages_property));
 			
 			if (homePages != null && !homePages.isEmpty() && homePages.size() > 0) {
