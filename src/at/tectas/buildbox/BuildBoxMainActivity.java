@@ -172,8 +172,13 @@ public class BuildBoxMainActivity extends DownloadActivity {
 			case R.id.settings:
 				Intent i = new Intent(this, BuildBoxPreferenceActivity.class);
 	            startActivity(i);
+	            return true;
 			case R.id.remove_broken:
 				this.removeBrokenAndAbortedFromMap();
+				return true;
+			case R.id.remove_all:
+				this.downloads.clear();
+				this.adapter.notifyDataSetChanged();
 				return true;
 		}
 		

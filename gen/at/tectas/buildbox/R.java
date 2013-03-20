@@ -224,7 +224,8 @@ containing a value of this type.
         public static final int onMove=0x7f060003;
         public static final int pager=0x7f060005;
         public static final int remove=0x7f060031;
-        public static final int remove_broken=0x7f060032;
+        public static final int remove_all=0x7f060032;
+        public static final int remove_broken=0x7f060033;
         public static final int settings=0x7f060030;
         public static final int title=0x7f06000d;
         public static final int version=0x7f06000e;
@@ -260,6 +261,9 @@ containing a value of this type.
         public static final int download_view_menu_broken=0x7f0a0003;
     }
     public static final class string {
+        public static final int activity_menu_remove_broken_title=0x7f080059;
+        public static final int activity_menu_settings_title=0x7f080057;
+        public static final int activtiy_menu_remove_all_title=0x7f080058;
         public static final int app_cancel_message=0x7f080006;
         public static final int app_name=0x7f080000;
         public static final int cancel_button_text=0x7f08004f;
@@ -286,6 +290,7 @@ containing a value of this type.
         public static final int download_flash_options_title=0x7f080036;
         public static final int download_flash_text=0x7f080034;
         public static final int download_menu_manage_title=0x7f080056;
+        public static final int download_queue_item_context_remove_title=0x7f08005a;
         public static final int download_retry_broken=0x7f080033;
         public static final int download_running_alert_text=0x7f08004d;
         public static final int download_running_alert_title=0x7f08004e;

@@ -87,4 +87,8 @@
     <string name="preference_interval_default">6</string>
     <string name="preference_queue_size_property">queue_size</string>
     <string name="download_menu_manage_title">Manage</string>
+    <string name="activity_menu_settings_title">Settings</string>
+    <string name="activtiy_menu_remove_all_title">Clear queue</string>
+    <string name="activity_menu_remove_broken_title">Remove broken/aborted</string>
+    <string name="download_queue_item_context_remove_title">Remove item</string>
 </resources>

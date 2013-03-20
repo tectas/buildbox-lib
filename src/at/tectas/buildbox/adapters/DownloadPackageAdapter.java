@@ -74,10 +74,12 @@ public class DownloadPackageAdapter extends BaseAdapter implements DragSortListe
 	    	
 	    	if (response.status == DownloadStatus.Successful) {
 	    		checkbox.setChecked(true);
+	    		text.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
 	    		statusText.setText("Successful");
 	    	}
 	    	else if (response.status == DownloadStatus.Done) {
 	    		checkbox.setChecked(false);
+	    		text.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
 	    		statusText.setText("Done");
 	    	}
 	    	else if (response.status == DownloadStatus.Broken) {
@@ -87,11 +89,18 @@ public class DownloadPackageAdapter extends BaseAdapter implements DragSortListe
 	    	}
 	    	else if (response.status == DownloadStatus.Md5mismatch) {
 	    		checkbox.setChecked(false);
+	    		text.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
 	    		statusText.setText("Md5sum mismatch");
 	    	}
 	    	else if (response.status == DownloadStatus.Aborted) {
 	    		checkbox.setChecked(false);
+	    		text.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
 	    		statusText.setText("Aborted");
+	    	}
+	    	else if (response.status == DownloadStatus.Pending) {
+	    		checkbox.setChecked(false);
+	    		text.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+	    		statusText.setText("");
 	    	}
 	    }
 	    else {

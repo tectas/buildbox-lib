@@ -242,8 +242,6 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 				continue;
 			}
 			
-			DownloadService.Processing = true;
-			
 			pack.addProgressListener(CallbackType.Service, this);
 			pack.addFinishedListener(CallbackType.Service, this);
 			pack.addCancelledListener(CallbackType.Service, this);
@@ -283,6 +281,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			
 			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 			
+			DownloadService.Processing = true;
+			
 			String downloadQueueSizeString = pref.getString(getString(R.string.preference_queue_size_property), null);
 			
 			if (PropertyHelper.stringIsNullOrEmpty(downloadQueueSizeString)) {
@@ -313,6 +313,12 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 	}
 	
 	public void stopDownloads() {
+		
+		for (DownloadPackage pack: this.map.values()) {
+			if (pack.getResponse() == null) {
+				pack.setResponse(new DownloadResponse(pack, DownloadStatus.Aborted));
+			}
+		}
 		
 		for (DownloadAsyncCommunicator communicators: this.downloadCommunicators.values()) {
 			communicators.cancel(true);
@@ -478,17 +484,9 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			packag.setResponse(response);
 		}
 		
-		int finishedDownloadsCount = 0;
+		this.downloadCommunicators.remove(key);
 		
-		for (DownloadPackage pack: this.map.values()) {
-			if (pack.getResponse() != null) {
-				if(response.status != DownloadStatus.Pending) {
-					finishedDownloadsCount++;
-				}
-			}
-		}
-		
-		if (finishedDownloadsCount != this.map.size())
+		if (this.downloadCommunicators.size() != 0)
 			startForeground(this.notificationServieID, this.serviceNotification);
 		else {
 			stopForeground(true);
