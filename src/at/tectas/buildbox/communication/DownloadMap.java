@@ -2,12 +2,23 @@ package at.tectas.buildbox.communication;
 
 import java.util.Hashtable;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.JsonArray;
 
 
-public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
+public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> implements Parcelable {
 
 	private static final long serialVersionUID = 1L;
+
+	public DownloadMap(Parcel source) {
+		for (int i = 0; i < source.dataSize(); i++) {
+			this.put((DownloadPackage)source.readParcelable(DownloadPackage.class.getClassLoader()));
+		}
+	}
+	
+	public DownloadMap() { }
 
 	public synchronized DownloadPackage get (String md5sum) {
 		for (DownloadKey key: this.keySet()) {
@@ -190,4 +201,29 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> {
 		
 		return map;
 	}
+
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static final Parcelable.Creator<DownloadMap> CREATOR = new Parcelable.Creator<DownloadMap>() {
+		
+		@Override
+		public DownloadMap[] newArray(int size) {
+			return new DownloadMap[size];
+		}
+		
+		@Override
+		public DownloadMap createFromParcel(Parcel source) {
+			return new DownloadMap(source);
+		}
+	};
 }

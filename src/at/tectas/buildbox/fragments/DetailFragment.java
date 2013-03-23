@@ -18,6 +18,7 @@ import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadPackage;
+import at.tectas.buildbox.content.DownloadType;
 import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
@@ -197,19 +198,40 @@ public class DetailFragment extends Fragment {
 			
 			String url = arguments.getString(getString(R.string.url_property));
 			
-			String downloadType = arguments.getString(getString(R.string.item_download_type_property));
+			DownloadType downloadType = null;
 			
-			if ((downloadType.equals(getString(R.string.item_download_type_zip)) || 
-					downloadType.equals(getString(R.string.item_download_type_apk)) ||
-					downloadType.equals(getString(R.string.item_download_type_other))) && 
+			try {
+				downloadType = DownloadType.valueOf(arguments.getString(getString(R.string.item_download_type_property)));
+			}
+			catch (IllegalArgumentException e) {
+				
+			}
+			
+			if ((downloadType.equals(DownloadType.zip) || 
+					downloadType.equals(DownloadType.other) ||
+					downloadType.equals(DownloadType.apk)) && 
 					PropertyHelper.stringIsNullOrEmpty(url) == false) {
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
 
 				pack.url = url;
 				
-				String[] splittedFilename = url.split("/");
+				String filename = "";
 				
-				pack.setFilename(splittedFilename[splittedFilename.length - 1]);
+				String[] splittedUrl = url.split("/");
+				
+				String[] urlParameters = splittedUrl[splittedUrl.length -1].split("\\?");
+				
+				splittedUrl = urlParameters[urlParameters.length - 1].split("&");
+				
+				for (String parameter: splittedUrl) {
+					if (parameter.contains(".")) {
+						String[] keyValuePair = parameter.split("=");
+						
+						filename = keyValuePair[keyValuePair.length - 1].replace("\"", "").replace("'", "").replace(";", "");
+					}
+				}
+				
+				pack.setFilename(filename);
 				
 				pack.setDirectory(activity.getDownloadDir());
 				

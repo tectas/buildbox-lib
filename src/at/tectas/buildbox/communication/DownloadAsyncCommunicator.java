@@ -2,8 +2,8 @@ package at.tectas.buildbox.communication;
 
 import java.util.Hashtable;
 
-import at.tectas.buildbox.communication.Communicator.CallbackType;
-import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
+import at.tectas.buildbox.communication.CallbackType;
+import at.tectas.buildbox.communication.DownloadStatus;
 
 public class DownloadAsyncCommunicator extends IDownloadAsyncCommunicator {
 	
@@ -11,7 +11,7 @@ public class DownloadAsyncCommunicator extends IDownloadAsyncCommunicator {
 	private Communicator communicator = null;
 	private Hashtable<CallbackType, IDownloadProgressCallback> updateListener = new Hashtable<CallbackType, IDownloadProgressCallback>();
 	private Hashtable<CallbackType, IDownloadFinishedCallback> finishedListener = new Hashtable<CallbackType, IDownloadFinishedCallback>();
-	private Hashtable<CallbackType, IDownloadCancelledCallback> cancelledListener = new Hashtable<Communicator.CallbackType, IDownloadCancelledCallback>();
+	private Hashtable<CallbackType, IDownloadCancelledCallback> cancelledListener = new Hashtable<CallbackType, IDownloadCancelledCallback>();
 	
 	private DownloadAsyncCommunicator (Communicator communicator, String ID) {
 		this.ID = ID;

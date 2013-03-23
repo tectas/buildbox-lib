@@ -13,13 +13,6 @@ import at.tectas.buildbox.R;
 import at.tectas.buildbox.helpers.JsonHelper;
 
 public class Item {
-	public enum ArrayTypes {
-		DEPENDENCIES, DEVELOPERS, HOMEPAGES, IMAGEURLS, DONATIONLINKS, CHANGELOG
-	}
-	
-	public enum ItemTypes {
-		ParentItem, ChildItem, DetailItem
-	}
 	
 	public static final String TAG = "ITEM";
 	protected static Context context;

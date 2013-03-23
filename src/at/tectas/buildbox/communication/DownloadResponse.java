@@ -1,14 +1,16 @@
 package at.tectas.buildbox.communication;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 import at.tectas.buildbox.helpers.IJsonSerialize;
 import at.tectas.buildbox.helpers.JsonHelper;
 
 import com.google.gson.JsonObject;
 
-public class DownloadResponse implements IJsonSerialize {
-	public enum DownloadStatus {
-		Pending, Successful, Broken, Md5mismatch, Done, Aborted
-	}
+public class DownloadResponse implements IJsonSerialize, Parcelable {
+
+	private static final String TAG = "DownloadResponse";
 	
 	public static JsonHelper helper = new JsonHelper();
 	
@@ -34,6 +36,20 @@ public class DownloadResponse implements IJsonSerialize {
 		this.mime = this.getMimeType(pack.getFilename(), pack.getFilename().length() - 3);
 	}
 	
+	public DownloadResponse(Parcel source) {
+		String statusString = source.readString();
+		
+		try {
+			this.status = DownloadStatus.valueOf(statusString);
+		}
+		catch (IllegalArgumentException e) {
+			Log.w(TAG, "DownloadStatus couldn't be parsed: " + statusString);
+		}
+		
+		this.mime = source.readString();
+		this.progress = source.readInt();
+	}
+
 	public String getKey() {
 		if (this.pack != null) {
 			return this.pack.getKey();
@@ -123,4 +139,29 @@ public class DownloadResponse implements IJsonSerialize {
 		
 		return json;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.status.name());
+		dest.writeString(this.mime);
+		dest.writeInt(this.progress);
+	}
+	
+	public static final Parcelable.Creator<DownloadResponse> CREATOR = new Parcelable.Creator<DownloadResponse>() {
+
+		@Override
+		public DownloadResponse createFromParcel(Parcel source) {
+			return new DownloadResponse(source);
+		}
+
+		@Override
+		public DownloadResponse[] newArray(int size) {
+			return new DownloadResponse[size];
+		}
+	};
 }

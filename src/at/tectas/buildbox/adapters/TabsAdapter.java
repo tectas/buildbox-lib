@@ -92,6 +92,8 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 				mViewPager.setCurrentItem(i);
 			}
 		}
+		
+		this.mContext.invalidateOptionsMenu();
 	}
 
 	@Override

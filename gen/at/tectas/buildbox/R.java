@@ -183,6 +183,7 @@ containing a value of this type.
     public static final class id {
         public static final int ListItemImageView=0x7f060029;
         public static final int ListItemTextView=0x7f06002a;
+        public static final int add_external=0x7f060034;
         public static final int changelog_head=0x7f060007;
         public static final int changelog_list=0x7f060006;
         public static final int changelog_text=0x7f060008;
@@ -225,10 +226,10 @@ containing a value of this type.
         public static final int onLongPress=0x7f060004;
         public static final int onMove=0x7f060003;
         public static final int pager=0x7f060005;
-        public static final int remove=0x7f060032;
+        public static final int remove=0x7f060031;
         public static final int remove_all=0x7f060033;
-        public static final int remove_broken=0x7f060034;
-        public static final int settings=0x7f060031;
+        public static final int remove_broken=0x7f060032;
+        public static final int settings=0x7f060035;
         public static final int title=0x7f06000d;
         public static final int version=0x7f06000e;
         public static final int webpage_url=0x7f06002e;
@@ -257,12 +258,11 @@ containing a value of this type.
         public static final int webpages_base_fragment=0x7f03000f;
     }
     public static final class menu {
-        public static final int activity_main=0x7f0a0000;
-        public static final int download_queue_context=0x7f0a0001;
-        public static final int download_view_menu=0x7f0a0002;
-        public static final int download_view_menu_broken=0x7f0a0003;
+        public static final int download_queue_context=0x7f0a0000;
+        public static final int download_view_menu=0x7f0a0001;
     }
     public static final class string {
+        public static final int activity_menu_add_external_title=0x7f08005b;
         public static final int activity_menu_remove_broken_title=0x7f080059;
         public static final int activity_menu_settings_title=0x7f080057;
         public static final int activtiy_menu_remove_all_title=0x7f080058;

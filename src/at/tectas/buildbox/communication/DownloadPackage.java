@@ -5,14 +5,18 @@ import java.util.Hashtable;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import at.tectas.buildbox.communication.Communicator.CallbackType;
+import android.os.Parcel;
+import android.os.Parcelable;
+import at.tectas.buildbox.communication.CallbackType;
+import at.tectas.buildbox.content.DownloadType;
 import at.tectas.buildbox.helpers.IJsonSerialize;
 import at.tectas.buildbox.helpers.JsonHelper;
 
-public class DownloadPackage implements IJsonSerialize {
+public class DownloadPackage implements IJsonSerialize, Parcelable {
+	
 	public static JsonHelper helper = new JsonHelper();
 	public String url = null;
-	public String type = null;
+	public DownloadType type = null;
 	public String title = null;
 	protected String directory = null;
 	protected String filename = null;
@@ -39,11 +43,11 @@ public class DownloadPackage implements IJsonSerialize {
 	}
 	
 	public void setFilename(String filename) {
+		this.filename = filename;
+		
 		if (response != null) {
 			response.mime = response.getMimeType(this.filename, this.filename.length() - 3);
 		}
-		
-		this.filename = filename;
 	}
 	
 	public String getFilename() {
@@ -79,6 +83,23 @@ public class DownloadPackage implements IJsonSerialize {
 			this.response = new DownloadResponse(this, element.getAsJsonObject());
 	}
 	
+	public DownloadPackage(Parcel source) {
+		this.setResponse((DownloadResponse)source.readParcelable(DownloadResponse.class.getClassLoader()));
+		this.url = source.readString();
+		
+		try {
+			this.type = DownloadType.valueOf(source.readString());
+		}
+		catch (IllegalArgumentException e) {
+			this.type = DownloadType.other;
+		}
+		
+		this.title = source.readString();
+		this.setDirectory(source.readString());
+		this.setFilename(source.readString());
+		this.md5sum = source.readString();
+	}
+
 	public void addProgressListener (CallbackType type, IDownloadProgressCallback callback) {
 		if (this.updateCallbacks.containsKey(type)) {
 			this.updateCallbacks.remove(type);
@@ -134,4 +155,33 @@ public class DownloadPackage implements IJsonSerialize {
 		
 		return json;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable(this.response, 0);
+		dest.writeString(this.url);
+		dest.writeString(this.type.name());
+		dest.writeString(this.title);
+		dest.writeString(this.directory);
+		dest.writeString(this.filename);
+		dest.writeString(this.md5sum);
+	}
+	
+	public static final Parcelable.Creator<DownloadPackage> CREATOR = new Parcelable.Creator<DownloadPackage>() {
+		
+		@Override
+		public DownloadPackage[] newArray(int size) {
+			return new DownloadPackage[size];
+		}
+		
+		@Override
+		public DownloadPackage createFromParcel(Parcel source) {
+			return new DownloadPackage(source);
+		}
+	};
 }

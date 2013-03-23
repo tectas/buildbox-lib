@@ -19,7 +19,7 @@ import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.content.ChildItem;
 import at.tectas.buildbox.content.Item;
-import at.tectas.buildbox.content.Item.ItemTypes;
+import at.tectas.buildbox.content.ItemTypes;
 import at.tectas.buildbox.content.ParentItem;
 import at.tectas.buildbox.content.DetailItem;
 import at.tectas.buildbox.listeners.ChildItemListItemListener;

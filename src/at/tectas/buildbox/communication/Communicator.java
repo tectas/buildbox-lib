@@ -15,6 +15,7 @@ import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Hashtable;
+import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.params.CoreProtocolPNames;
@@ -27,12 +28,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
-import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
+import at.tectas.buildbox.communication.DownloadStatus;
+import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class Communicator {
-	public enum CallbackType {
-		UI, Service
-	}
 	
 	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(
 			DownloadPackage pack, 
@@ -268,7 +267,14 @@ public class Communicator {
 			        	dir.mkdir();
 			        }
 			        
-			        pack.setFilename(responseFilename == null? pack.getFilename() : responseFilename);
+			        pack.setFilename(
+			        		responseFilename == null || PropertyHelper.stringIsNullOrEmpty(responseFilename) ?
+			        				(
+			        						pack.getFilename().equals("") ?
+			        						(UUID.randomUUID().toString() + '.' + pack.type) : 
+			        						pack.getFilename()
+			        				) : 
+			        				responseFilename);
 			        
 			        File file = new File(pack.directory, pack.getFilename());
 			        
@@ -555,7 +561,8 @@ public class Communicator {
 		String header = connection.getHeaderField("Content-Disposition");
 		
 		if (!(header.isEmpty()) && header.contains(".")) {
-			return header.split("=")[1];
+			
+			return header.split("filename=")[1].split(";")[0].replace("\"", "").replace("'", "");
 		}
 		
 		return null;

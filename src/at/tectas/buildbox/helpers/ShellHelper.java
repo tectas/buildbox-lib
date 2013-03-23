@@ -5,12 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import at.tectas.buildbox.recovery.RebootType;
 
 public class ShellHelper {
-
-	public enum RebootType {
-		Recovery, Bootloader, System
-	}
 	
 	public static String[] addRootPrefix(String[] commands) {
 		String[] rootCommands = new String[commands.length + 1];

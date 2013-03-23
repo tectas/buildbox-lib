@@ -13,7 +13,7 @@ public class DetailItem extends Item {
 	public String version;
 	public String url;
 	public String md5sum;
-	public String downloadType;
+	public DownloadType downloadType;
 	public ArrayList<Developer> developers = new ArrayList<Developer>();
 	public ArrayList<String> homePages = new ArrayList<String>();
 	public ArrayList<String> imageUrls = new ArrayList<String>();
@@ -61,7 +61,7 @@ public class DetailItem extends Item {
 		
 		result.putString(Item.context.getString(R.string.item_type_property), Item.context.getString(R.string.item_detail_type));
 		
-		result.putString(Item.context.getString(R.string.item_download_type_property), this.downloadType);
+		result.putString(Item.context.getString(R.string.item_download_type_property), this.downloadType.name());
 		
 		result.putString(Item.context.getString(R.string.description_property), this.description);
 		result.putString(Item.context.getString(R.string.version_property), this.version);

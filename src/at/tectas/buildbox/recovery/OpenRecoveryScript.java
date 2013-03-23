@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
-import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
+import at.tectas.buildbox.communication.DownloadStatus;
 import at.tectas.buildbox.helpers.ShellHelper;
-import at.tectas.buildbox.helpers.ShellHelper.RebootType;
+import at.tectas.buildbox.recovery.RebootType;
 
 public class OpenRecoveryScript {
 	public OpenRecoveryScriptConfiguration configuration = null;

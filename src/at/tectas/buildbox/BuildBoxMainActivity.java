@@ -26,7 +26,11 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
+import at.tectas.buildbox.communication.DownloadPackage;
+import at.tectas.buildbox.communication.DownloadResponse;
+import at.tectas.buildbox.communication.DownloadStatus;
 import at.tectas.buildbox.content.DetailItem;
+import at.tectas.buildbox.content.DownloadType;
 import at.tectas.buildbox.content.Item;
 import at.tectas.buildbox.content.ItemList;
 import at.tectas.buildbox.fragments.ContentListFragment;
@@ -42,6 +46,8 @@ import at.tectas.buildbox.R;
 
 @SuppressLint("DefaultLocale")
 public class BuildBoxMainActivity extends DownloadActivity {
+	public static final int PICK_FILE_RESULT = 1;
+	
 	ViewPager mViewPager;
 	
 	private String romUrl = null;
@@ -150,20 +156,31 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.clear();
 		if (this.bar.getTabCount() == 0 || !this.bar.getTabAt(this.viewPagerIndex).getText().equals("Downloads")) {
-			getMenuInflater().inflate(R.menu.activity_main, menu);
+			menu.getItem(0).setVisible(false);
+			menu.getItem(1).setVisible(false);
 		}
 		else {
 			if (this.downloadMapContainsBrokenOrAborted()) {
-				getMenuInflater().inflate(R.menu.download_view_menu_broken, menu);
+				menu.getItem(0).setVisible(true);
+				menu.getItem(1).setVisible(true);
 			}
 			else {
-				getMenuInflater().inflate(R.menu.download_view_menu, menu);
+				menu.getItem(0).setVisible(false);
+				menu.getItem(1).setVisible(true);
 			}
 		}
 		return true;
 	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.clear();
+		
+		getMenuInflater().inflate(R.menu.download_view_menu, menu);
+		
+		return true;
+	};
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -180,9 +197,59 @@ public class BuildBoxMainActivity extends DownloadActivity {
 				this.downloads.clear();
 				this.adapter.notifyDataSetChanged();
 				return true;
+			case R.id.add_external:
+				 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+	             intent.setType("file/*");
+	             startActivityForResult(intent,PICK_FILE_RESULT);
+				return true;
 		}
 		
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch(requestCode){
+  			case PICK_FILE_RESULT:
+  				if(resultCode == RESULT_OK) {
+  					String filePath = data.getData().getPath();
+  					
+  					String[] splittedPath = filePath.split("/");
+  					
+  					String fileName = splittedPath[splittedPath.length - 1];
+  					
+  					String extension = fileName.split("\\.")[fileName.split("\\.").length - 1];
+  					
+  					DownloadPackage pack = new DownloadPackage();
+  					pack.title = fileName;
+  					
+  					DownloadResponse response = new DownloadResponse();
+  					response.progress = 100;
+  					response.status = DownloadStatus.Done;
+  					
+  					pack.setResponse(response);
+  					
+  					pack.setFilename(fileName);
+  					pack.setDirectory(filePath.replace(fileName, ""));
+  					pack.md5sum = fileName;
+  					
+  					if (extension.toLowerCase().equals(DownloadType.zip.name())) {
+  						pack.type = DownloadType.zip;
+  					}
+  					else {
+  						pack.type = DownloadType.other;
+  					}
+  					
+  					this.downloads.put(pack);
+  					
+  					this.addDownloadsTab();
+  					
+  					if (this.downloadAdapter != null) {
+  						this.downloadAdapter.notifyDataSetChanged();
+  					}
+  				}
+  				break;
+   		}
 	}
 	
 	public void startUpdateAlarm() {
@@ -209,9 +276,9 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		super.getServiceDownloadMap();
 		
 		if (this.getDownloads().size() != 0) {
-			if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads")) {
-				this.addDownloadsTab();
-			}
+			
+			this.addDownloadsTab();
+			
 			
 			if (this.downloadAdapter != null) {
 				this.downloadAdapter.notifyDataSetChanged();
@@ -317,15 +384,16 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	}
 	
 	public void addDownloadsTab() {
-		this.addTab("Downloads", DownloadListFragment.class, new Bundle());
+		if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads"))
+			this.addTab("Downloads", DownloadListFragment.class, new Bundle());
 	}
 	
 	public void getDownloadsMapandUpdateList () {
 		this.getServiceMap(false);
 		
 		if (this.getDownloads().size() != 0) {
-			if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads"))
-				this.addDownloadsTab();
+			
+			this.addDownloadsTab();
 			
 			if (this.downloadAdapter != null) {
 				this.downloadAdapter.notifyDataSetChanged();

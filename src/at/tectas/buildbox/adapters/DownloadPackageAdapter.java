@@ -15,7 +15,7 @@ import at.tectas.buildbox.DownloadActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
-import at.tectas.buildbox.communication.DownloadResponse.DownloadStatus;
+import at.tectas.buildbox.communication.DownloadStatus;
 import at.tectas.buildbox.service.DownloadService;
 
 public class DownloadPackageAdapter extends BaseAdapter implements DragSortListener {
