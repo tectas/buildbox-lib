@@ -1,14 +1,9 @@
 package at.tectas.buildbox;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,13 +17,14 @@ import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.CallbackType;
 import at.tectas.buildbox.communication.DownloadStatus;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
+import at.tectas.buildbox.communication.IDeserializeMapFinishedCallback;
 import at.tectas.buildbox.communication.IDownloadCancelledCallback;
 import at.tectas.buildbox.communication.IDownloadFinishedCallback;
 import at.tectas.buildbox.communication.IDownloadProgressCallback;
 import at.tectas.buildbox.listeners.DownloadBaseCallback;
 import at.tectas.buildbox.service.DownloadService;
 
-public abstract class DownloadActivity extends FragmentActivity implements ICommunicatorCallback {
+public abstract class DownloadActivity extends FragmentActivity implements ICommunicatorCallback, IDeserializeMapFinishedCallback {
 
 	public static final String TAG = "DownloadActivity";
 	
@@ -208,46 +204,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	}
 	
 	protected void loadDownloadsMapFromCacheFile() {
-		BufferedReader stream = null;
-		
-		String[] files = this.fileList();
-		
-		boolean exists = false;
-		
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].equals(this.getString(R.string.downloads_cach_filename))) {
-				exists = true;
-				break;
-			}
-		}
-		
-		if (exists == true) {
-			try {
-				stream = new BufferedReader(new InputStreamReader(openFileInput(getString(R.string.downloads_cach_filename))));
-		
-				StringBuilder builder = new StringBuilder();
-				String line = "";
-		
-				while ((line = stream.readLine()) != null) 
-				{
-					builder.append(line);
-				}
-				
-		        stream.close();
-		        
-		        JsonParser parser = new JsonParser();
-		        
-		        JsonArray elements = parser.parse(builder.toString()).getAsJsonArray();
-				
-		        this.setDownloads(DownloadMap.getDownloadMapFromJson(elements));
-		        
-		        this.deleteFile(getString(R.string.downloads_cach_filename));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		this.getDownloads().deserializeMapFromCache(this.getApplicationContext(), this);
 	}
 
 	@Override

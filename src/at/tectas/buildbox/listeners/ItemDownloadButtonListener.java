@@ -15,15 +15,14 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
 	public void onClick(View v) {
 		final View button = v;
 		
-		if (!activity.bar.getTabAt(activity.bar.getTabCount() - 1).getText().equals("Downloads")) {
-			activity.addDownloadsTab();
-		}
+		activity.addDownloadsTab();
 		
  		DownloadPackage pack = (DownloadPackage) button.getTag();
  		
  		if (DownloadService.Processing == false) {
 			if (activity.downloadAdapter != null) {
 				activity.downloadAdapter.add(pack);
+				activity.downloadAdapter.notifyDataSetChanged();
 			}
 			else {
 				activity.getDownloads().put(pack);

@@ -264,7 +264,11 @@ public class Communicator {
 			        File dir = new File(pack.directory);
 			        
 			        if (!dir.exists()) {
-			        	dir.mkdir();
+			        	boolean successfull = dir.mkdirs();
+			        	
+			        	if (!successfull) {
+			        		throw new IOException("Couldn't create directory: " + dir.getPath());
+			        	}
 			        }
 			        
 			        pack.setFilename(

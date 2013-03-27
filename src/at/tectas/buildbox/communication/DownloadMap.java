@@ -1,15 +1,28 @@
 package at.tectas.buildbox.communication;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Hashtable;
 
+import android.content.Context;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+import at.tectas.buildbox.R;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 
 
 public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> implements Parcelable {
 
+	protected static final String TAG = "DownloadMap";
 	private static final long serialVersionUID = 1L;
 
 	public DownloadMap(Parcel source) {
@@ -192,26 +205,34 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		return objects;
 	}
 	
+	public void addPackagesFromJson(JsonArray objects) {
+		if (objects != null) {
+			for (int i = 0; i < objects.size(); i++) {
+				this.put(new DownloadPackage(objects.get(i).getAsJsonObject()));
+			}
+		}
+	}
+	
 	public static DownloadMap getDownloadMapFromJson(JsonArray objects) {
 		DownloadMap map = new DownloadMap();
 		
-		for (int i = 0; i < objects.size(); i++) {
-			map.put(new DownloadPackage(objects.get(i).getAsJsonObject()));
-		}
+		map.addPackagesFromJson(objects);
 		
 		return map;
 	}
 
 	@Override
 	public int describeContents() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		// TODO Auto-generated method stub
-		
+		if (dest != null) {
+			for (int i = 0; i < this.size(); i++) {
+				dest.writeParcelable(this.get(i), flags);
+			}
+		}
 	}
 	
 	public static final Parcelable.Creator<DownloadMap> CREATOR = new Parcelable.Creator<DownloadMap>() {
@@ -226,4 +247,132 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 			return new DownloadMap(source);
 		}
 	};
+	
+	public void deserializeMapFromCache(final Context context) {
+		this.deserializeMapFromCache(context, null);
+	}
+	
+	public void deserializeMapFromCache(final Context context, final IDeserializeMapFinishedCallback callback) {
+		String[] files = context.fileList();
+		
+		boolean exists = false;
+		
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].equals(context.getString(R.string.downloads_cache_filename))) {
+				exists = true;
+				break;
+			}
+		}
+		
+		if (exists) {
+			this.deserializeMapFromFile(context, context.getString(R.string.downloads_cache_filename), true, callback);
+		}
+		else {
+			Log.i(TAG, "cache file didn't exist");
+		}
+	}
+	
+	public void deserializeMapFromStorage(final Context context, final String filePath) {
+		this.deserializeMapFromFile(context, filePath, false, null);
+	}
+	
+	public void deserializeMapFromStorage(final Context context, final String filePath, final IDeserializeMapFinishedCallback callback) {
+		this.deserializeMapFromFile(context, filePath, false, callback);
+	}
+	
+	public void deserializeMapFromFile(final Context context, final String filename, final boolean cache, final IDeserializeMapFinishedCallback callback) {
+		Handler handler = new Handler();
+		
+		final DownloadMap map = this;
+		
+		handler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				BufferedReader stream = null;
+				
+				try {
+					
+					if (cache) {
+						stream = new BufferedReader(new InputStreamReader(context.openFileInput(filename)));
+					}
+					else {
+						stream = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+					}
+					
+					StringBuilder builder = new StringBuilder();
+					String line = "";
+			
+					while ((line = stream.readLine()) != null) 
+					{
+						builder.append(line);
+					}
+					
+			        stream.close();
+			        
+			        JsonParser parser = new JsonParser();
+			        
+			        JsonArray elements = parser.parse(builder.toString()).getAsJsonArray();
+			        
+			        map.addPackagesFromJson(elements);
+			        
+			        if (cache) {
+			        	context.deleteFile(filename);
+			        }
+			        
+			        if (callback != null) {
+			        	callback.mapDeserializedCallback();
+			        }
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	public void serializeMapToCache(final Context context) {
+		this.serializeMapToFile(context, context.getString(R.string.downloads_cache_filename), true);
+	}
+	
+	public void serializeMapToStorage(final Context context, final String filePath) {
+		this.serializeMapToFile(context, filePath, false);
+	}
+	
+	public void serializeMapToFile(final Context context, final String filename, final boolean cache) {
+		Handler handler = new Handler();
+		
+		final DownloadMap map = this;
+		
+		handler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				JsonArray jsonMap = map.serializeToJsonArray();
+				
+				try {
+					BufferedOutputStream stream = null;
+					
+					if (cache) {
+						stream = new BufferedOutputStream(context.openFileOutput(filename, Context.MODE_PRIVATE));
+					}
+					else {
+						stream = new BufferedOutputStream(new FileOutputStream(filename));
+					}
+					
+					stream.write(jsonMap.toString().getBytes());
+					
+					stream.flush();
+					
+					if (stream != null)
+						stream.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 }

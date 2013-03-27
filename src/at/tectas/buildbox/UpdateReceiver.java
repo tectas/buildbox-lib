@@ -50,7 +50,7 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 	public void getRomItem() {
 		String romUrl = this.helper.getRomUrl();
 		
-		if (romUrl != null) {
+		if (!PropertyHelper.stringIsNullOrEmpty(romUrl)) {
 			try {
 				PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 	            this.wakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");

@@ -8,7 +8,7 @@
     <string name="kitchen_download_dir">buildbox.downloaddir</string>
     <string name="app_cancel_message">It seems your rom is not supporting this application, please speak with the maintainer of it for further informations.</string>
     <string name="thumbnail_description">Thumbnail</string>
-    <string name="default_rom_url">http://kitchen.tectas.eu/Test.json</string>
+    <string name="default_rom_url"/>
     <string name="default_content_url">http://kitchen.tectas.eu/Content.json</string>
     <string name="changelog_head">Changelog</string>
     <string name="md5sum_head">md5sum:</string>
@@ -36,7 +36,7 @@
     <string name="developers_head">Developers</string>
     <string name="webpages_head">Webpages/Support:</string>
     <string name="service_notification_title">BuildBox Download Service</string>
-    <string name="service_notification_text"> </string>
+    <string name="service_notification_text">backup</string>
     <string name="service_result_notification_title">BuildBox Finished Downloads</string>
     <string name="service_result_notification_text">Expand to view</string>
     <string name="service_download_finished">successfully finished</string>
@@ -44,7 +44,6 @@
     <string name="service_download_mismatch">md5sum mismatch</string>
     <string name="service_result_notification_bigview_title">Finished Downloads</string>
     <string name="download_checkbox_label">md5:</string>
-    <string name="downloads_cach_filename">downloads.json</string>
     <string name="default_sd_directory">BuildBox</string>
     <string name="update_notification_title">Rom update found</string>
     <string name="update_notification_text">There is an update for your Rom available!</string>
@@ -91,5 +90,18 @@
     <string name="activtiy_menu_remove_all_title">Clear queue</string>
     <string name="activity_menu_remove_broken_title">Remove broken/aborted</string>
     <string name="download_queue_item_context_remove_title">Remove item</string>
-    <string name="activity_menu_add_external_title">Add from storage</string>
+    <string name="activity_menu_add_external_title">Add file from storage</string>
+    <string name="activity_menu_backup_queue">Backup current queue</string>
+    <string name="activity_menu_restore_queue">Restore backuped queue</string>
+    <string name="kitchen_backup_directory_name">backup</string>
+    <string name="backup_dialog_title">Backupname</string>
+    <string name="backup_dialog_text">Choose a name for the backup</string>
+    <string name="ok_button_text">Ok</string>
+    <string name="backup_file_extension">.bbb</string>
+    <string name="restore_alert_text">Chose the backup you like to restore from</string>
+    <string name="restore_alert_title">Restore downloads</string>
+    <string name="downloads_cache_filename">downloads.json</string>
+    <string name="preference_path_change_error_text">The given path isn\'t accessible, please verify that it is correct and you have read and write access to it (or it\'s parent if it\'s not existent).</string>
+    <string name="preference_content_urls_property">content</string>
+    <string name="splashscreen_label">BuildBox\n by Tectas\n\nset your device free\n\n\nLoading content...</string>
 </resources>

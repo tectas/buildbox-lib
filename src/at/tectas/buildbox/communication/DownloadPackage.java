@@ -151,8 +151,11 @@ public class DownloadPackage implements IJsonSerialize, Parcelable {
 		json.addProperty("directory", this.directory);
 		json.addProperty("filename", this.filename);
 		json.addProperty("md5sum", this.md5sum);
-		json.add("response", this.response.serializeToJson());
 		
+		if (this.response != null) {
+			json.add("response", this.response.serializeToJson());
+		}
+			
 		return json;
 	}
 
@@ -163,7 +166,7 @@ public class DownloadPackage implements IJsonSerialize, Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeParcelable(this.response, 0);
+		dest.writeParcelable(this.response, flags);
 		dest.writeString(this.url);
 		dest.writeString(this.type.name());
 		dest.writeString(this.title);

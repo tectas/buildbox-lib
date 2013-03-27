@@ -1,12 +1,7 @@
 package at.tectas.buildbox.service;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Hashtable;
-
-import com.google.gson.JsonArray;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -18,7 +13,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -441,37 +435,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			this.currentDownloadIndex = 0;
 			
 			if (this.clientsConnected <= 0)
-				this.serializeMap();
+				this.map.serializeMapToCache(this);
 		}
-	}
-	
-	public void serializeMap() {
-		Handler handler = new Handler();
-		
-		final DownloadMap map = this.map;
-		
-		handler.post(new Runnable() {
-			
-			@Override
-			public void run() {
-				JsonArray jsonMap = map.serializeToJsonArray();
-				
-				try {
-					BufferedOutputStream stream = new BufferedOutputStream(openFileOutput(getString(R.string.downloads_cach_filename), Context.MODE_PRIVATE));
-					
-					stream.write(jsonMap.toString().getBytes());
-					
-					stream.flush();
-					
-					if (stream != null)
-						stream.close();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		});
 	}
 
 	@Override
@@ -496,7 +461,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			this.currentDownloadIndex = 0;
 			
 			if (this.clientsConnected <= 0)
-				this.serializeMap();
+				this.map.serializeMapToCache(this);
 		}
 	}
 }

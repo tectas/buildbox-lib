@@ -1,5 +1,7 @@
 package at.tectas.buildbox.helpers;
 
+import java.util.HashSet;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -30,18 +32,23 @@ public class PropertyHelper {
 		return rom;
 	}
 	
-	public String getContentUrl() {
+	public String getPresetContentUrl() {
 		String content = null;
 		
 		if (pref.getBoolean(this.context.getString(R.string.preference_ignore_build_prop), false) == false) {
 			content = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_content_url_property));
 		}
 		
-		content = (PropertyHelper.stringIsNullOrEmpty(content) == true? context.getString(R.string.default_content_url): content);
+		content = (PropertyHelper.stringIsNullOrEmpty(content)? context.getString(R.string.default_content_url): content);
 		
 		return content;
 	}
 	
+	public HashSet<String> getUserContentUrls() {
+
+		return new HashSet<String>(pref.getStringSet(context.getString(R.string.preference_content_urls_property), new HashSet<String>()));
+	}
+ 	
 	public String getVersion() {
 		String version = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_rom_version_property));
 		
@@ -54,7 +61,7 @@ public class PropertyHelper {
 		if (downloadDir == null) {		
 			downloadDir = ShellHelper.getBuildPropProperty(context.getString(R.string.kitchen_download_dir));
 			
-			if (PropertyHelper.stringIsNullOrEmpty(downloadDir) == true) {
+			if (PropertyHelper.stringIsNullOrEmpty(downloadDir)) {
 				downloadDir = Environment.getExternalStorageDirectory().getPath() + "/" + context.getString(R.string.default_sd_directory);
 			}
 			
@@ -63,6 +70,10 @@ public class PropertyHelper {
 			editor.putString(context.getString(R.string.preference_dir_property), downloadDir);
 			
 			editor.commit();
+		}
+		
+		if (!downloadDir.endsWith("/")) {
+			downloadDir = downloadDir + "/";
 		}
 		
 		return downloadDir;
