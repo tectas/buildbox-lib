@@ -42,8 +42,11 @@ public class BuildBoxPreferenceActivity extends PreferenceActivity {
 		
 		File folder = new File(directoryPath);
 		
-		if (folder.exists() && folder.canRead() && folder.canWrite()) {
-			return true;
+		if (folder.exists()) {
+			if (folder.isDirectory() && folder.canRead() && folder.canWrite())
+				return true;
+			else 
+				return false;
 		}
 		else {
 			String[] folders = directoryPath.split("/");
