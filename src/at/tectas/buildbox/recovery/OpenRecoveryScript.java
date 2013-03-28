@@ -51,7 +51,7 @@ public class OpenRecoveryScript {
 			if ((response.status == DownloadStatus.Successful || 
 				response.status == DownloadStatus.Done ||
 				(response.status == DownloadStatus.Md5mismatch && this.configuration.includeMd5mismatch == true)) &&
-				((response.mime != null && response.mime.equals("zip")) || (pack.type != null && pack.type.equals(DownloadType.zip)))) {
+				(((response.mime != null && response.mime.equals("zip")) || (pack.type != null && pack.type.equals(DownloadType.zip))) && !pack.type.equals(DownloadType.apk))) {
 				
 				if (shellCommands.size() == 1) {
 					shellCommands.add(ShellHelper.getStringToFileCommand("install " + pack.getDirectory() + pack.getFilename(), filePath));
