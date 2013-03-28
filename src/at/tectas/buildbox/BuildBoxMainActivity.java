@@ -36,6 +36,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
+import at.tectas.buildbox.communication.ApkInstallHandler;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadStatus;
@@ -46,6 +47,7 @@ import at.tectas.buildbox.content.ItemList;
 import at.tectas.buildbox.fragments.ContentListFragment;
 import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.fragments.DownloadListFragment;
+import at.tectas.buildbox.fragments.FlashConfigurationDialog;
 import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.listeners.BuildBoxDownloadCallback;
@@ -58,6 +60,7 @@ import at.tectas.buildbox.R;
 public class BuildBoxMainActivity extends DownloadActivity {
 	public static final int PICK_FILE_RESULT = 1;
 	public static final int SETTINGS_RESULT = 2;
+	public static final int PACKAGE_MANAGER_RESULT = 3;
 	
 	ViewPager mViewPager;
 	
@@ -65,16 +68,17 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	private String version = null;
 	private String contentUrl = null;
 	private String downloadDir = null;
-	private PropertyHelper helper = null;
+	protected PropertyHelper helper = null;
 	protected Dialog splashScreen = null;
 	protected Hashtable<String, File> backupList = null;
 	public ActionBar bar = null;
-	private TabsAdapter adapter = null;
-	private DetailItem romItem = null;
+	protected TabsAdapter adapter = null;
+	protected DetailItem romItem = null;
 	public DownloadPackageAdapter downloadAdapter = null;
 	public ItemList contentItems = null;
 	public int viewPagerIndex = 0;
 	public Fragment fragment = null;
+	public int currentApkInstallIndex = 0;
 	public HashSet<String> contentUrls = new HashSet<String>();
 	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
 	
@@ -416,6 +420,17 @@ public class BuildBoxMainActivity extends DownloadActivity {
   				Intent intent = new Intent(this.getApplicationContext(), BuildBoxMainActivity.class);
   				
   				this.startActivity(intent);
+  				break;
+  			case PACKAGE_MANAGER_RESULT:
+  				DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex, getString(R.string.item_download_type_apk), DownloadType.apk);
+  				
+  				if (pack == null) {
+  					this.showFlashOptionsDialog();
+  				}
+  				else {
+  					this.installApks();
+  				}
+  				break;
    		}
 	}
 	
@@ -593,7 +608,26 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		}
 	}
 	
-	public void setupFlashProcess(ArrayList<Integer> list) {
+	public void installApks() {
+		DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex, getString(R.string.item_download_type_apk), DownloadType.apk);
+		
+		if (pack == null) {
+			this.currentApkInstallIndex = 0;
+			this.showFlashOptionsDialog();
+		}
+		else {
+			pack.installHandler = new ApkInstallHandler(this, pack, this.getDownloads().getIndex(pack));
+			
+			pack.installHandler.installDownload();
+		}
+	}
+	
+	public void showFlashOptionsDialog() {
+		FlashConfigurationDialog dialog = new FlashConfigurationDialog();
+		dialog.show(getFragmentManager(), this.getString(R.string.download_flash_options_title));
+	}
+	
+	public void installZips(ArrayList<Integer> list) {
 		OpenRecoveryScriptConfiguration config = new OpenRecoveryScriptConfiguration(this.downloadDir, this.getDownloads());
 		
 		for (Integer option: list){			
@@ -613,7 +647,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		}
 		
 		OpenRecoveryScript script = new OpenRecoveryScript(config);
-		script.writeScriptFile();
+		script.writeScriptFileAndReboot();
 	}
 
 	protected void showSplashscreen() {

@@ -9,6 +9,18 @@ import at.tectas.buildbox.recovery.RebootType;
 
 public class ShellHelper {
 	
+	public static String[] addShellPrefix(String[] commands) {
+		String[] newCommands = new String[commands.length + 1];
+		
+		newCommands[0] = "/system/bin/sh";
+		
+		for (int i = 0; i < commands.length; i++) {
+			newCommands[i + 1] = commands[i];
+		}
+		
+		return newCommands;
+	}
+	
 	public static String[] addRootPrefix(String[] commands) {
 		String[] rootCommands = new String[commands.length + 1];
 		
@@ -26,28 +38,30 @@ public class ShellHelper {
 		BufferedReader shellOut = null;
 		
 		try {
-			Process process = Runtime.getRuntime().exec("/system/bin/sh");
-			
-		    shellIn = new DataOutputStream(process.getOutputStream());
-		    shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
-	        
-		    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
-		    
-		    outWorker.start();
-		    
-		    for (String command: commands) {
-		    	shellIn.writeBytes(command + "\n");
-		    }
-	        
-	        shellIn.writeBytes("exit\n");
-	        
-		    process.waitFor();
-		    
-		    ArrayList<String> output = outWorker.result;
-		    
-		    process.destroy();
-		    
-		    return output;
+			if (commands != null && commands.length > 0) {
+				Process process = Runtime.getRuntime().exec(commands[0]);
+				
+			    shellIn = new DataOutputStream(process.getOutputStream());
+			    shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		        
+			    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
+			    
+			    outWorker.start();
+			    
+			    for (int i = 1; i < commands.length; i++) {
+			    	shellIn.writeBytes(commands[i] + "\n");
+			    }
+		        
+		        shellIn.writeBytes("exit\n");
+		        
+			    process.waitFor();
+			    
+			    ArrayList<String> output = outWorker.result;
+			    
+			    process.destroy();
+			    
+			    return output;
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -73,7 +87,7 @@ public class ShellHelper {
 	}
 	
 	public static ArrayList<String> executeSingleCommand(String command) {
-		return ShellHelper.executeCommand(new String[] { command });
+		return ShellHelper.executeCommand(ShellHelper.addShellPrefix(new String[] { command }));
 	}
 	
 	public static ArrayList<String> executeRootCommands(String[] commands) {

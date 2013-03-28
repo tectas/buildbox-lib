@@ -1,6 +1,5 @@
 package at.tectas.buildbox.service;
 
-import java.io.File;
 import java.util.Hashtable;
 
 import android.app.Notification;
@@ -12,7 +11,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -352,28 +350,6 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 	@Override
 	public void downloadFinished(DownloadResponse response) {
 		String key = response.getKey();
-		
-		DownloadPackage packag = this.map.get(key);
-		
-		if (packag != null) {
-			packag.setResponse(response);
-			
-			if (
-					PropertyHelper.stringIsNullOrEmpty(packag.getDirectory()) == true && (
-						(response.mime != null && response.mime.equals("apk")) || 
-						(packag.type != null && packag.type.equals("apk"))
-					)
-					&& (
-						response.status == DownloadStatus.Successful || 
-						response.status == DownloadStatus.Done)
-					) {
-				
-				Intent intent = new Intent(Intent.ACTION_VIEW);
-				
-				intent.setDataAndType(Uri.fromFile(new File(packag.getDirectory() + response.pack.getFilename())), "application/vnd.android.package-archive");
-				startActivity(intent); 
-			}
-		}
 		
 		this.resultBuilder.setSmallIcon(R.drawable.buildbox);
 		

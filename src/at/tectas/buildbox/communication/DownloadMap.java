@@ -8,18 +8,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
+import java.util.Set;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import at.tectas.buildbox.R;
+import at.tectas.buildbox.content.DownloadType;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
 
+@SuppressLint("DefaultLocale")
 public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> implements Parcelable {
 
 	protected static final String TAG = "DownloadMap";
@@ -53,6 +57,24 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		return null;
 	}
 	
+	public synchronized DownloadPackage get (int startingIndex, String mime, DownloadType type) {
+		if (startingIndex >= this.size()) {
+			return null;
+		}
+		
+		for (int i = startingIndex; i < this.size(); i++) {
+			DownloadPackage pack = this.get(i);
+			
+			if (pack != null && 
+				((pack.type != null && pack.type.equals(type)) || 
+				(pack.response != null && pack.response.mime != null && pack.response.mime.toLowerCase().equals(mime)))) {
+				return pack;
+			}
+		}
+		
+		return null;
+	}
+	
 	public synchronized DownloadKey getKey(int index) {
 		for (DownloadKey key: this.keySet()) {
 			if (key.index == index) {
@@ -69,6 +91,17 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 			}
 		}
 		return null;
+	}
+	
+	public synchronized int getIndex(DownloadPackage pack) {
+		Set<Entry<DownloadKey, DownloadPackage>> set = this.entrySet();
+		
+		for (Entry<DownloadKey, DownloadPackage> entry: set) {
+			if (entry.getValue() != null && entry.getValue().equals(pack))
+				return entry.getKey().index;
+		}
+		
+		return -1;
 	}
 	
 	private synchronized void changeIndex (int oldIndex, int newIndex) {

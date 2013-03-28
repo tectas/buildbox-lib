@@ -3,9 +3,12 @@ package at.tectas.buildbox.listeners;
 import java.util.ArrayList;
 
 import android.content.DialogInterface;
+import android.util.Log;
 import at.tectas.buildbox.BuildBoxMainActivity;
 
 public class FlashdialogOnClickListener implements DialogInterface.OnMultiChoiceClickListener, DialogInterface.OnClickListener {
+	private static final String TAG = "FlashdialogOnClickListener";
+
 	public ArrayList<Integer> list = new ArrayList<Integer>();
 	
 	public BuildBoxMainActivity activity = null;
@@ -27,7 +30,8 @@ public class FlashdialogOnClickListener implements DialogInterface.OnMultiChoice
 
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
+		Log.e(TAG, "click");
 		dialog.dismiss();
-		this.activity.setupFlashProcess(this.list);
+		this.activity.installZips(this.list);
 	}
 }

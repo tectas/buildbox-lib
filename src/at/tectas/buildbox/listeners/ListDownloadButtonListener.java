@@ -4,7 +4,6 @@ import android.view.View;
 import android.widget.Button;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
-import at.tectas.buildbox.fragments.FlashConfigurationDialog;
 import at.tectas.buildbox.service.DownloadService;
 
 public class ListDownloadButtonListener extends DownloadButtonBaseListener {
@@ -18,8 +17,7 @@ public class ListDownloadButtonListener extends DownloadButtonBaseListener {
 		Button button = (Button)v;
 		
 		if (button.getText().equals(this.activity.getString(R.string.download_flash_text))) {
-			FlashConfigurationDialog dialog = new FlashConfigurationDialog();
-			dialog.show(activity.getFragmentManager(), this.activity.getString(R.string.download_flash_options_title));
+			activity.installApks();
 		}
 		else if (DownloadService.Processing == true) {
 			activity.stopDownload();

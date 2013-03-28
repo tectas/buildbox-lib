@@ -24,6 +24,7 @@ public class DownloadPackage implements IJsonSerialize, Parcelable {
 	public Hashtable<CallbackType, IDownloadProgressCallback> updateCallbacks = new Hashtable<CallbackType, IDownloadProgressCallback>();
 	public Hashtable<CallbackType, IDownloadFinishedCallback> finishedCallbacks = new Hashtable<CallbackType, IDownloadFinishedCallback>();
 	public Hashtable<CallbackType, IDownloadCancelledCallback> cancelCallbacks = new Hashtable<CallbackType, IDownloadCancelledCallback>();
+	public IInstallDownloadHandler installHandler = null;
 	protected DownloadResponse response = null;
 	
 	public void setDirectory(String directory) {
