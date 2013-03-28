@@ -207,8 +207,16 @@ public class DetailFragment extends Fragment {
 				
 			}
 			
-			if ((downloadType != null && 
-					(downloadType.equals(DownloadType.zip) || 
+			if (downloadType == null) {
+				if (url == null && (homePages != null && homePages.size() > 0)) {
+					downloadType = DownloadType.web;
+				}
+				else {
+					downloadType = DownloadType.other;
+				}
+			}
+			
+			if (((downloadType.equals(DownloadType.zip) || 
 					downloadType.equals(DownloadType.other) ||
 					downloadType.equals(DownloadType.apk))) && 
 					PropertyHelper.stringIsNullOrEmpty(url) == false) {
