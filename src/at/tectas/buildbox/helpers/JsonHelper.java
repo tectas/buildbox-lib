@@ -63,7 +63,7 @@ public class JsonHelper {
 				result = DownloadType.valueOf(dummy.getAsString());
 			}
 			catch (IllegalArgumentException e) {
-				result = DownloadType.zip;
+				result = DownloadType.other;
 			}
 		}
 		else {
@@ -75,7 +75,7 @@ public class JsonHelper {
 			}
 			
 			if (result == null) {
-				result = DownloadType.zip;
+				result = DownloadType.other;
 			}
 		}
 		

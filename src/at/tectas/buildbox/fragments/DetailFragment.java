@@ -207,9 +207,10 @@ public class DetailFragment extends Fragment {
 				
 			}
 			
-			if ((downloadType.equals(DownloadType.zip) || 
+			if ((downloadType != null && 
+					(downloadType.equals(DownloadType.zip) || 
 					downloadType.equals(DownloadType.other) ||
-					downloadType.equals(DownloadType.apk)) && 
+					downloadType.equals(DownloadType.apk))) && 
 					PropertyHelper.stringIsNullOrEmpty(url) == false) {
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
 

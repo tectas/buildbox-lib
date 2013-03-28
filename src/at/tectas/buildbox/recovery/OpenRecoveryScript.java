@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadStatus;
+import at.tectas.buildbox.content.DownloadType;
 import at.tectas.buildbox.helpers.ShellHelper;
 import at.tectas.buildbox.recovery.RebootType;
 
@@ -50,7 +51,7 @@ public class OpenRecoveryScript {
 			if ((response.status == DownloadStatus.Successful || 
 				response.status == DownloadStatus.Done ||
 				(response.status == DownloadStatus.Md5mismatch && this.configuration.includeMd5mismatch == true)) &&
-				response.mime.equals("zip")) {
+				((response.mime != null && response.mime.equals("zip")) || (pack.type != null && pack.type.equals(DownloadType.zip)))) {
 				
 				if (shellCommands.size() == 1) {
 					shellCommands.add(ShellHelper.getStringToFileCommand("install " + pack.getDirectory() + pack.getFilename(), filePath));
