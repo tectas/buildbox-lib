@@ -116,12 +116,15 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 	
 	public synchronized DownloadPackage put (String md5sum, DownloadPackage object) {
 		if (md5sum != null) {
-			DownloadKey oldKey = this.getKey(md5sum);
+			DownloadKey oldKey = this.getKey((String)md5sum);
+			DownloadPackage oldPackage = null;
 			
-			if (oldKey != null) {				
+			if (oldKey != null) {
 				for (int i = oldKey.index + 1; i < this.size(); i++) {
 					this.changeIndex(i, i - 1);
 				}
+				
+				oldPackage = this.get(oldKey);
 				
 				this.remove(oldKey);
 			}
@@ -130,7 +133,9 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 			key.md5sum = md5sum;
 			key.index = this.size();
 			
-			return this.put(key, object);
+			this.put(key, object);
+			
+			return oldPackage;
 		}
 		else {
 			return null;
@@ -138,7 +143,7 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 	}
 	
 	public synchronized DownloadPackage put (DownloadPackage value) {
-		return this.put(value.getKey(), value);
+		return this.put((String)value.getKey(), value);
 	}
 	
 	public synchronized boolean insert(int index, DownloadPackage object) {

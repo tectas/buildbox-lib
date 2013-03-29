@@ -9,6 +9,7 @@ import at.tectas.buildbox.listeners.ListDownloadButtonListener;
 import at.tectas.buildbox.service.DownloadService;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -21,6 +22,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class DownloadListFragment extends Fragment {
 
+	private static final String TAG = "DownloadListFragment";
 	private DragSortListView list = null;
 	private BuildBoxMainActivity activity = null;
 	
@@ -80,6 +82,8 @@ public class DownloadListFragment extends Fragment {
 	public boolean onContextItemSelected(MenuItem item) {
 		
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
+		
+		Log.e(TAG, String.valueOf(info.position));
 		
 		switch (item.getItemId()) {
 			case R.id.remove:

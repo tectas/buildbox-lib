@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
@@ -79,6 +80,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	public int viewPagerIndex = 0;
 	public Fragment fragment = null;
 	public int currentApkInstallIndex = -1;
+	public boolean restored = false;
 	public HashSet<String> contentUrls = new HashSet<String>();
 	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
 	
@@ -171,6 +173,8 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		
 		this.getDownloads().serializeMapToCache(getApplicationContext());
 		
+		this.restored = false;
+		
 		super.onStop();
 	};
 
@@ -179,10 +183,14 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	protected void onRestart() {
 		super.onRestart();
 		
-		this.getDownloads().clear();
-		
-		if (this.bar.getTabCount() != 0) {
-			this.getDownloads().deserializeMapFromCache(getApplicationContext(), this);
+		if (!this.restored) {
+			this.getDownloads().clear();
+			
+			if (this.bar.getTabCount() != 0) {
+				this.getDownloads().deserializeMapFromCache(getApplicationContext(), this);
+			}
+			
+			this.restored = true;
 		}
 	}
 	
@@ -378,39 +386,48 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode){
   			case PICK_FILE_RESULT:
-  				if(resultCode == RESULT_OK) {
-  					String filePath = data.getData().getPath();
-  					
-  					String[] splittedPath = filePath.split("/");
-  					
-  					String fileName = splittedPath[splittedPath.length - 1];
-  					
-  					String extension = fileName.split("\\.")[fileName.split("\\.").length - 1];
-  					
-  					DownloadPackage pack = new DownloadPackage();
-  					pack.title = fileName;
-  					
-  					DownloadResponse response = new DownloadResponse();
-  					response.progress = 100;
-  					response.status = DownloadStatus.Done;
-  					
-  					pack.setResponse(response);
-  					
-  					pack.setFilename(fileName);
-  					pack.setDirectory(filePath.replace(fileName, ""));
-  					pack.md5sum = fileName;
-  					
-  					if (extension.toLowerCase().equals(DownloadType.zip.name())) {
-  						pack.type = DownloadType.zip;
-  					}
-  					else {
-  						pack.type = DownloadType.other;
-  					}
-  					
-  					this.downloads.put(pack);
-  					
-  					this.addDownloadsTab();
-  				}
+				String filePath = data.getData().getPath();
+				
+				if (filePath != null) {
+					String[] splittedPath = filePath.split("/");
+					
+					String fileName = splittedPath[splittedPath.length - 1];
+					
+					DownloadPackage pack = new DownloadPackage();
+					pack.title = fileName;
+					
+					pack.url = fileName;
+					
+					DownloadResponse response = new DownloadResponse();
+					response.progress = 100;
+					response.status = DownloadStatus.Done;
+					
+					pack.setResponse(response);
+					
+					pack.setFilename(fileName);
+					pack.setDirectory(filePath.replace(fileName, ""));
+					pack.md5sum = fileName;
+					
+					String extension = pack.getResponse().mime;
+					
+					if (extension != null && extension.toLowerCase().equals(DownloadType.zip.name())) {
+						pack.type = DownloadType.zip;
+					}
+					else {
+						pack.type = DownloadType.other;
+					}
+					
+					if (!this.restored) {
+						this.getDownloads().clear();
+						
+						this.loadDownloadsMapFromCacheFile();
+						this.restored = true;
+					}
+					
+					this.getDownloads().put(pack);
+					
+					this.addDownloadsTab();
+				}
   				break;
   			case SETTINGS_RESULT:
   				this.getDownloads().serializeMapToCache(this);
@@ -590,7 +607,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	}
 	
 	public void addDownloadsTab() {
-		if (!this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads")) {
+		if (this.bar.getTabCount() == 0 || !this.bar.getTabAt(this.bar.getTabCount() - 1).getText().equals("Downloads")) {
 			this.addTab("Downloads", DownloadListFragment.class, new Bundle());
 		}
 		

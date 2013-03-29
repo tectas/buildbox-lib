@@ -56,6 +56,14 @@ public class ShellHelper {
 		        
 			    process.waitFor();
 			    
+				if (shellIn != null) {
+					shellIn.close();
+				}
+				
+				if (shellOut != null) {
+					shellOut.close();
+				}
+			    
 			    ArrayList<String> output = outWorker.result;
 			    
 			    process.destroy();
@@ -67,20 +75,6 @@ public class ShellHelper {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
-		finally {
-			try {
-				if (shellIn != null) {
-					shellIn.close();
-				}
-				
-				if (shellOut != null) {
-					shellOut.close();
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 		
 		return null;
