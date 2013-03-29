@@ -9,7 +9,7 @@ The used backend for BuildBox can be a simple json file or a webservice, basical
 
 To configure where the applications backend is reachable (and which is the current ROM version if the update notification feature is used) build.prop properties can be used or the given resource strings within the app can be altered.
 
-The buildbox java packages (and it\'s subpackages) are licensed under LGPL, dslv is licensed under the apache license, for more detail look at the [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/src/at/tectas/buildbox/LICENSE.txt) of the buildbox package or this [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/src/com/mobeta/android/dslv/LICENSE.txt) for dslv.
+The buildbox java packages (and it's subpackages) are licensed under LGPL, dslv is licensed under the apache license, for more detail look at the [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/src/at/tectas/buildbox/LICENSE.txt) of the buildbox package or this [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/src/com/mobeta/android/dslv/LICENSE.txt) for dslv.
 
 Main features
 ------------------------------------------------------
@@ -24,10 +24,10 @@ Main features
 + Concurrent downloads to achieve full use of bandwidth (configurable amount)
 + Backup and restore of download queues
 + Support of every host with direct link capabilities
-+ Support of hosts with up to 5 redirects (note: still direct link redirects, download webpages don\'t get handled)
++ Support of hosts with up to 5 redirects (note: still direct link redirects, download webpages don't get handled)
 + Internal retry or resume (if supported by the server) functionality to avoid broken downloads because of unstable connections (up to 5 retries)
 + Direct install of apks
-+ \"External\" link handling
++ "External" link handling
 + Direct flash capabilities (if an openrecoveryscript supporting recovery is installed)
 + Adding of zips from storage to the queue
 + Backup/wipe options before flashing
