@@ -78,7 +78,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	public ItemList contentItems = null;
 	public int viewPagerIndex = 0;
 	public Fragment fragment = null;
-	public int currentApkInstallIndex = 0;
+	public int currentApkInstallIndex = -1;
 	public HashSet<String> contentUrls = new HashSet<String>();
 	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
 	
@@ -422,7 +422,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
   				this.startActivity(intent);
   				break;
   			case PACKAGE_MANAGER_RESULT:
-  				DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex, getString(R.string.item_download_type_apk), DownloadType.apk);
+  				DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex + 1, getString(R.string.item_download_type_apk), DownloadType.apk);
   				
   				if (pack == null) {
   					this.showFlashOptionsDialog();
@@ -609,10 +609,10 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	}
 	
 	public void installApks() {
-		DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex, getString(R.string.item_download_type_apk), DownloadType.apk);
+		DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex + 1, getString(R.string.item_download_type_apk), DownloadType.apk);
 		
 		if (pack == null) {
-			this.currentApkInstallIndex = 0;
+			this.currentApkInstallIndex = -1;
 			this.showFlashOptionsDialog();
 		}
 		else {

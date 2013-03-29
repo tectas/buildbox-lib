@@ -111,17 +111,19 @@ public class OpenRecoveryScript {
 	}
 	
 	public void addInstallsToScript() {
-		for (int i = 0; i < this.configuration.downloads.size(); i++) {
-			DownloadPackage pack = this.configuration.downloads.get(i);
-			
-			this.addIntallToScript(pack);
+		if (this.configuration != null && this.configuration.downloads != null) {
+			for (int i = 0; i < this.configuration.downloads.size(); i++) {
+				DownloadPackage pack = this.configuration.downloads.get(i);
+				
+				this.addIntallToScript(pack);
+			}
 		}
 	}
 	
 	public void writeScriptFileAndReboot() {		
 		this.addScriptHead();
 		this.addInstallsToScript();
-		//this.addScriptTail();
+		this.addScriptTail();
 		this.execute();
 	}
 }
