@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 import at.tectas.buildbox.communication.CallbackType;
@@ -43,11 +44,24 @@ public class DownloadPackage implements IJsonSerialize, Parcelable {
 		return this.md5sum == null ? this.url : this.md5sum;
 	}
 	
+	@SuppressLint("DefaultLocale")
 	public void setFilename(String filename) {
 		this.filename = filename;
 		
 		if (response != null) {
 			response.mime = response.getMimeType(this.filename, this.filename.length() - 3);
+			
+			if ((response.mime != null && response.mime.toLowerCase().equals("apk") && type == null) || (type != null && type.equals(DownloadType.apk))) {
+				this.installHandler = new ApkInstallDownloadHandler(this);
+				this.type = DownloadType.apk;
+			}
+			else if ((response.mime != null && response.mime.toLowerCase().equals("zip") && type == null) || (type != null && type.equals(DownloadType.zip))) {
+				this.installHandler = new ZipInstallDownloadHandler(this);
+				this.type = DownloadType.zip;
+			}
+			else {
+				this.installHandler = new DummyInstallDownloadHandler();
+			}
 		}
 	}
 	
@@ -72,16 +86,16 @@ public class DownloadPackage implements IJsonSerialize, Parcelable {
 	}
 	
 	public DownloadPackage(JsonObject json) {
-		this.url = DownloadPackage.helper.tryGetStringFromJson("url", json);
-		this.title = DownloadPackage.helper.tryGetStringFromJson("title", json);
-		this.directory = DownloadPackage.helper.tryGetStringFromJson("directory", json);
-		this.filename = DownloadPackage.helper.tryGetStringFromJson("filename", json);
-		this.md5sum = DownloadPackage.helper.tryGetStringFromJson("md5sum", json);
-		
 		JsonElement element = json.get("response");
 		
 		if (element != null && element.isJsonObject())
 			this.response = new DownloadResponse(this, element.getAsJsonObject());
+		
+		this.url = DownloadPackage.helper.tryGetStringFromJson("url", json);
+		this.title = DownloadPackage.helper.tryGetStringFromJson("title", json);
+		this.directory = DownloadPackage.helper.tryGetStringFromJson("directory", json);
+		this.md5sum = DownloadPackage.helper.tryGetStringFromJson("md5sum", json);
+		this.setFilename(DownloadPackage.helper.tryGetStringFromJson("filename", json));
 	}
 	
 	public DownloadPackage(Parcel source) {

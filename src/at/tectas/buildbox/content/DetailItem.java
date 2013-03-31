@@ -34,8 +34,6 @@ public class DetailItem extends Item {
 			this.version = ((ChildItem)this.parent).version;
 		}
 		
-		this.downloadType = Item.helper.tryGetDownloadType(Item.context, json);
-		
 		this.url = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.url_property), json);
 	
 		this.md5sum = Item.helper.tryGetStringFromJson(Item.context.getString(R.string.md5sum_property), json);
@@ -47,6 +45,8 @@ public class DetailItem extends Item {
 		this.tryGetArrayFromJson(Item.context.getString(R.string.imageurls_property), json, ArrayTypes.IMAGEURLS);
 		
 		this.tryGetArrayFromJson(Item.context.getString(R.string.changelog_property), json, ArrayTypes.CHANGELOG);
+		
+		this.downloadType = Item.helper.tryGetDownloadType(Item.context, this, json);
 		
 		this.type = ItemTypes.DetailItem;
 	}
@@ -61,7 +61,8 @@ public class DetailItem extends Item {
 		
 		result.putString(Item.context.getString(R.string.item_type_property), Item.context.getString(R.string.item_detail_type));
 		
-		result.putString(Item.context.getString(R.string.item_download_type_property), this.downloadType.name());
+		if (this.downloadType != null)
+			result.putString(Item.context.getString(R.string.item_download_type_property), this.downloadType.name());
 		
 		result.putString(Item.context.getString(R.string.description_property), this.description);
 		result.putString(Item.context.getString(R.string.version_property), this.version);

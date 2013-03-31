@@ -18,6 +18,7 @@ import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadPackage;
+import at.tectas.buildbox.communication.DummyInstallDownloadHandler;
 import at.tectas.buildbox.content.DownloadType;
 import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
@@ -207,19 +208,33 @@ public class DetailFragment extends Fragment {
 				
 			}
 			
-			if (downloadType == null) {
-				if (url == null && (homePages != null && homePages.size() > 0)) {
-					downloadType = DownloadType.web;
+			if ((downloadType != null && downloadType.equals(DownloadType.web)) || PropertyHelper.stringIsNullOrEmpty(url)) {
+				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
+				
+				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
+				
+				downloadButton.setText(R.string.item_web_button_text);
+				
+				downloadButton.setOnClickListener(new BrowserUrlListener());
+				
+				String page = null;
+				
+				if (PropertyHelper.stringIsNullOrEmpty(url) == false) {
+					page = url;
 				}
-				else {
-					downloadType = DownloadType.other;
+				else if (homePages != null && homePages.size() != 0) {
+					page = homePages.get(0);
+				}
+				
+				if (PropertyHelper.stringIsNullOrEmpty(page) == false) {
+					downloadButton.setTag(page);
+					
+					buttonLayout.addView(downloadButton);
+					
+					pack.installHandler = new DummyInstallDownloadHandler();
 				}
 			}
-			
-			if (((downloadType.equals(DownloadType.zip) || 
-					downloadType.equals(DownloadType.other) ||
-					downloadType.equals(DownloadType.apk))) && 
-					PropertyHelper.stringIsNullOrEmpty(url) == false) {
+			else {
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
 
 				pack.url = url;
@@ -254,30 +269,6 @@ public class DetailFragment extends Fragment {
 				
 				buttonLayout.addView(downloadButton);
 				
-			}
-			else {
-				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
-				
-				Button downloadButton = (Button) inflater.inflate(R.layout.download_button, buttonLayout, false);
-				
-				downloadButton.setText(R.string.item_web_button_text);
-				
-				downloadButton.setOnClickListener(new BrowserUrlListener());
-				
-				String page = null;
-				
-				if (PropertyHelper.stringIsNullOrEmpty(url) == false) {
-					page = url;
-				}
-				else if (homePages != null && homePages.size() != 0) {
-					page = homePages.get(0);
-				}
-				
-				if (PropertyHelper.stringIsNullOrEmpty(page) == false) {
-					downloadButton.setTag(page);
-					
-					buttonLayout.addView(downloadButton);
-				}
 			}
 		}
 		

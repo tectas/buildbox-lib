@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.widget.ImageView;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadKey;
@@ -16,22 +17,33 @@ import at.tectas.buildbox.communication.DownloadMap;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.CallbackType;
 import at.tectas.buildbox.communication.DownloadStatus;
+import at.tectas.buildbox.communication.IActivityInstallDownloadHandler;
 import at.tectas.buildbox.communication.ICommunicatorCallback;
 import at.tectas.buildbox.communication.IDeserializeMapFinishedCallback;
 import at.tectas.buildbox.communication.IDownloadCancelledCallback;
 import at.tectas.buildbox.communication.IDownloadFinishedCallback;
 import at.tectas.buildbox.communication.IDownloadProgressCallback;
+import at.tectas.buildbox.content.DownloadType;
+import at.tectas.buildbox.fragments.FlashConfigurationDialog;
 import at.tectas.buildbox.listeners.DownloadBaseCallback;
+import at.tectas.buildbox.recovery.OpenRecoveryScript;
+import at.tectas.buildbox.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.service.DownloadService;
 
 public abstract class DownloadActivity extends FragmentActivity implements ICommunicatorCallback, IDeserializeMapFinishedCallback {
 
 	public static final String TAG = "DownloadActivity";
+	public static final int PACKAGE_MANAGER_RESULT = 3;
 	
 	protected Communicator communicator = new Communicator();
 	protected DownloadMap downloads = new DownloadMap();
 	protected DownloadBaseCallback callback = null;
 	public DownloadServiceConnection serviceConnection = new DownloadServiceConnection(this);
+	public OpenRecoveryScript recoveryScript = null;
+	public int currentInstallIndex = 0;
+	protected String downloadDir = null;
+	
+	public abstract String getDownloadDir();
 	
 	public Communicator getCommunicator() {
 		return this.communicator;
@@ -44,6 +56,15 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	public synchronized void setDownloads(DownloadMap map) {
 		if (map != null) {
 			this.downloads = map;
+		}
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch(requestCode){
+			case PACKAGE_MANAGER_RESULT:
+  				this.iterateDownloadsToInstall();
+  				break;
 		}
 	}
 	
@@ -215,4 +236,68 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 
 	@Override
 	public abstract void updateWithJsonObject(JsonObject result);
+	
+	public void iterateDownloadsToInstall() {
+		for (; this.currentInstallIndex < this.getDownloads().size(); this.currentInstallIndex++) {
+			DownloadPackage pack = this.getDownloads().get(this.currentInstallIndex);
+			
+			Log.e(TAG, "iterate == " + pack);
+			
+			if (pack != null && pack.installHandler != null) {
+				
+				pack.installHandler.setParentActivity(this);
+				
+				pack.installHandler.install();
+				
+				if (pack.installHandler instanceof IActivityInstallDownloadHandler) {
+					this.currentInstallIndex++;
+					break;
+				}
+			}
+		}
+		
+		if (this.currentInstallIndex == this.getDownloads().size() && this.recoveryScript != null) {
+			this.recoveryScript.execute();
+		}
+	}
+	
+	public void installFiles() {		
+		DownloadPackage pack = this.getDownloads().get(this.currentInstallIndex, DownloadType.zip);
+		
+		if (pack != null) {
+			this.showFlashOptionsDialog();
+		}
+		else {	
+			this.iterateDownloadsToInstall();
+		}
+	}
+	
+	public void showFlashOptionsDialog() {
+		FlashConfigurationDialog dialog = new FlashConfigurationDialog();
+		dialog.show(getFragmentManager(), this.getString(R.string.download_flash_options_title));
+	}
+	
+	public void installZips(ArrayList<Integer> list) {
+		OpenRecoveryScriptConfiguration config = new OpenRecoveryScriptConfiguration(this.downloadDir, null);
+		
+		for (Integer option: list){			
+			if (option.equals(Integer.valueOf(0))) {
+				config.backupFirst = true;
+			}
+			if (option.equals(Integer.valueOf(1))) {
+				config.wipeData = true;
+			}
+			if (option.equals(Integer.valueOf(2))) {
+				config.includeMd5mismatch = true;
+			}
+		}
+		
+		if (!list.contains(Integer.valueOf(0))) {
+			config.backupFirst = false;
+		}
+		
+		this.recoveryScript = new OpenRecoveryScript(config);
+		
+		this.iterateDownloadsToInstall();
+	}
 }

@@ -5,7 +5,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -29,7 +28,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
@@ -37,7 +35,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.adapters.TabsAdapter;
-import at.tectas.buildbox.communication.ApkInstallHandler;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadStatus;
@@ -48,12 +45,9 @@ import at.tectas.buildbox.content.ItemList;
 import at.tectas.buildbox.fragments.ContentListFragment;
 import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.fragments.DownloadListFragment;
-import at.tectas.buildbox.fragments.FlashConfigurationDialog;
 import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.listeners.BuildBoxDownloadCallback;
-import at.tectas.buildbox.recovery.OpenRecoveryScript;
-import at.tectas.buildbox.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.service.DownloadService;
 import at.tectas.buildbox.R;
 
@@ -61,14 +55,12 @@ import at.tectas.buildbox.R;
 public class BuildBoxMainActivity extends DownloadActivity {
 	public static final int PICK_FILE_RESULT = 1;
 	public static final int SETTINGS_RESULT = 2;
-	public static final int PACKAGE_MANAGER_RESULT = 3;
 	
 	ViewPager mViewPager;
 	
 	private String romUrl = null;
 	private String version = null;
 	private String contentUrl = null;
-	private String downloadDir = null;
 	protected PropertyHelper helper = null;
 	protected Dialog splashScreen = null;
 	protected Hashtable<String, File> backupList = null;
@@ -79,7 +71,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	public ItemList contentItems = null;
 	public int viewPagerIndex = 0;
 	public Fragment fragment = null;
-	public int currentApkInstallIndex = -1;
 	public boolean restored = false;
 	public HashSet<String> contentUrls = new HashSet<String>();
 	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
@@ -108,6 +99,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		return this.contentUrl;
 	}
 	
+	@Override
 	public String getDownloadDir() {
 		return this.downloadDir;
 	}
@@ -438,17 +430,9 @@ public class BuildBoxMainActivity extends DownloadActivity {
   				
   				this.startActivity(intent);
   				break;
-  			case PACKAGE_MANAGER_RESULT:
-  				DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex + 1, getString(R.string.item_download_type_apk), DownloadType.apk);
-  				
-  				if (pack == null) {
-  					this.showFlashOptionsDialog();
-  				}
-  				else {
-  					this.installApks();
-  				}
-  				break;
    		}
+		
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 	
 	@Override
@@ -623,48 +607,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 			
 			this.addDownloadsTab();
 		}
-	}
-	
-	public void installApks() {
-		DownloadPackage pack = this.getDownloads().get(this.currentApkInstallIndex + 1, getString(R.string.item_download_type_apk), DownloadType.apk);
-		
-		if (pack == null) {
-			this.currentApkInstallIndex = -1;
-			this.showFlashOptionsDialog();
-		}
-		else {
-			pack.installHandler = new ApkInstallHandler(this, pack, this.getDownloads().getIndex(pack));
-			
-			pack.installHandler.installDownload();
-		}
-	}
-	
-	public void showFlashOptionsDialog() {
-		FlashConfigurationDialog dialog = new FlashConfigurationDialog();
-		dialog.show(getFragmentManager(), this.getString(R.string.download_flash_options_title));
-	}
-	
-	public void installZips(ArrayList<Integer> list) {
-		OpenRecoveryScriptConfiguration config = new OpenRecoveryScriptConfiguration(this.downloadDir, this.getDownloads());
-		
-		for (Integer option: list){			
-			if (option.equals(Integer.valueOf(0))) {
-				config.backupFirst = true;
-			}
-			if (option.equals(Integer.valueOf(1))) {
-				config.wipeData = true;
-			}
-			if (option.equals(Integer.valueOf(2))) {
-				config.includeMd5mismatch = true;
-			}
-		}
-		
-		if (!list.contains(Integer.valueOf(0))) {
-			config.backupFirst = false;
-		}
-		
-		OpenRecoveryScript script = new OpenRecoveryScript(config);
-		script.writeScriptFileAndReboot();
 	}
 
 	protected void showSplashscreen() {

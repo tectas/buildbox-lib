@@ -17,7 +17,7 @@ public class ListDownloadButtonListener extends DownloadButtonBaseListener {
 		Button button = (Button)v;
 		
 		if (button.getText().equals(this.activity.getString(R.string.download_flash_text))) {
-			activity.installApks();
+			activity.installFiles();
 		}
 		else if (DownloadService.Processing == true) {
 			activity.stopDownload();

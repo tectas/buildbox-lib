@@ -57,7 +57,7 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		return null;
 	}
 	
-	public synchronized DownloadPackage get (int startingIndex, String mime, DownloadType type) {
+	public synchronized DownloadPackage get (int startingIndex, DownloadType type) {
 		if (startingIndex >= this.size()) {
 			return null;
 		}
@@ -65,10 +65,10 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		for (int i = startingIndex; i < this.size(); i++) {
 			DownloadPackage pack = this.get(i);
 			
-			if (pack != null && 
-				((pack.type != null && pack.type.equals(type)) || 
-				(pack.response != null && pack.response.mime != null && pack.response.mime.toLowerCase().equals(mime)))) {
-				return pack;
+			if (pack != null) {
+				if (pack.type != null)
+					if (pack.type.equals(type))
+					return pack;
 			}
 		}
 		

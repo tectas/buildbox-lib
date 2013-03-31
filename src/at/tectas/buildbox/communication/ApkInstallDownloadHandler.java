@@ -3,26 +3,33 @@ package at.tectas.buildbox.communication;
 import java.io.File;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.helpers.PropertyHelper;
 
-@SuppressLint("DefaultLocale")
-public class ApkInstallHandler implements IInstallDownloadHandler {
+public class ApkInstallDownloadHandler implements IActivityInstallDownloadHandler {
 	
+	private static final String TAG = "ApkInstallDownloadHandler";
 	public DownloadPackage packag = null;
-	public BuildBoxMainActivity activity = null;
-	public int itemIndex = -1;
+	public Activity activity = null;
 	
-	public ApkInstallHandler(BuildBoxMainActivity activity, DownloadPackage packag, int itemIndex) {
+
+	@Override
+	public void setParentActivity(Activity activity) {
 		this.activity = activity;
+	}
+	
+	public ApkInstallDownloadHandler(DownloadPackage packag) {
 		this.packag = packag;
 	}
 	
 	@Override
-	public void installDownload() {
+	@SuppressLint("DefaultLocale")
+	public void install() {
 		
 		if (packag != null && activity != null) {
 			DownloadResponse response = packag.getResponse();
@@ -41,9 +48,10 @@ public class ApkInstallHandler implements IInstallDownloadHandler {
 				
 				intent.setDataAndType(Uri.fromFile(new File(packag.getDirectory(), response.pack.getFilename())), "application/vnd.android.package-archive");
 				
-				activity.currentApkInstallIndex = this.itemIndex;
-				
-				activity.startActivityForResult(intent, BuildBoxMainActivity.PACKAGE_MANAGER_RESULT); 
+				if (activity != null)
+					activity.startActivityForResult(intent, BuildBoxMainActivity.PACKAGE_MANAGER_RESULT);
+				else
+					Log.e(TAG, "activity == null: " + packag.title);
 			}
 		}
 	}

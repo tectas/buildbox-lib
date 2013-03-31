@@ -1,7 +1,9 @@
 package at.tectas.buildbox.helpers;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import at.tectas.buildbox.R;
+import at.tectas.buildbox.content.DetailItem;
 import at.tectas.buildbox.content.DownloadType;
 
 import com.google.gson.JsonArray;
@@ -54,31 +56,34 @@ public class JsonHelper {
 		return dummyArray;
 	}
 	
-	public DownloadType tryGetDownloadType(Context context, JsonObject json) {
-		DownloadType result = null;
+	@SuppressLint("DefaultLocale")
+	public DownloadType tryGetDownloadType(Context context, DetailItem item, JsonObject json) {
 		JsonElement dummy = json.get(context.getString(R.string.item_download_type_property));
 		
 		if (dummy != null && dummy.isJsonPrimitive()) {
 			try {
-				result = DownloadType.valueOf(dummy.getAsString());
+				return DownloadType.valueOf(dummy.getAsString().toLowerCase().trim());
 			}
 			catch (IllegalArgumentException e) {
-				result = DownloadType.other;
+				return this.tryGetDownloadTypeFromItem(item);
 			}
 		}
 		else {
 			try {
-				result = DownloadType.valueOf(ShellHelper.getBuildPropProperty(context.getString(R.string.item_download_default_type)));
+				return DownloadType.valueOf(ShellHelper.getBuildPropProperty(context.getString(R.string.item_download_default_type)));
 			}
 			catch (IllegalArgumentException e) {
-				
-			}
-			
-			if (result == null) {
-				result = DownloadType.other;
+				return this.tryGetDownloadTypeFromItem(item);
 			}
 		}
-		
-		return result;
+	}
+	
+	public DownloadType tryGetDownloadTypeFromItem(DetailItem item) {
+		if (item.url == null && item.homePages != null && item.homePages.size() > 0) {
+			return DownloadType.web;
+		}
+		else {
+			return null;
+		}
 	}
 }

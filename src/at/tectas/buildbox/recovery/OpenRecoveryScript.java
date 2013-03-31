@@ -90,6 +90,14 @@ public class OpenRecoveryScript {
 		ShellHelper.executeRootCommands(commands);
 	}
 	
+	public void executeAndReboot() {
+		if (this.tailWritten == false) {
+			this.addScriptTail();
+		}
+		
+		this.execute();
+	}
+	
 	public void addIntallToScript(DownloadPackage pack) {
 		DownloadResponse response = pack.getResponse();
 		
