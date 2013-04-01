@@ -26,6 +26,7 @@ import at.tectas.buildbox.communication.IDownloadProgressCallback;
 import at.tectas.buildbox.content.DownloadType;
 import at.tectas.buildbox.fragments.FlashConfigurationDialog;
 import at.tectas.buildbox.listeners.DownloadBaseCallback;
+import at.tectas.buildbox.listeners.MapDeserializedProcessCallback;
 import at.tectas.buildbox.recovery.OpenRecoveryScript;
 import at.tectas.buildbox.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.service.DownloadService;
@@ -42,6 +43,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	public OpenRecoveryScript recoveryScript = null;
 	public int currentInstallIndex = 0;
 	protected String downloadDir = null;
+	public boolean restored = false;
 	
 	public abstract String getDownloadDir();
 	
@@ -63,7 +65,12 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode){
 			case PACKAGE_MANAGER_RESULT:
-  				this.iterateDownloadsToInstall();
+				if (!this.restored) {
+					this.getDownloads().clear();
+					
+					this.loadDownloadsMapFromCacheFile(new MapDeserializedProcessCallback(this));
+					this.restored = true;
+				}
   				break;
 		}
 	}
@@ -228,6 +235,10 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		this.getDownloads().deserializeMapFromCache(this.getApplicationContext(), this);
 	}
 
+	protected void loadDownloadsMapFromCacheFile(IDeserializeMapFinishedCallback callback) {
+		this.getDownloads().deserializeMapFromCache(this.getApplicationContext(), callback);
+	}
+	
 	@Override
 	public abstract void updateWithImage(ImageView view, Bitmap bitmap);
 
@@ -299,5 +310,24 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		this.recoveryScript = new OpenRecoveryScript(config);
 		
 		this.iterateDownloadsToInstall();
+	}
+	
+	public void restoreDownloadMapFromCache() {
+		this.restoreDownloadMapFromCache(null);
+	}
+	
+	public void restoreDownloadMapFromCache(IDeserializeMapFinishedCallback callback) {
+		if (!this.restored) {
+			this.getDownloads().clear();
+			
+			if (callback == null) {
+				this.loadDownloadsMapFromCacheFile(callback);
+			}
+			else {
+				this.loadDownloadsMapFromCacheFile();
+			}
+			
+			this.restored = true;
+		}
 	}
 }

@@ -48,6 +48,8 @@ import at.tectas.buildbox.fragments.DownloadListFragment;
 import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.listeners.BuildBoxDownloadCallback;
+import at.tectas.buildbox.listeners.BuildBoxMapDeserializedProcessCallback;
+import at.tectas.buildbox.listeners.MapDeserializedProcessCallback;
 import at.tectas.buildbox.service.DownloadService;
 import at.tectas.buildbox.R;
 
@@ -71,7 +73,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	public ItemList contentItems = null;
 	public int viewPagerIndex = 0;
 	public Fragment fragment = null;
-	public boolean restored = false;
 	public HashSet<String> contentUrls = new HashSet<String>();
 	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
 	
@@ -430,9 +431,15 @@ public class BuildBoxMainActivity extends DownloadActivity {
   				
   				this.startActivity(intent);
   				break;
+			case PACKAGE_MANAGER_RESULT:
+				if (!this.restored) {
+					this.getDownloads().clear();
+					
+					this.restored = true;
+					this.loadDownloadsMapFromCacheFile(new BuildBoxMapDeserializedProcessCallback(this));
+				}
+  				break;
    		}
-		
-		super.onActivityResult(requestCode, resultCode, data);
 	}
 	
 	@Override
