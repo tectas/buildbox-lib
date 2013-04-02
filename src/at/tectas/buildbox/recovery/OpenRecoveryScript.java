@@ -3,10 +3,11 @@ package at.tectas.buildbox.recovery;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
+import at.tectas.buildbox.communication.DownloadMap;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadStatus;
-import at.tectas.buildbox.content.DownloadType;
+import at.tectas.buildbox.content.items.properties.DownloadType;
 import at.tectas.buildbox.helpers.ShellHelper;
 import at.tectas.buildbox.recovery.RebootType;
 
@@ -118,20 +119,13 @@ public class OpenRecoveryScript {
 		}
 	}
 	
-	public void addInstallsToScript() {
-		if (this.configuration != null && this.configuration.downloads != null) {
-			for (int i = 0; i < this.configuration.downloads.size(); i++) {
-				DownloadPackage pack = this.configuration.downloads.get(i);
+	public void addInstallsToScript(DownloadMap map) {
+		if (this.configuration != null && map != null) {
+			for (int i = 0; i < map.size(); i++) {
+				DownloadPackage pack = map.get(i);
 				
 				this.addIntallToScript(pack);
 			}
 		}
-	}
-	
-	public void writeScriptFileAndReboot() {		
-		this.addScriptHead();
-		this.addInstallsToScript();
-		this.addScriptTail();
-		this.execute();
 	}
 }

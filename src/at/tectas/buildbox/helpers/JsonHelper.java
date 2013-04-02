@@ -3,8 +3,8 @@ package at.tectas.buildbox.helpers;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import at.tectas.buildbox.R;
-import at.tectas.buildbox.content.DetailItem;
-import at.tectas.buildbox.content.DownloadType;
+import at.tectas.buildbox.content.items.DetailItem;
+import at.tectas.buildbox.content.items.properties.DownloadType;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

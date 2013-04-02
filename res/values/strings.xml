@@ -16,7 +16,7 @@
     <string name="changelog_property">changelog</string>
     <string name="item_parent_type">parent</string>
     <string name="item_type_property">type</string>
-    <string name="item_child_type">child</string>
+    <string name="item_child_type">children</string>
     <string name="description_property">description</string>
     <string name="children_property">children</string>
     <string name="dependencies_property">dependencies</string>
@@ -104,4 +104,6 @@
     <string name="preference_path_change_error_text">The given path isn\'t accessible, please verify that it is correct and you have read and write access to it (or it\'s parent if it\'s not existent).</string>
     <string name="preference_content_urls_property">content</string>
     <string name="splashscreen_label">BuildBox\n by Tectas\n\nset your device free\n\n\nLoading content...</string>
+    <string name="device_model_property">ro.product.model</string>
+    <string name="item_device_type">device</string>
 </resources>

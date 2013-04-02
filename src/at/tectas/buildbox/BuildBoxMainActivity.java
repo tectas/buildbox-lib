@@ -38,18 +38,21 @@ import at.tectas.buildbox.adapters.TabsAdapter;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadStatus;
-import at.tectas.buildbox.content.DetailItem;
-import at.tectas.buildbox.content.DownloadType;
-import at.tectas.buildbox.content.Item;
+import at.tectas.buildbox.communication.callbacks.BuildBoxDownloadCallback;
+import at.tectas.buildbox.communication.callbacks.BuildBoxMapDeserializedProcessCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.DownloadBaseCallback;
 import at.tectas.buildbox.content.ItemList;
+import at.tectas.buildbox.content.items.DetailItem;
+import at.tectas.buildbox.content.items.Item;
+import at.tectas.buildbox.content.items.JsonItemParser;
+import at.tectas.buildbox.content.items.properties.DownloadType;
+import at.tectas.buildbox.download.DownloadActivity;
 import at.tectas.buildbox.fragments.ContentListFragment;
 import at.tectas.buildbox.fragments.DetailFragment;
 import at.tectas.buildbox.fragments.DownloadListFragment;
-import at.tectas.buildbox.helpers.JsonItemParser;
 import at.tectas.buildbox.helpers.PropertyHelper;
-import at.tectas.buildbox.listeners.BuildBoxDownloadCallback;
-import at.tectas.buildbox.listeners.BuildBoxMapDeserializedProcessCallback;
-import at.tectas.buildbox.listeners.MapDeserializedProcessCallback;
+import at.tectas.buildbox.preferences.BuildBoxPreferenceActivity;
+import at.tectas.buildbox.receiver.UpdateReceiver;
 import at.tectas.buildbox.service.DownloadService;
 import at.tectas.buildbox.R;
 
@@ -60,21 +63,52 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	
 	ViewPager mViewPager;
 	
-	private String romUrl = null;
-	private String version = null;
-	private String contentUrl = null;
 	protected PropertyHelper helper = null;
 	protected Dialog splashScreen = null;
 	protected Hashtable<String, File> backupList = null;
 	public ActionBar bar = null;
 	protected TabsAdapter adapter = null;
 	protected DetailItem romItem = null;
-	public DownloadPackageAdapter downloadAdapter = null;
-	public ItemList contentItems = null;
-	public int viewPagerIndex = 0;
-	public Fragment fragment = null;
-	public HashSet<String> contentUrls = new HashSet<String>();
-	public Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
+	protected DownloadPackageAdapter downloadAdapter = null;
+	protected ItemList contentItems = null;
+	protected HashSet<String> contentUrls = new HashSet<String>();
+	protected Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
+	protected JsonItemParser parser = null;
+	protected DownloadBaseCallback downloadCallback = null;
+	
+	@Override
+	public DownloadBaseCallback getDownloadCallback() {
+		return this.downloadCallback;
+	}
+	
+	@Override
+	public void setDownloadCallback(DownloadBaseCallback callback) {
+		this.downloadCallback = callback;
+	}
+	
+	public DownloadPackageAdapter getDownloadPackageAdapter() {
+		return this.downloadAdapter;
+	}
+	
+	public void setDownloadPackageAdapter(DownloadPackageAdapter adapter) {
+		this.downloadAdapter = adapter;
+	}
+	
+	public Hashtable<String, Bitmap> getRemoteDrawables() {
+		return this.remoteDrawables;
+	}
+	
+	public void setRemoteDrawables(Hashtable<String, Bitmap> drawables) {
+		this.remoteDrawables = drawables;
+	}
+	
+	public ItemList getContentItems() {
+		return this.contentItems;
+	}
+	
+	public Fragment getCurrentFragment() {
+		return this.adapter.getCurrentFragment();
+	}
 	
 	public Hashtable<String, File> getBackupList() {
 		return this.backupList;
@@ -84,25 +118,13 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		this.backupList = backups;
 	}
 	
-	public String getRomUrl() {
-		return this.romUrl;
-	}
-	
-	public String getVersion() {
-		return this.version;
-	}
-	
 	public DetailItem getRomItem() {
 		return this.romItem;
-	}
-
-	public String getContentUrl() {
-		return this.contentUrl;
 	}
 	
 	@Override
 	public String getDownloadDir() {
-		return this.downloadDir;
+		return this.helper.downloadDir;
 	}
 	
 	public void initialize() {
@@ -110,26 +132,20 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		
 		this.helper = new PropertyHelper(this.getApplicationContext());
 		
-		this.romUrl = this.helper.getRomUrl();
-	
-		this.version = this.helper.getVersion();
-	
-		this.contentUrl = this.helper.getPresetContentUrl();
-		
-		this.downloadDir = this.helper.getDownloadDirectory();
+		this.parser = new JsonItemParser(this, this.helper.deviceModel);
 		
 		this.contentUrls = this.helper.getUserContentUrls();
 		
-		if (PropertyHelper.stringIsNullOrEmpty(this.romUrl) && PropertyHelper.stringIsNullOrEmpty(this.contentUrl) && this.contentUrls.size() == 0) {
+		if (PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl) && PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl) && this.contentUrls.size() == 0) {
 			this.addDownloadsTab();
 		}
 		
 		try {
-			if (!PropertyHelper.stringIsNullOrEmpty(this.romUrl))
-				this.communicator.executeJSONObjectAsyncCommunicator(this.romUrl, this);			
+			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl))
+				this.communicator.executeJSONObjectAsyncCommunicator(this.helper.romUrl, this);			
 			
-			if (!PropertyHelper.stringIsNullOrEmpty(this.contentUrl))
-				this.communicator.executeJSONArrayAsyncCommunicator(this.contentUrl, this);
+			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl))
+				this.communicator.executeJSONArrayAsyncCommunicator(this.helper.presetContentUrl, this);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -166,7 +182,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		
 		this.getDownloads().serializeMapToCache(getApplicationContext());
 		
-		this.restored = false;
+		this.downloadMapRestored = false;
 		
 		super.onStop();
 	};
@@ -176,29 +192,29 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	protected void onRestart() {
 		super.onRestart();
 		
-		if (!this.restored) {
+		if (!this.downloadMapRestored) {
 			this.getDownloads().clear();
 			
 			if (this.bar.getTabCount() != 0) {
 				this.getDownloads().deserializeMapFromCache(getApplicationContext(), this);
 			}
 			
-			this.restored = true;
+			this.downloadMapRestored = true;
 		}
 	}
 	
 	@Override
 	public void startServiceDownload() {
-		if (this.callback == null) {
-			this.callback = new BuildBoxDownloadCallback(this);
+		if (this.downloadCallback == null) {
+			this.downloadCallback = new BuildBoxDownloadCallback(this);
 		}
 		
-		super.startServiceDownload(this.callback, this.callback, this.callback);
+		super.startServiceDownload(this.downloadCallback, this.downloadCallback, this.downloadCallback);
 	}
 	
 	@Override
 	public void onBackPressed() {
-	    if (this.fragment == null || !this.fragment.getChildFragmentManager().popBackStackImmediate()) {
+	    if (this.adapter.getCurrentFragment() == null || !this.adapter.getCurrentFragment().getChildFragmentManager().popBackStackImmediate()) {
 	    	if (!this.getFragmentManager().popBackStackImmediate())
 	    		finish();
 	    }
@@ -217,7 +233,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 			menu.getItem(3).setVisible(true);
 		}
 		
-		if (this.bar.getTabCount() == 0 || !this.bar.getTabAt(this.viewPagerIndex).getText().equals("Downloads")) {
+		if (this.bar.getTabCount() == 0 || !this.bar.getTabAt(this.adapter.getViewPagerIndex()).getText().equals("Downloads")) {
 			menu.getItem(0).setVisible(false);
 			menu.getItem(1).setVisible(false);
 			menu.getItem(2).setVisible(false);
@@ -294,7 +310,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 						
 						if (!PropertyHelper.stringIsNullOrEmpty(filename)) {
 							
-							File backupDirectory = new File(activity.downloadDir + getString(R.string.kitchen_backup_directory_name));
+							File backupDirectory = new File(activity.getDownloadDir() + getString(R.string.kitchen_backup_directory_name));
 									
 							if (!backupDirectory.exists()) {
 								boolean succuessful = backupDirectory.mkdirs();
@@ -410,11 +426,11 @@ public class BuildBoxMainActivity extends DownloadActivity {
 						pack.type = DownloadType.other;
 					}
 					
-					if (!this.restored) {
+					if (!this.downloadMapRestored) {
 						this.getDownloads().clear();
 						
 						this.loadDownloadsMapFromCacheFile();
-						this.restored = true;
+						this.downloadMapRestored = true;
 					}
 					
 					this.getDownloads().put(pack);
@@ -432,10 +448,10 @@ public class BuildBoxMainActivity extends DownloadActivity {
   				this.startActivity(intent);
   				break;
 			case PACKAGE_MANAGER_RESULT:
-				if (!this.restored) {
+				if (!this.downloadMapRestored) {
 					this.getDownloads().clear();
 					
-					this.restored = true;
+					this.downloadMapRestored = true;
 					this.loadDownloadsMapFromCacheFile(new BuildBoxMapDeserializedProcessCallback(this));
 				}
   				break;
@@ -474,11 +490,11 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	@Override
 	public void getServiceDownloadMap(boolean addListeners) {
 		if (addListeners == true) {
-			if (this.callback == null) {
-				this.callback = new BuildBoxDownloadCallback(this);
+			if (this.downloadCallback == null) {
+				this.downloadCallback = new BuildBoxDownloadCallback(this);
 			}
 			
-			super.getServiceDownloadMap(this.callback, this.callback, this.callback);
+			super.getServiceDownloadMap(this.downloadCallback, this.downloadCallback, this.downloadCallback);
 		}
 		else {
 			super.getServiceDownloadMap();
@@ -488,9 +504,9 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	@Override
 	public void updateWithJsonObject(JsonObject result) {
 		try {
-			this.romItem = (DetailItem) JsonItemParser.parseJsonToItem(result);
+			this.romItem = (DetailItem) this.parser.parseJsonToItem(result);
 			
-			if (this.romItem == null && this.contentUrl == null) {
+			if (this.romItem == null && this.helper.presetContentUrl == null) {
 				this.addDownloadsTab();
 			}
 			
@@ -502,12 +518,12 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		} 
 		catch (NullPointerException e) {
 			e.printStackTrace();
-			if (this.contentUrl == null) {
+			if (this.helper.presetContentUrl == null) {
 				this.addDownloadsTab();
 			}
 		}
 		
-		if (PropertyHelper.stringIsNullOrEmpty(this.contentUrl)) {
+		if (PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl)) {
 			if (DownloadService.Started) {
 				this.getServiceMap();
 			}
@@ -523,7 +539,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	public void updateWithJsonArray(JsonArray result) {
 		
 		try {
-			this.contentItems = JsonItemParser.parseJson(result);
+			this.contentItems = this.parser.parseJson(result);
 			
 			int i = 0;
 			
@@ -640,7 +656,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	}
 	
 	protected void fillBackupList() {
-		File rootDirectory = new File(this.downloadDir);
+		File rootDirectory = new File(this.getDownloadDir());
 		
 		if (!rootDirectory.exists()) {
 			rootDirectory.mkdir();

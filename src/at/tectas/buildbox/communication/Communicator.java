@@ -29,6 +29,16 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 import at.tectas.buildbox.communication.DownloadStatus;
+import at.tectas.buildbox.communication.asynccommunicators.BitmapAsyncCommunicator;
+import at.tectas.buildbox.communication.asynccommunicators.DownloadAsyncCommunicator;
+import at.tectas.buildbox.communication.asynccommunicators.JSONArrayAsyncCommunicator;
+import at.tectas.buildbox.communication.asynccommunicators.JSONObjectAsyncCommunicator;
+import at.tectas.buildbox.communication.asynccommunicators.interfaces.IDownloadAsyncCommunicator;
+import at.tectas.buildbox.communication.callbacks.CallbackType;
+import at.tectas.buildbox.communication.callbacks.interfaces.ICommunicatorCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadCancelledCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadFinishedCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadProgressCallback;
 import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class Communicator {

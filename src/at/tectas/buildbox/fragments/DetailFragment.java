@@ -18,8 +18,8 @@ import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadPackage;
-import at.tectas.buildbox.communication.DummyInstallDownloadHandler;
-import at.tectas.buildbox.content.DownloadType;
+import at.tectas.buildbox.communication.handler.DummyInstallDownloadHandler;
+import at.tectas.buildbox.content.items.properties.DownloadType;
 import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.helpers.ViewHelper;
 import at.tectas.buildbox.listeners.BrowserUrlListener;
@@ -168,8 +168,8 @@ public class DetailFragment extends Fragment {
 					
 					imageView.setTag(url);
 					
-					if (activity.remoteDrawables.containsKey((String) url)) {
-						imageView.setImageBitmap(activity.remoteDrawables.get((String)url));
+					if (activity.getRemoteDrawables().containsKey((String) url)) {
+						imageView.setImageBitmap(activity.getRemoteDrawables().get((String)url));
 					}
 					else {
 						imageView.setImageResource(R.drawable.spinner);

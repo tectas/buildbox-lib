@@ -14,18 +14,18 @@ import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import at.tectas.buildbox.DownloadActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
-import at.tectas.buildbox.communication.CallbackType;
 import at.tectas.buildbox.communication.DownloadMap;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
-import at.tectas.buildbox.communication.IDownloadCancelledCallback;
-import at.tectas.buildbox.communication.DownloadAsyncCommunicator;
 import at.tectas.buildbox.communication.DownloadStatus;
-import at.tectas.buildbox.communication.IDownloadFinishedCallback;
-import at.tectas.buildbox.communication.IDownloadProgressCallback;
+import at.tectas.buildbox.communication.asynccommunicators.DownloadAsyncCommunicator;
+import at.tectas.buildbox.communication.callbacks.CallbackType;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadCancelledCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadFinishedCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadProgressCallback;
+import at.tectas.buildbox.download.DownloadActivity;
 import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class DownloadService extends Service implements IDownloadProgressCallback, IDownloadFinishedCallback, IDownloadCancelledCallback {

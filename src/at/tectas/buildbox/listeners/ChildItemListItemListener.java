@@ -5,7 +5,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.View.OnClickListener;
 import at.tectas.buildbox.R;
-import at.tectas.buildbox.content.DetailItem;
+import at.tectas.buildbox.content.items.DetailItem;
 import at.tectas.buildbox.fragments.DetailFragment;
 
 public class ChildItemListItemListener implements OnClickListener {

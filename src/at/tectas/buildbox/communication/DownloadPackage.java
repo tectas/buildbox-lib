@@ -8,11 +8,19 @@ import com.google.gson.JsonObject;
 import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
-import at.tectas.buildbox.communication.CallbackType;
-import at.tectas.buildbox.content.DownloadType;
+import at.tectas.buildbox.communication.callbacks.CallbackType;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadCancelledCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadFinishedCallback;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDownloadProgressCallback;
+import at.tectas.buildbox.communication.handler.ApkInstallDownloadHandler;
+import at.tectas.buildbox.communication.handler.DummyInstallDownloadHandler;
+import at.tectas.buildbox.communication.handler.ZipInstallDownloadHandler;
+import at.tectas.buildbox.communication.handler.interfaces.IInstallDownloadHandler;
+import at.tectas.buildbox.content.items.properties.DownloadType;
 import at.tectas.buildbox.helpers.IJsonSerialize;
 import at.tectas.buildbox.helpers.JsonHelper;
 
+@SuppressLint("DefaultLocale")
 public class DownloadPackage implements IJsonSerialize, Parcelable {
 	
 	public static JsonHelper helper = new JsonHelper();
@@ -44,7 +52,6 @@ public class DownloadPackage implements IJsonSerialize, Parcelable {
 		return this.md5sum == null ? this.url : this.md5sum;
 	}
 	
-	@SuppressLint("DefaultLocale")
 	public void setFilename(String filename) {
 		this.filename = filename;
 		

@@ -17,7 +17,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import at.tectas.buildbox.R;
-import at.tectas.buildbox.content.DownloadType;
+import at.tectas.buildbox.communication.callbacks.interfaces.IDeserializeMapFinishedCallback;
+import at.tectas.buildbox.content.items.properties.DownloadType;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;

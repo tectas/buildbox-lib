@@ -47,7 +47,7 @@ public class DownloadListFragment extends Fragment {
 		
 		BuildBoxDragSortController controller = new BuildBoxDragSortController(list, adapter);
 		
-		activity.downloadAdapter = adapter;
+		activity.setDownloadPackageAdapter(adapter);
 		
 		list.setAdapter(adapter);
 		
@@ -88,8 +88,8 @@ public class DownloadListFragment extends Fragment {
 		switch (item.getItemId()) {
 			case R.id.remove:
 				activity.getDownloads().remove(info.position);
-				if (activity.downloadAdapter != null)
-					activity.downloadAdapter.notifyDataSetChanged();
+				if (activity.getDownloadPackageAdapter() != null)
+					activity.getDownloadPackageAdapter().notifyDataSetChanged();
 				return true;
 		}
 		

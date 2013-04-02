@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import android.os.Bundle;
+import at.tectas.buildbox.content.items.Item;
 
 public class ItemList extends ArrayList<Item>  {
 	

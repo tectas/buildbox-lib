@@ -9,7 +9,7 @@ import android.view.View.OnClickListener;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.ItemArrayAdapter;
-import at.tectas.buildbox.content.Item;
+import at.tectas.buildbox.content.items.Item;
 import at.tectas.buildbox.fragments.ContentListFragment;
 
 public class ParentItemListItemListener implements OnClickListener {

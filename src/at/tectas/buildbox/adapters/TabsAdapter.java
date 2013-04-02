@@ -19,7 +19,17 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 	private final ActionBar mActionBar;
 	private final ViewPager mViewPager;
 	private final ArrayList<TabInfo> mTabs = new ArrayList<TabInfo>();
-
+	protected Fragment currentFragment = null;
+	protected int viewPagerIndex = 0;
+	
+	public Fragment getCurrentFragment() {
+		return this.currentFragment;
+	}
+	
+	public int getViewPagerIndex() {
+		return this.viewPagerIndex;
+	}
+	
 	static final class TabInfo {
 		private final Class<?> clss;
 		private final Bundle args;
@@ -48,8 +58,8 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 		notifyDataSetChanged();
 		
 		if (this.mTabs.size() == 1) {
-			this.mContext.viewPagerIndex = 0;
-			this.mContext.fragment = (Fragment) this.instantiateItem(this.mViewPager, this.mContext.viewPagerIndex);
+			this.viewPagerIndex = 0;
+			this.currentFragment = (Fragment) this.instantiateItem(this.mViewPager, this.viewPagerIndex);
 		}
 	}
 
@@ -74,8 +84,8 @@ public class TabsAdapter extends FragmentPagerAdapter implements
 	@Override
 	public void onPageSelected(int position) {
 		if (position < this.mTabs.size()) {
-			this.mContext.viewPagerIndex = position;
-			this.mContext.fragment = (Fragment) this.instantiateItem(this.mViewPager, this.mContext.viewPagerIndex);
+			this.viewPagerIndex = position;
+			this.currentFragment = (Fragment) this.instantiateItem(this.mViewPager, this.viewPagerIndex);
 			mActionBar.setSelectedNavigationItem(position);
 		}
 	}

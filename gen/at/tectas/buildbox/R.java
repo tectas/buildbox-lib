@@ -293,6 +293,7 @@ containing a value of this type.
         public static final int developers_donationurls_property=0x7f080015;
         public static final int developers_head=0x7f080021;
         public static final int developers_property=0x7f080017;
+        public static final int device_model_property=0x7f080068;
         public static final int download_all_button_text=0x7f08002f;
         public static final int download_checkbox_label=0x7f08002b;
         public static final int download_clear_broken=0x7f080034;
@@ -311,6 +312,7 @@ containing a value of this type.
         public static final int imageurls_property=0x7f08001e;
         public static final int item_child_type=0x7f080010;
         public static final int item_detail_type=0x7f08001f;
+        public static final int item_device_type=0x7f080069;
         public static final int item_download_default_type=0x7f08003c;
         public static final int item_download_type_apk=0x7f08003a;
         public static final int item_download_type_external=0x7f080038;

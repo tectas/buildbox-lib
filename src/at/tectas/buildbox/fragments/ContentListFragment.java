@@ -11,8 +11,8 @@ import android.widget.ListView;
 import at.tectas.buildbox.BuildBoxMainActivity;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.ItemArrayAdapter;
-import at.tectas.buildbox.content.ParentItem;
-import at.tectas.buildbox.content.Item;
+import at.tectas.buildbox.content.items.Item;
+import at.tectas.buildbox.content.items.ParentItem;
 
 public class ContentListFragment extends Fragment {
 	private ItemArrayAdapter adapter = null;
@@ -47,7 +47,7 @@ public class ContentListFragment extends Fragment {
 								activity, 
 								R.id.ListItemTextView, 
 								new ArrayList<Item>(
-										((ParentItem)activity.contentItems
+										((ParentItem)activity.getContentItems()
 												.get(arrayIndex))
 												.childs), 
 								getChildFragmentManager()) : 

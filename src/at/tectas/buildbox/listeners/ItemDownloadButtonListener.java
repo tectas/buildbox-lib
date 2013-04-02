@@ -20,9 +20,9 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
  		DownloadPackage pack = (DownloadPackage) button.getTag();
  		
  		if (DownloadService.Processing == false) {
-			if (activity.downloadAdapter != null) {
-				activity.downloadAdapter.add(pack);
-				activity.downloadAdapter.notifyDataSetChanged();
+			if (activity.getDownloadPackageAdapter() != null) {
+				activity.getDownloadPackageAdapter().add(pack);
+				activity.getDownloadPackageAdapter().notifyDataSetChanged();
 			}
 			else {
 				activity.getDownloads().put(pack);
@@ -32,6 +32,6 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
  			activity.addDownload(pack);
  		}
  		
- 		while(activity.fragment.getChildFragmentManager().popBackStackImmediate());
+ 		while(activity.getCurrentFragment().getChildFragmentManager().popBackStackImmediate());
 	}
 }

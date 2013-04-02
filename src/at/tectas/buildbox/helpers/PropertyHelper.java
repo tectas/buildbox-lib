@@ -12,12 +12,21 @@ import at.tectas.buildbox.R;
 public class PropertyHelper {
 	
 	public Context context = null;
-	
 	public SharedPreferences pref = null;
+	public String romUrl = null;
+	public String presetContentUrl = null;
+	public String version = null;
+	public String downloadDir = null;
+	public String deviceModel = null;
 	
 	public PropertyHelper (Context context) {
 		this.context = context;
 		this.pref = PreferenceManager.getDefaultSharedPreferences(this.context);
+		this.romUrl = this.getRomUrl();
+		this.presetContentUrl = this.getPresetContentUrl();
+		this.version = this.getVersion();
+		this.downloadDir = this.getDownloadDirectory();
+		this.deviceModel = this.getDeviceModel();
 	}
 	
 	public String getRomUrl() {
@@ -77,6 +86,10 @@ public class PropertyHelper {
 		}
 		
 		return downloadDir;
+	}
+	
+	public String getDeviceModel() {
+		return ShellHelper.getBuildPropProperty(context.getString(R.string.device_model_property));
 	}
 	
 	public static boolean stringIsNullOrEmpty(String string) {
