@@ -291,7 +291,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		}
 		
 		if (this.currentInstallIndex == this.getDownloads().size() && this.recoveryScript != null) {
-			this.recoveryScript.execute();
+			this.recoveryScript.executeAndReboot();
 		}
 	}
 	
