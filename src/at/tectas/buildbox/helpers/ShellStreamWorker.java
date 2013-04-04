@@ -17,9 +17,11 @@ public class ShellStreamWorker extends Thread {
 	public void run() {		
 		try {
 			String line = null;
-		
-			while ((line = this.stream.readLine()) != null) {
-				result.add(line);
+			
+			if (this.stream != null && !this.stream.ready()) {
+				while ((line = this.stream.readLine()) != null) {
+					result.add(line);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

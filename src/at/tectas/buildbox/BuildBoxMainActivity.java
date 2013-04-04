@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -160,6 +161,13 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		/*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectDiskReads()
+        .detectDiskWrites()
+        .detectNetwork()
+        .penaltyLog()
+        .build());
+		*/
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.activity_main);

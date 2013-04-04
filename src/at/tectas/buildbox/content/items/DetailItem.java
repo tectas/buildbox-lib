@@ -50,7 +50,7 @@ public class DetailItem extends Item {
 		
 		this.tryGetArrayFromJson(Item.context.getString(R.string.changelog_property), json, ArrayTypes.CHANGELOG);
 		
-		this.downloadType = Item.helper.tryGetDownloadType(Item.context, this, json);
+		this.downloadType = Item.helper.tryGetDownloadType(Item.context, this, json, Item.parser.defaultType);
 		
 		this.type = ItemTypes.DetailItem;
 	}

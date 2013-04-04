@@ -8,18 +8,25 @@ import android.content.Context;
 import android.util.Log;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.content.ItemList;
+import at.tectas.buildbox.content.items.properties.DownloadType;
 import at.tectas.buildbox.helpers.JsonHelper;
 
 @SuppressLint("DefaultLocale")
 public class JsonItemParser {
 	public static final String TAG = "JsonParser";
 	public Context context = null;
-	public String deviceModel = null;	
+	public String deviceModel = null;
+	public DownloadType defaultType = null;
 	protected JsonHelper helper = new JsonHelper();
 	
 	public JsonItemParser(Context context, String deviceModel) {
 		this.context = context;
 		this.deviceModel = deviceModel;
+	}
+	
+	public JsonItemParser(Context context, String deviceModel, DownloadType type) {
+		this(context, deviceModel);
+		this.defaultType = type;
 	}
 	
 	public ItemList parseJson (JsonArray json) {

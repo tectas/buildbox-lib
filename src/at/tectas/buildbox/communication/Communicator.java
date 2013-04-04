@@ -43,6 +43,8 @@ import at.tectas.buildbox.helpers.PropertyHelper;
 
 public class Communicator {
 	
+	private static final String TAG = "Communicator";
+
 	public DownloadAsyncCommunicator executeDownloadAsyncCommunicator(
 			DownloadPackage pack, 
 			IDownloadProgressCallback updateCallback, 
@@ -564,7 +566,7 @@ public class Communicator {
 	public static Boolean tryGetAcceptRangesFromConnection(HttpURLConnection response) {
 		String header = response.getHeaderField("Accept-Ranges");
 		
-		if (!header.isEmpty() || header != "none") {
+		if (!PropertyHelper.stringIsNullOrEmpty(header) || header != "none") {
 			return true;
 		}
 		
@@ -574,7 +576,7 @@ public class Communicator {
 	public static String tryGetFilenameFromConnection(HttpURLConnection connection) {
 		String header = connection.getHeaderField("Content-Disposition");
 		
-		if (!(header.isEmpty()) && header.contains(".")) {
+		if (!PropertyHelper.stringIsNullOrEmpty(header) && header.contains(".")) {
 			
 			return header.split("filename=")[1].split(";")[0].replace("\"", "").replace("'", "");
 		}

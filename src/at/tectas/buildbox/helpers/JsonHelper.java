@@ -57,7 +57,7 @@ public class JsonHelper {
 	}
 	
 	@SuppressLint("DefaultLocale")
-	public DownloadType tryGetDownloadType(Context context, DetailItem item, JsonObject json) {
+	public DownloadType tryGetDownloadType(Context context, DetailItem item, JsonObject json, DownloadType defaultType) {
 		JsonElement dummy = json.get(context.getString(R.string.item_download_type_property));
 		
 		if (dummy != null && dummy.isJsonPrimitive()) {
@@ -65,25 +65,20 @@ public class JsonHelper {
 				return DownloadType.valueOf(dummy.getAsString().toLowerCase().trim());
 			}
 			catch (IllegalArgumentException e) {
-				return this.tryGetDownloadTypeFromItem(item);
+				return this.tryGetDownloadTypeFromItem(item, defaultType);
 			}
 		}
 		else {
-			try {
-				return DownloadType.valueOf(ShellHelper.getBuildPropProperty(context.getString(R.string.item_download_default_type)));
-			}
-			catch (IllegalArgumentException e) {
-				return this.tryGetDownloadTypeFromItem(item);
-			}
+			return this.tryGetDownloadTypeFromItem(item, defaultType);
 		}
 	}
 	
-	public DownloadType tryGetDownloadTypeFromItem(DetailItem item) {
+	public DownloadType tryGetDownloadTypeFromItem(DetailItem item, DownloadType defaultType) {
 		if (item.url == null && item.homePages != null && item.homePages.size() > 0) {
 			return DownloadType.web;
 		}
 		else {
-			return null;
+			return defaultType;
 		}
 	}
 }

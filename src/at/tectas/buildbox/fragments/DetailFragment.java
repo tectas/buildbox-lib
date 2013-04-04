@@ -104,7 +104,7 @@ public class DetailFragment extends Fragment {
 				
 			ArrayList<String> homePages = arguments.getStringArrayList(getString(R.string.webpages_property));
 			
-			if (homePages != null && !homePages.isEmpty() && homePages.size() > 0) {
+			if (homePages != null && homePages.size() > 0) {
 				ViewGroup childView = (ViewGroup) inflater.inflate(R.layout.webpages_base_fragment, layoutView, false);
 				
 				for (String url: homePages) {
@@ -124,11 +124,11 @@ public class DetailFragment extends Fragment {
 			
 			Bundle developers = arguments.getBundle(getString(R.string.developers_property));
 			
-			if (developers != null && !developers.isEmpty() && homePages.size() > 0) {
+			if (developers != null && !developers.isEmpty()) {
 				ArrayList<String> names = developers.getStringArrayList(getString(R.string.developer_names_property));
 				ArrayList<String> urls = developers.getStringArrayList(getString(R.string.developers_donationurls_property));
 				
-				if (names != null && !names.isEmpty() && urls != null && !urls.isEmpty()) {
+				if (names != null && names.size() > 0 && urls != null && urls.size() > 0) {
 					ViewGroup childView = (ViewGroup) inflater.inflate(R.layout.developers_base_fragment, layoutView, false);
 					
 					for (int i = 0; i < names.size() && i < urls.size(); i++) {
@@ -160,7 +160,7 @@ public class DetailFragment extends Fragment {
 			
 			ArrayList<String> images = arguments.getStringArrayList(getString(R.string.imageurls_property));
 
-			if (images != null && !images.isEmpty() && homePages.size() > 0) {
+			if (images != null && !images.isEmpty()) {
 				ViewGroup childView = (ViewGroup) inflater.inflate(R.layout.images_base_fragment, layoutView, false);
 				
 				for (String url: images) {
@@ -208,6 +208,8 @@ public class DetailFragment extends Fragment {
 				
 			}
 			
+			pack.type = downloadType;
+			
 			if ((downloadType != null && downloadType.equals(DownloadType.web)) || PropertyHelper.stringIsNullOrEmpty(url)) {
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
 				
@@ -236,7 +238,7 @@ public class DetailFragment extends Fragment {
 			}
 			else {
 				ViewGroup buttonLayout = (ViewGroup) this.relatedView.findViewById(R.id.detail_button_layout);
-
+				
 				pack.url = url;
 				
 				String filename = "";
@@ -253,6 +255,12 @@ public class DetailFragment extends Fragment {
 						
 						filename = keyValuePair[keyValuePair.length - 1].replace("\"", "").replace("'", "").replace(";", "");
 					}
+				}
+				
+				if (filename.equals("")) {
+					String[] keyValuePair = splittedUrl[splittedUrl.length - 1].split("=");
+					
+					filename = keyValuePair[keyValuePair.length - 1].replace("\"", "").replace("'", "").replace(";", "");
 				}
 				
 				pack.setFilename(filename);

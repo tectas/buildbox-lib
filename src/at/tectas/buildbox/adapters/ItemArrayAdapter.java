@@ -21,6 +21,7 @@ import at.tectas.buildbox.content.items.DetailItem;
 import at.tectas.buildbox.content.items.Item;
 import at.tectas.buildbox.content.items.ParentItem;
 import at.tectas.buildbox.content.items.properties.ItemTypes;
+import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.listeners.ChildItemListItemListener;
 import at.tectas.buildbox.listeners.ParentItemListItemListener;
 
@@ -120,7 +121,12 @@ public class ItemArrayAdapter extends ArrayAdapter<at.tectas.buildbox.content.it
 		    	
 		    	ChildItem child = (ChildItem) item;
 		    	
-		    	rowView.setOnClickListener(new ChildItemListItemListener((DetailItem) child.childs.get(0), manager));
+		    	if (child.childs.size() == 0 && PropertyHelper.stringIsNullOrEmpty(child.detailUrl)) {
+		    		
+		    	}
+		    	else {
+		    		rowView.setOnClickListener(new ChildItemListItemListener((DetailItem) child.childs.get(0), manager));
+		    	}
 		    }
 		}
 		return rowView;

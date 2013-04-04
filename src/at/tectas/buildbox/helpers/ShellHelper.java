@@ -5,10 +5,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import android.util.Log;
 import at.tectas.buildbox.recovery.RebootType;
 
 public class ShellHelper {
 	
+	private static final String TAG = "ShellHelper";
+
 	public static String[] addShellPrefix(String[] commands) {
 		String[] newCommands = new String[commands.length + 1];
 		
@@ -46,12 +50,12 @@ public class ShellHelper {
 		        
 			    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
 			    
-			    outWorker.start();
-			    
 			    for (int i = 1; i < commands.length; i++) {
 			    	shellIn.writeBytes(commands[i] + "\n");
 			    }
 		        
+			    outWorker.start();
+			    
 		        shellIn.writeBytes("exit\n");
 		        
 			    process.waitFor();

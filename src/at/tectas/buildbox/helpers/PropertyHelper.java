@@ -8,6 +8,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import at.tectas.buildbox.R;
+import at.tectas.buildbox.content.items.properties.DownloadType;
 
 public class PropertyHelper {
 	
@@ -18,6 +19,7 @@ public class PropertyHelper {
 	public String version = null;
 	public String downloadDir = null;
 	public String deviceModel = null;
+	public DownloadType type = null;
 	
 	public PropertyHelper (Context context) {
 		this.context = context;
@@ -27,6 +29,7 @@ public class PropertyHelper {
 		this.version = this.getVersion();
 		this.downloadDir = this.getDownloadDirectory();
 		this.deviceModel = this.getDeviceModel();
+		this.type = this.getDownloadType();
 	}
 	
 	public String getRomUrl() {
@@ -90,6 +93,15 @@ public class PropertyHelper {
 	
 	public String getDeviceModel() {
 		return ShellHelper.getBuildPropProperty(context.getString(R.string.device_model_property));
+	}
+	
+	public DownloadType getDownloadType() {
+		try {
+			return DownloadType.valueOf(ShellHelper.getBuildPropProperty(context.getString(R.string.item_download_default_type)));
+		}
+		catch (IllegalArgumentException e) {
+			return null;
+		}
 	}
 	
 	public static boolean stringIsNullOrEmpty(String string) {
