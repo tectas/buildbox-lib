@@ -4,7 +4,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.View.OnClickListener;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.msteam.R;
 import at.tectas.buildbox.content.items.DetailItem;
 import at.tectas.buildbox.fragments.DetailFragment;
 

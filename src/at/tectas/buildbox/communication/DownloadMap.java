@@ -16,7 +16,7 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.msteam.R;
 import at.tectas.buildbox.communication.callbacks.interfaces.IDeserializeMapFinishedCallback;
 import at.tectas.buildbox.content.items.properties.DownloadType;
 
@@ -291,17 +291,23 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		this.deserializeMapFromCache(context, null);
 	}
 	
-	public void deserializeMapFromCache(final Context context, final IDeserializeMapFinishedCallback callback) {
+	public boolean checkIfCacheFileExists(final Context context, String filename) {
 		String[] files = context.fileList();
 		
 		boolean exists = false;
 		
 		for (int i = 0; i < files.length; i++) {
-			if (files[i].equals(context.getString(R.string.downloads_cache_filename))) {
+			if (files[i].equals(filename)) {
 				exists = true;
 				break;
 			}
 		}
+		
+		return exists;
+	}
+	
+	public void deserializeMapFromCache(final Context context, final IDeserializeMapFinishedCallback callback) {
+		boolean exists = this.checkIfCacheFileExists(context, context.getString(R.string.downloads_cache_filename));
 		
 		if (exists) {
 			this.deserializeMapFromFile(context, context.getString(R.string.downloads_cache_filename), true, callback);

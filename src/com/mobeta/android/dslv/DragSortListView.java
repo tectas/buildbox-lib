@@ -42,7 +42,7 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.msteam.R;
 
 import java.io.File;
 import java.io.FileWriter;

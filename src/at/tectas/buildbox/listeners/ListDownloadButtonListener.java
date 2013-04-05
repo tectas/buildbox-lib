@@ -3,7 +3,7 @@ package at.tectas.buildbox.listeners;
 import android.view.View;
 import android.widget.Button;
 import at.tectas.buildbox.BuildBoxMainActivity;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.msteam.R;
 import at.tectas.buildbox.service.DownloadService;
 
 public class ListDownloadButtonListener extends DownloadButtonBaseListener {

@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.msteam.R;
 import at.tectas.buildbox.content.items.properties.DownloadType;
 
 public class PropertyHelper {
@@ -97,7 +97,12 @@ public class PropertyHelper {
 	
 	public DownloadType getDownloadType() {
 		try {
-			return DownloadType.valueOf(ShellHelper.getBuildPropProperty(context.getString(R.string.item_download_default_type)));
+			String downloadType = ShellHelper.getBuildPropProperty(context.getString(R.string.item_download_default_type));
+			
+			if (!PropertyHelper.stringIsNullOrEmpty(downloadType))
+				return DownloadType.valueOf(downloadType);
+			else
+				return null;
 		}
 		catch (IllegalArgumentException e) {
 			return null;

@@ -14,7 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import at.tectas.buildbox.BuildBoxMainActivity;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.msteam.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.content.items.ChildItem;
 import at.tectas.buildbox.content.items.DetailItem;

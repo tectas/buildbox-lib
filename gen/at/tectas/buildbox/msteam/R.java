@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package at.tectas.buildbox;
+package at.tectas.buildbox.msteam;
 
 public final class R {
     public static final class array {
@@ -174,12 +174,9 @@ containing a value of this type.
     }
     public static final class drawable {
         public static final int buildbox=0x7f020000;
-        public static final int donate_button=0x7f020001;
-        public static final int drag_drop_grid=0x7f020002;
-        public static final int ic_launcher=0x7f020003;
-        public static final int spinner=0x7f020004;
-        public static final int spinner_small=0x7f020005;
-        public static final int splashscreen_icon=0x7f020006;
+        public static final int drag_drop_grid=0x7f020001;
+        public static final int spinner=0x7f020002;
+        public static final int spinner_small=0x7f020003;
     }
     public static final class id {
         public static final int ListItemImageView=0x7f060029;
@@ -411,24 +408,24 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #DragSortListView_click_remove_id at.tectas.buildbox:click_remove_id}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_collapsed_height at.tectas.buildbox:collapsed_height}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_drag_enabled at.tectas.buildbox:drag_enabled}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_drag_handle_id at.tectas.buildbox:drag_handle_id}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_drag_scroll_start at.tectas.buildbox:drag_scroll_start}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_drag_start_mode at.tectas.buildbox:drag_start_mode}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_drop_animation_duration at.tectas.buildbox:drop_animation_duration}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_fling_handle_id at.tectas.buildbox:fling_handle_id}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_float_alpha at.tectas.buildbox:float_alpha}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_float_background_color at.tectas.buildbox:float_background_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_max_drag_scroll_speed at.tectas.buildbox:max_drag_scroll_speed}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_remove_animation_duration at.tectas.buildbox:remove_animation_duration}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_remove_enabled at.tectas.buildbox:remove_enabled}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_remove_mode at.tectas.buildbox:remove_mode}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_slide_shuffle_speed at.tectas.buildbox:slide_shuffle_speed}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_sort_enabled at.tectas.buildbox:sort_enabled}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_track_drag_sort at.tectas.buildbox:track_drag_sort}</code></td><td></td></tr>
-           <tr><td><code>{@link #DragSortListView_use_default_controller at.tectas.buildbox:use_default_controller}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_click_remove_id at.tectas.buildbox.msteam:click_remove_id}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_collapsed_height at.tectas.buildbox.msteam:collapsed_height}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_drag_enabled at.tectas.buildbox.msteam:drag_enabled}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_drag_handle_id at.tectas.buildbox.msteam:drag_handle_id}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_drag_scroll_start at.tectas.buildbox.msteam:drag_scroll_start}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_drag_start_mode at.tectas.buildbox.msteam:drag_start_mode}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_drop_animation_duration at.tectas.buildbox.msteam:drop_animation_duration}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_fling_handle_id at.tectas.buildbox.msteam:fling_handle_id}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_float_alpha at.tectas.buildbox.msteam:float_alpha}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_float_background_color at.tectas.buildbox.msteam:float_background_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_max_drag_scroll_speed at.tectas.buildbox.msteam:max_drag_scroll_speed}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_remove_animation_duration at.tectas.buildbox.msteam:remove_animation_duration}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_remove_enabled at.tectas.buildbox.msteam:remove_enabled}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_remove_mode at.tectas.buildbox.msteam:remove_mode}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_slide_shuffle_speed at.tectas.buildbox.msteam:slide_shuffle_speed}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_sort_enabled at.tectas.buildbox.msteam:sort_enabled}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_track_drag_sort at.tectas.buildbox.msteam:track_drag_sort}</code></td><td></td></tr>
+           <tr><td><code>{@link #DragSortListView_use_default_controller at.tectas.buildbox.msteam:use_default_controller}</code></td><td></td></tr>
            </table>
            @see #DragSortListView_click_remove_id
            @see #DragSortListView_collapsed_height
@@ -457,7 +454,7 @@ containing a value of this type.
             0x7f010010, 0x7f010011
         };
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#click_remove_id}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#click_remove_id}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -471,7 +468,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_click_remove_id = 16;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#collapsed_height}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#collapsed_height}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -487,7 +484,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_collapsed_height = 0;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#drag_enabled}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#drag_enabled}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -501,7 +498,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_drag_enabled = 10;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#drag_handle_id}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#drag_handle_id}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -515,7 +512,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_drag_handle_id = 14;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#drag_scroll_start}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#drag_scroll_start}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -529,7 +526,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_drag_scroll_start = 1;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#drag_start_mode}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#drag_start_mode}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -547,7 +544,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_drag_start_mode = 13;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#drop_animation_duration}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#drop_animation_duration}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -561,7 +558,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_drop_animation_duration = 9;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#fling_handle_id}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#fling_handle_id}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -575,7 +572,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_fling_handle_id = 15;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#float_alpha}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#float_alpha}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -589,7 +586,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_float_alpha = 6;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#float_background_color}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#float_background_color}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -604,7 +601,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_float_background_color = 3;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#max_drag_scroll_speed}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#max_drag_scroll_speed}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -618,7 +615,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_max_drag_scroll_speed = 2;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#remove_animation_duration}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#remove_animation_duration}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -632,7 +629,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_remove_animation_duration = 8;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#remove_enabled}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#remove_enabled}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -646,7 +643,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_remove_enabled = 12;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#remove_mode}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#remove_mode}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -663,7 +660,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_remove_mode = 4;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#slide_shuffle_speed}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#slide_shuffle_speed}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -677,7 +674,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_slide_shuffle_speed = 7;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#sort_enabled}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#sort_enabled}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -691,7 +688,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_sort_enabled = 11;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#track_drag_sort}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#track_drag_sort}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
@@ -705,7 +702,7 @@ containing a value of this type.
         */
         public static final int DragSortListView_track_drag_sort = 5;
         /**
-          <p>This symbol is the offset where the {@link at.tectas.buildbox.R.attr#use_default_controller}
+          <p>This symbol is the offset where the {@link at.tectas.buildbox.msteam.R.attr#use_default_controller}
           attribute's value can be found in the {@link #DragSortListView} array.
 
 
