@@ -28,12 +28,12 @@
             	<category android:name="android.intent.category.LAUNCHER" />
         	</intent-filter>
         </activity>
-        <activity android:name="at.tectas.buildbox.BuildBoxPreferenceActivity" />
+        <activity android:name="at.tectas.buildbox.preferences.BuildBoxPreferenceActivity" />
         <service android:name="at.tectas.buildbox.service.DownloadService"
             android:label="BuildBox Download Service">
         </service>
         <receiver
-            android:name="at.tectas.buildbox.UpdateReceiver" >
+            android:name="at.tectas.buildbox.receiver.UpdateReceiver" >
             <intent-filter>
             	<action android:name="android.intent.action.BOOT_COMPLETED" />
         	</intent-filter>
