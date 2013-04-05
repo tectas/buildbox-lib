@@ -15,8 +15,6 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
 	public void onClick(View v) {
 		final View button = v;
 		
-		activity.addDownloadsTab();
-		
  		DownloadPackage pack = (DownloadPackage) button.getTag();
  		
  		if (DownloadService.Processing == false) {
@@ -31,6 +29,8 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
  		else {
  			activity.addDownload(pack);
  		}
+ 		
+		activity.addDownloadsTab();
  		
  		while(activity.getCurrentFragment().getChildFragmentManager().popBackStackImmediate());
 	}
