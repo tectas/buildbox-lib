@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 import at.tectas.buildbox.content.ItemList;
 import at.tectas.buildbox.content.items.properties.DownloadType;
 import at.tectas.buildbox.helpers.JsonHelper;

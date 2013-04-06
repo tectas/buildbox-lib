@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
@@ -56,7 +55,7 @@ import at.tectas.buildbox.helpers.PropertyHelper;
 import at.tectas.buildbox.preferences.BuildBoxPreferenceActivity;
 import at.tectas.buildbox.receiver.UpdateReceiver;
 import at.tectas.buildbox.service.DownloadService;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 
 @SuppressLint("DefaultLocale")
 public class BuildBoxMainActivity extends DownloadActivity {

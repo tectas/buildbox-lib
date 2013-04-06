@@ -6,7 +6,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import at.tectas.buildbox.BuildBoxMainActivity;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 import at.tectas.buildbox.listeners.FlashdialogOnClickListener;
 
 public class FlashConfigurationDialog extends DialogFragment {

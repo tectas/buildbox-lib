@@ -7,7 +7,7 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.widget.Toast;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 
 public class BuildBoxPreferenceActivity extends PreferenceActivity {
 	protected static final String TAG = "BuildBoxPreferenceActivity";

@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import at.tectas.buildbox.BuildBoxMainActivity;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadStatus;

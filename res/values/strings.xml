@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="app_name">MS Team HD BuildBox</string>
+    <string name="app_name">BuildBox</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="kitchen_content_url_property">buildbox.contenturl</string>
     <string name="kitchen_rom_url_property">buildbox.updateurl</string>
@@ -8,8 +8,8 @@
     <string name="kitchen_download_dir">buildbox.downloaddir</string>
     <string name="app_cancel_message">It seems your rom is not supporting this application, please speak with the maintainer of it for further informations.</string>
     <string name="thumbnail_description">Thumbnail</string>
-    <string name="default_rom_url">http://ms-team-hd.tectas.eu/buildbox/Rom.json</string>
-    <string name="default_content_url">http://ms-team-hd.tectas.eu/buildbox/Content.json</string>
+    <string name="default_rom_url"/>
+    <string name="default_content_url">http://kitchen.tectas.eu/TestContent.json</string>
     <string name="changelog_head">Changelog</string>
     <string name="md5sum_head">md5sum:</string>
     <string name="detail_property">detail</string>
@@ -103,7 +103,7 @@
     <string name="downloads_cache_filename">downloads.json</string>
     <string name="preference_path_change_error_text">The given path isn\'t accessible, please verify that it is correct and you have read and write access to it (or it\'s parent if it\'s not existent).</string>
     <string name="preference_content_urls_property">content</string>
-    <string name="splashscreen_label">BuildBox\n by MS Team HD \n\nset your device free\n\n\nLoading content...</string>
+    <string name="splashscreen_label">BuildBox\n by Tectas \n\nset your device free\n\n\nLoading content...</string>
     <string name="device_model_property">ro.product.model</string>
     <string name="item_device_type">device</string>
 </resources>

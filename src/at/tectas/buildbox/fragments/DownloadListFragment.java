@@ -3,7 +3,7 @@ package at.tectas.buildbox.fragments;
 import com.mobeta.android.dslv.DragSortListView;
 
 import at.tectas.buildbox.BuildBoxMainActivity;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.DownloadPackageAdapter;
 import at.tectas.buildbox.listeners.ListDownloadButtonListener;
 import at.tectas.buildbox.service.DownloadService;

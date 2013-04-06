@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import at.tectas.buildbox.BuildBoxMainActivity;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 import at.tectas.buildbox.adapters.ItemArrayAdapter;
 import at.tectas.buildbox.content.items.Item;
 import at.tectas.buildbox.content.items.ParentItem;

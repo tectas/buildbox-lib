@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.DownloadPackage;
 import at.tectas.buildbox.communication.DownloadResponse;
 import at.tectas.buildbox.communication.DownloadStatus;

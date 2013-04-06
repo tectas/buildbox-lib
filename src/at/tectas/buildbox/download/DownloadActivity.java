@@ -11,7 +11,7 @@ import android.graphics.Bitmap;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.ImageView;
-import at.tectas.buildbox.msteam.R;
+import at.tectas.buildbox.R;
 import at.tectas.buildbox.communication.Communicator;
 import at.tectas.buildbox.communication.DownloadKey;
 import at.tectas.buildbox.communication.DownloadMap;
