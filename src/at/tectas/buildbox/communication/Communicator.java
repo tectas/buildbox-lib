@@ -380,6 +380,7 @@ public class Communicator {
 		        }
 		        else {
 		        	result.status = DownloadStatus.Broken;
+		        	return result;
 		        }
 		    }
 	        catch (Exception e) {

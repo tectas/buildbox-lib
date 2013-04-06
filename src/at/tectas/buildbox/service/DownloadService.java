@@ -316,6 +316,8 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			communicators.cancel(true);
 		}
 		
+		this.currentDownloadIndex = 0;
+		
 		DownloadService.Processing = false;
 		
 		this.stopForeground(true);

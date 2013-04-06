@@ -505,7 +505,7 @@ public class BuildBoxMainActivity extends DownloadActivity {
 			super.getServiceDownloadMap(this.downloadCallback, this.downloadCallback, this.downloadCallback);
 		}
 		else {
-			super.getServiceDownloadMap();
+			this.getServiceDownloadMap();
 		}
 	}
 	
