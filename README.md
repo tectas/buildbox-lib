@@ -9,7 +9,7 @@ The used backend for BuildBox can be a simple json file or a webservice, basical
 
 To configure where the applications backend is reachable (and which is the current ROM version if the update notification feature is used) build.prop properties can be used or the given resource strings within the app can be altered.
 
-The buildbox java packages (and it's subpackages) are licensed under LGPL, dslv (credits to [bauerca](https://github.com/bauerca)) is licensed under the apache license, for more detail look at the [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/src/at/tectas/buildbox/LICENSE.txt) of the buildbox package or this [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/src/com/mobeta/android/dslv/LICENSE.txt) for dslv (the full source of dslv can be viewed [here](https://github.com/bauerca/drag-sort-listview)).
+The buildbox java packages (and it's subpackages) are licensed under LGPL, dslv (credits to [bauerca](https://github.com/bauerca)) is licensed under the apache license, for more detail look at the [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/library/src/at/tectas/buildbox/LICENSE.txt) of the buildbox package or this [LICENSE.txt](https://github.com/tectas/buildbox/blob/dev/library/src/com/mobeta/android/dslv/LICENSE.txt) for dslv (the full source of dslv can be viewed [here](https://github.com/bauerca/drag-sort-listview)).
 
 Main features
 ------------------------------------------------------
