@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="at.tectas.buildbox"
+    android:versionCode="13"
+    android:versionName="0.9.4" >
+    
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="14" />
+    
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <application
+        android:allowBackup="true" >
+        
+        <activity android:name="at.tectas.buildbox.library.preferences.BuildBoxPreferenceActivity" />
+        <service android:name="at.tectas.buildbox.library.service.DownloadService"
+            android:label="BuildBox Download Service">
+        </service>
+        <receiver
+            android:name="at.tectas.buildbox.receiver.UpdateReceiver" >
+            <intent-filter>
+            	<action android:name="android.intent.action.BOOT_COMPLETED" />
+        	</intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
