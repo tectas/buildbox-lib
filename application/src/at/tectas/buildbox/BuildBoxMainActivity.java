@@ -57,14 +57,11 @@ import at.tectas.buildbox.R;
 
 @SuppressLint("DefaultLocale")
 public class BuildBoxMainActivity extends DownloadActivity {
-	public static final int PICK_FILE_RESULT = 1;
-	public static final int SETTINGS_RESULT = 2;
 	
 	ViewPager mViewPager;
 	
 	protected PropertyHelper helper = null;
 	protected Dialog splashScreen = null;
-	protected Hashtable<String, File> backupList = null;
 	public ActionBar bar = null;
 	protected TabsAdapter adapter = null;
 	protected DetailItem romItem = null;
@@ -93,20 +90,14 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		this.remoteDrawables = drawables;
 	}
 	
+	@Override
 	public ItemList getContentItems() {
 		return this.contentItems;
 	}
 	
+	@Override
 	public Fragment getCurrentFragment() {
 		return this.adapter.getCurrentFragment();
-	}
-	
-	public Hashtable<String, File> getBackupList() {
-		return this.backupList;
-	}
-	
-	public void setBackupList(Hashtable<String, File> backups) {
-		this.backupList = backups;
 	}
 	
 	public DetailItem getRomItem() {
@@ -172,32 +163,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		this.bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 		
 		this.adapter = new TabsAdapter(this, (ViewPager)findViewById(R.id.pager));
-	}
-	
-	@Override
-	protected void onStop() {
-		this.removeActivityCallbacks();
-		
-		this.getDownloads().serializeMapToCache(getApplicationContext());
-		
-		this.downloadMapRestored = false;
-		
-		super.onStop();
-	};
-	
-	@Override
-	protected void onRestart() {
-		super.onRestart();
-		
-		if (!this.downloadMapRestored) {
-			this.getDownloads().clear();
-			
-			if (this.bar.getTabCount() != 0) {
-				this.getDownloads().deserializeMapFromCache(getApplicationContext(), this);
-			}
-			
-			this.downloadMapRestored = true;
-		}
 	}
 	
 	@Override
@@ -267,174 +232,8 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	};
 	
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		final BuildBoxMainActivity activity = this;
-		
-		int itemId = item.getItemId();
-		if (itemId == R.id.settings) {
-			Intent preferenceIntent = new Intent(this, BuildBoxPreferenceActivity.class);
-			startActivityForResult(preferenceIntent, BuildBoxMainActivity.SETTINGS_RESULT);
-			return true;
-		}
-		else if (itemId == R.id.remove_broken) {
-			this.removeBrokenAndAbortedFromMap();
-			return true;
-		}
-		else if (itemId == R.id.remove_all) {
-			this.downloads.clear();
-			this.dowloadViewAdapter.notifyDataSetChanged();
-			return true;
-		}
-		else if (itemId == R.id.add_external) {
-			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-			intent.setType("file/*");
-			startActivityForResult(intent,PICK_FILE_RESULT);
-			return true;
-		}
-		else if (itemId == R.id.backup_queue) {
-			final EditText backupFilenameField = new EditText(this);
-			Date now = new Date();
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.ENGLISH);
-			backupFilenameField.setText(format.format(now));
-			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-			alertBuilder.setTitle(R.string.backup_dialog_title);
-			alertBuilder.setMessage(R.string.backup_dialog_text);
-			alertBuilder.setView(backupFilenameField);
-			alertBuilder.setPositiveButton(R.string.ok_button_text, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {						
-					String filename = backupFilenameField.getText().toString();
-					
-					if (!PropertyHelper.stringIsNullOrEmpty(filename)) {
-						
-						File backupDirectory = new File(activity.getDownloadDir() + getString(R.string.kitchen_backup_directory_name));
-								
-						if (!backupDirectory.exists()) {
-							boolean succuessful = backupDirectory.mkdirs();
-							
-							if (!succuessful) {
-								try {
-									throw new IOException("Couldn't create directory: " + backupDirectory);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-							}
-						}
-						
-						activity.getDownloads().serializeMapToStorage(activity, backupDirectory.getPath() + "/" + filename + getString(R.string.backup_file_extension));
-						
-						activity.fillBackupList();
-					}
-				}
-			});
-			alertBuilder.setNegativeButton(R.string.cancel_button_text, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			});
-			alertBuilder.create().show();
-			return true;
-		}
-		else if (itemId == R.id.restore_queue) {
-			this.fillBackupList();
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.restore_alert_title));
-			final String[] keys = new String[this.getBackupList().size()];
-			int i = 0;
-			for (String key: this.getBackupList().keySet()) {
-				
-				keys[i] = key.replace(getString(R.string.backup_file_extension), "");
-				i++;
-			}
-			Arrays.sort(keys);
-			builder.setSingleChoiceItems(keys, -1, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-					
-					int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-					
-					if (selectedPosition < activity.getBackupList().size()) {
-						
-						activity.getDownloads().deserializeMapFromStorage(activity, activity.getBackupList().get(keys[selectedPosition] + getString(R.string.backup_file_extension)).getPath(), activity);
-					}
-				}
-			});
-			builder.setNegativeButton(R.string.cancel_button_text, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			});
-			builder.create().show();
-			return true;
-		}
-		
-		return super.onOptionsItemSelected(item);
-	}
-	
-	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode){
-  			case PICK_FILE_RESULT:
-				String filePath = data.getData().getPath();
-				
-				if (filePath != null) {
-					String[] splittedPath = filePath.split("/");
-					
-					String fileName = splittedPath[splittedPath.length - 1];
-					
-					DownloadPackage pack = new DownloadPackage();
-					pack.title = fileName;
-					
-					pack.url = fileName;
-					
-					DownloadResponse response = new DownloadResponse();
-					response.progress = 100;
-					response.status = DownloadStatus.Done;
-					
-					pack.setResponse(response);
-					
-					pack.setFilename(fileName);
-					pack.setDirectory(filePath.replace(fileName, ""));
-					pack.md5sum = fileName;
-					
-					String extension = pack.getResponse().mime;
-					
-					if (extension != null && extension.toLowerCase().equals(DownloadType.zip.name())) {
-						pack.type = DownloadType.zip;
-					}
-					else {
-						pack.type = DownloadType.other;
-					}
-					
-					if (!this.downloadMapRestored) {
-						this.getDownloads().clear();
-						
-						this.loadDownloadsMapFromCacheFile();
-						this.downloadMapRestored = true;
-					}
-					
-					this.getDownloads().put(pack);
-					
-					this.refreshDownloadsView();
-				}
-  				break;
-  			case SETTINGS_RESULT:
-  				this.getDownloads().serializeMapToCache(this);
-  				
-  				this.finish();
-  				
-  				Intent intent = new Intent(this.getApplicationContext(), BuildBoxMainActivity.class);
-  				
-  				this.startActivity(intent);
-  				break;
 			case PACKAGE_MANAGER_RESULT:
 				if (!this.downloadMapRestored) {
 					this.getDownloads().clear();
@@ -442,21 +241,11 @@ public class BuildBoxMainActivity extends DownloadActivity {
 					this.downloadMapRestored = true;
 					this.loadDownloadsMapFromCacheFile(new BuildBoxMapDeserializedProcessCallback(this));
 				}
-  				break;
+  				return;
    		}
+		
+		super.onActivityResult(requestCode, resultCode, data);
 	}
-	
-	@Override
-	public void mapDeserializedCallback() {
-		if (this.getDownloads().size() != 0) {
-			this.refreshDownloadsView();
-		}
-	}
-	
-	@Override
-	protected void loadDownloadsMapFromCacheFile() {
-		super.loadDownloadsMapFromCacheFile();
-	};
 	
 	@Override
 	public void getServiceDownloadMap(boolean addListeners) {
@@ -570,16 +359,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		}
 	}
 	
-	public void startUpdateAlarm() {
-		Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.SECOND, 1);
-        
-        AlarmManager alarmManager = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, UpdateReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
-	}
-	
 	public void addTab(String title, Class<?> clss, Bundle bundle) {
 		this.adapter.addTab(this.bar.newTab().setText(title), clss, bundle);
 	}
@@ -613,37 +392,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 		if (this.splashScreen != null) {
 			this.splashScreen.dismiss();
 			this.splashScreen = null;
-		}
-	}
-	
-	protected void fillBackupList() {
-		File rootDirectory = new File(this.getDownloadDir());
-		
-		if (!rootDirectory.exists()) {
-			rootDirectory.mkdir();
-		}
-		
-		File queueDirectoy = new File(rootDirectory, getString(R.string.kitchen_backup_directory_name));
-		
-		if (!queueDirectoy.exists()) {
-			queueDirectoy.mkdirs();
-		}
-		
-		File[] fileList = queueDirectoy.listFiles(new FilenameFilter() {
-			
-			@Override
-			public boolean accept(File dir, String filename) {
-				if (filename.endsWith(getString(R.string.backup_file_extension)))
-					return true;
-				else
-					return false;
-			}
-		});
-		
-		this.backupList = new Hashtable<String, File>();
-		
-		for (File file: fileList) {
-			this.backupList.put(file.getName(), file);
 		}
 	}
 }

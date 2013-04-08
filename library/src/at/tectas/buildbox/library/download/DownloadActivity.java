@@ -1,24 +1,40 @@
 package at.tectas.buildbox.library.download;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import android.support.v4.app.Fragment;
+import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.DownloadKey;
 import at.tectas.buildbox.library.communication.DownloadMap;
 import at.tectas.buildbox.library.communication.DownloadPackage;
+import at.tectas.buildbox.library.communication.DownloadResponse;
 import at.tectas.buildbox.library.communication.DownloadStatus;
 import at.tectas.buildbox.library.communication.callbacks.CallbackType;
 import at.tectas.buildbox.library.communication.callbacks.MapDeserializedProcessCallback;
@@ -32,6 +48,9 @@ import at.tectas.buildbox.library.communication.handler.interfaces.IActivityInst
 import at.tectas.buildbox.library.content.ItemList;
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 import at.tectas.buildbox.library.fragments.FlashConfigurationDialog;
+import at.tectas.buildbox.library.helpers.PropertyHelper;
+import at.tectas.buildbox.library.preferences.BuildBoxPreferenceActivity;
+import at.tectas.buildbox.library.receiver.UpdateReceiver;
 import at.tectas.buildbox.library.recovery.OpenRecoveryScript;
 import at.tectas.buildbox.library.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.library.service.DownloadService;
@@ -39,6 +58,8 @@ import at.tectas.buildbox.library.service.DownloadService;
 public abstract class DownloadActivity extends FragmentActivity implements ICommunicatorCallback, IDeserializeMapFinishedCallback {
 
 	public static final String TAG = "DownloadActivity";
+	public static final int PICK_FILE_RESULT = 1;
+	public static final int SETTINGS_RESULT = 2;
 	public static final int PACKAGE_MANAGER_RESULT = 3;
 	
 	protected Communicator communicator = new Communicator();
@@ -46,6 +67,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	protected BaseAdapter dowloadViewAdapter = null;
 	protected DownloadServiceConnection serviceConnection = new DownloadServiceConnection(this);
 	protected OpenRecoveryScript recoveryScript = null;
+	protected Hashtable<String, File> backupList = null;
 	protected int currentInstallIndex = 0;
 	protected boolean downloadMapRestored = false;
 	
@@ -103,15 +125,52 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		return this.dowloadViewAdapter;
 	}
 	
+	public Hashtable<String, File> getBackupList() {
+		return this.backupList;
+	}
+	
+	public void setBackupList(Hashtable<String, File> backups) {
+		this.backupList = backups;
+	}
+	
+	
 	@Override
-	protected void onDestroy() {
-		Log.e(TAG, "onDestroy");
+	protected void onStop() {
+		this.removeActivityCallbacks();
 		
+		this.getDownloads().serializeMapToCache(getApplicationContext());
+		
+		this.downloadMapRestored = false;
+		
+		super.onStop();
+	};
+	
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		
+		if (!this.downloadMapRestored) {
+			this.getDownloads().clear();
+			
+			if (DownloadService.Started) {
+				this.getServiceMap(true);
+			}
+			else {
+				this.restoreDownloadMapFromCache();
+			}
+			
+			this.downloadMapRestored = true;
+		}
+	}
+	
+	@Override
+	protected void onDestroy() {		
 		new DownloadMap().serializeMapToCache(this.getApplicationContext());
 		
 		super.onDestroy();
 	};
 	
+	@SuppressLint("DefaultLocale")
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode){
@@ -123,7 +182,189 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 					this.downloadMapRestored = true;
 				}
   				break;
+  			case SETTINGS_RESULT:
+  				this.getDownloads().serializeMapToCache(this);
+  				
+  				this.finish();
+  				
+  				Intent intent = new Intent(this.getApplicationContext(), this.getClass());
+  				
+  				this.startActivity(intent);
+  				break;
+  			case PICK_FILE_RESULT:
+				String filePath = data.getData().getPath();
+				
+				if (filePath != null) {
+					String[] splittedPath = filePath.split("/");
+					
+					String fileName = splittedPath[splittedPath.length - 1];
+					
+					DownloadPackage pack = new DownloadPackage();
+					pack.title = fileName;
+					
+					pack.url = fileName;
+					
+					DownloadResponse response = new DownloadResponse();
+					response.progress = 100;
+					response.status = DownloadStatus.Done;
+					
+					pack.setResponse(response);
+					
+					pack.setFilename(fileName);
+					pack.setDirectory(filePath.replace(fileName, ""));
+					pack.md5sum = fileName;
+					
+					String extension = pack.getResponse().mime;
+					
+					if (extension != null && extension.toLowerCase().equals(DownloadType.zip.name())) {
+						pack.type = DownloadType.zip;
+					}
+					else {
+						pack.type = DownloadType.other;
+					}
+					
+					if (!this.downloadMapRestored) {
+						this.getDownloads().clear();
+						
+						this.loadDownloadsMapFromCacheFile();
+						this.downloadMapRestored = true;
+					}
+					
+					this.getDownloads().put(pack);
+					
+					this.refreshDownloadsView();
+				}
+  				break;
 		}
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		final DownloadActivity activity = this;
+		
+		int itemId = item.getItemId();
+		if (itemId == R.id.settings) {
+			Intent preferenceIntent = new Intent(this, BuildBoxPreferenceActivity.class);
+			startActivityForResult(preferenceIntent, DownloadActivity.SETTINGS_RESULT);
+			return true;
+		}
+		else if (itemId == R.id.remove_broken) {
+			this.removeBrokenAndAbortedFromMap();
+			return true;
+		}
+		else if (itemId == R.id.remove_all) {
+			this.downloads.clear();
+			this.refreshDownloadsView();
+			return true;
+		}
+		else if (itemId == R.id.add_external) {
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.setType("file/*");
+			startActivityForResult(intent,DownloadActivity.PICK_FILE_RESULT);
+			return true;
+		}
+		else if (itemId == R.id.backup_queue) {
+			final EditText backupFilenameField = new EditText(this);
+			Date now = new Date();
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.ENGLISH);
+			backupFilenameField.setText(format.format(now));
+			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+			alertBuilder.setTitle(R.string.backup_dialog_title);
+			alertBuilder.setMessage(R.string.backup_dialog_text);
+			alertBuilder.setView(backupFilenameField);
+			alertBuilder.setPositiveButton(R.string.ok_button_text, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {						
+					String filename = backupFilenameField.getText().toString();
+					
+					if (!PropertyHelper.stringIsNullOrEmpty(filename)) {
+						
+						File backupDirectory = new File(activity.getDownloadDir() + getString(R.string.kitchen_backup_directory_name));
+								
+						if (!backupDirectory.exists()) {
+							boolean succuessful = backupDirectory.mkdirs();
+							
+							if (!succuessful) {
+								try {
+									throw new IOException("Couldn't create directory: " + backupDirectory);
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+						
+						activity.getDownloads().serializeMapToStorage(activity, backupDirectory.getPath() + "/" + filename + getString(R.string.backup_file_extension));
+						
+						activity.fillBackupList();
+					}
+				}
+			});
+			alertBuilder.setNegativeButton(R.string.cancel_button_text, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+			alertBuilder.create().show();
+			return true;
+		}
+		else if (itemId == R.id.restore_queue) {
+			this.fillBackupList();
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.restore_alert_title));
+			final String[] keys = new String[this.getBackupList().size()];
+			int i = 0;
+			for (String key: this.getBackupList().keySet()) {
+				
+				keys[i] = key.replace(getString(R.string.backup_file_extension), "");
+				i++;
+			}
+			Arrays.sort(keys);
+			builder.setSingleChoiceItems(keys, -1, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+					
+					int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+					
+					if (selectedPosition < activity.getBackupList().size()) {
+						
+						activity.getDownloads().deserializeMapFromStorage(activity, activity.getBackupList().get(keys[selectedPosition] + getString(R.string.backup_file_extension)).getPath(), activity);
+					}
+				}
+			});
+			builder.setNegativeButton(R.string.cancel_button_text, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+			builder.create().show();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public void mapDeserializedCallback() {
+		if (this.getDownloads().size() != 0) {
+			this.refreshDownloadsView();
+		}
+	}
+	
+	public void startUpdateAlarm() {
+		Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, 1);
+        
+        AlarmManager alarmManager = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, UpdateReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 	}
 	
 	public boolean allDownloadsFinished() {
@@ -248,7 +489,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 			this.bindDownloadService();
 		}
 		else {
-			this.getServiceDownloadMap(false);
+			this.getServiceDownloadMap(addListeners);
 		}
 	}
 	
@@ -290,6 +531,10 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		if (serviceMap != null && serviceMap.size() != 0) {
 			this.setDownloads(serviceMap);
 			this.refreshDownloadsView();
+			new DownloadMap().serializeMapToCache(this.getApplicationContext());
+		}
+		else {
+			this.loadDownloadsMapFromCacheFile();
 		}
 	}
 	
@@ -405,6 +650,38 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		if (this.getDownloads().size() != 0) {
 			
 			this.refreshDownloadsView();
+		}
+	}
+	
+	
+	protected void fillBackupList() {
+		File rootDirectory = new File(this.getDownloadDir());
+		
+		if (!rootDirectory.exists()) {
+			rootDirectory.mkdir();
+		}
+		
+		File queueDirectoy = new File(rootDirectory, getString(R.string.kitchen_backup_directory_name));
+		
+		if (!queueDirectoy.exists()) {
+			queueDirectoy.mkdirs();
+		}
+		
+		File[] fileList = queueDirectoy.listFiles(new FilenameFilter() {
+			
+			@Override
+			public boolean accept(File dir, String filename) {
+				if (filename.endsWith(getString(R.string.backup_file_extension)))
+					return true;
+				else
+					return false;
+			}
+		});
+		
+		this.backupList = new Hashtable<String, File>();
+		
+		for (File file: fileList) {
+			this.backupList.put(file.getName(), file);
 		}
 	}
 }

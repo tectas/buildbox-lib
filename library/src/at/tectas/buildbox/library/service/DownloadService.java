@@ -412,8 +412,10 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			
 			this.currentDownloadIndex = 0;
 			
-			if (this.clientsConnected <= 0)
+			if (this.clientsConnected <= 0) {
 				this.map.serializeMapToCache(this);
+				this.map = new DownloadMap();
+			}
 		}
 	}
 
@@ -438,8 +440,10 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			
 			this.currentDownloadIndex = 0;
 			
-			if (this.clientsConnected <= 0)
+			if (this.clientsConnected <= 0) {
 				this.map.serializeMapToCache(this);
+				this.map = new DownloadMap();
+			}
 		}
 	}
 }
