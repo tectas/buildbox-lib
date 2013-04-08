@@ -1,0 +1,6 @@
+bin/assets
+bin/dexedLibs
+bin/gen
+bin/library
+bin/res
+bin/AndroidManifest.xml
