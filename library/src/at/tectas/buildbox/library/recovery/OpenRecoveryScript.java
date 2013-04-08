@@ -13,6 +13,10 @@ import at.tectas.buildbox.library.recovery.RebootType;
 
 @SuppressLint("DefaultLocale")
 public class OpenRecoveryScript {
+	@SuppressLint("SdCardPath")
+	public static final String RECOVERY_SDCARD_ROOT = "/sdcard";
+	public static final String RECOVERY_EXTERNAL_SDCARD_ROOT = "/external_sd";
+	
 	public OpenRecoveryScriptConfiguration configuration = null;
 	protected ArrayList<String> shellCommands = new ArrayList<String>();
 	protected String scriptFilename = "openrecoveryscript";
@@ -29,12 +33,17 @@ public class OpenRecoveryScript {
 	
 	@SuppressLint("SdCardPath")
 	public String mutateStoragePathForRecovery (String path) {
-		if (path != null && path.contains("extSdCard")) {
-			path = path.replaceAll("/mnt/extSdCard", "/external_sd");
+		if (path != null && path.contains("extSdCard") || path.contains("sdcard1")) {
+			path = path.replaceAll("/mnt/extSdCard", RECOVERY_EXTERNAL_SDCARD_ROOT)
+					.replaceAll("/storage/sdcard1", RECOVERY_EXTERNAL_SDCARD_ROOT)
+					.replaceAll("/extSdCard", RECOVERY_EXTERNAL_SDCARD_ROOT);
 		}
 		
-		if (path != null && path.contains("sdcard0")) {
-			path = path.replaceAll("/storage/sdcard0", "/sdcard");
+		if (path != null && path.contains("sdcard0") || path.contains("emulated") || path.contains("mnt")) {
+			path = path.replaceAll("/storage/sdcard0", RECOVERY_SDCARD_ROOT)
+					.replaceAll("/storage/emulated/0", RECOVERY_SDCARD_ROOT)
+					.replaceAll("/storage/emulated/legacy", RECOVERY_SDCARD_ROOT)
+					.replaceAll("/mnt/sdcard", RECOVERY_SDCARD_ROOT);
 		}
 		
 		if (path != null && !path.endsWith("/")) {

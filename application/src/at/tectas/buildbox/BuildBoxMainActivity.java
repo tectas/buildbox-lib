@@ -1,27 +1,14 @@
 package at.tectas.buildbox;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Arrays;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -29,9 +16,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.animation.Animation;
-import android.widget.EditText;
 import android.widget.ImageView;
 import at.tectas.buildbox.adapters.TabsAdapter;
 import at.tectas.buildbox.communication.callbacks.BuildBoxDownloadCallback;
@@ -39,19 +24,12 @@ import at.tectas.buildbox.communication.callbacks.BuildBoxMapDeserializedProcess
 import at.tectas.buildbox.library.fragments.ContentListFragment;
 import at.tectas.buildbox.library.fragments.DetailFragment;
 import at.tectas.buildbox.library.fragments.DownloadListFragment;
-import at.tectas.buildbox.library.communication.DownloadPackage;
-import at.tectas.buildbox.library.communication.DownloadResponse;
-import at.tectas.buildbox.library.communication.DownloadStatus;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.DownloadBaseCallback;
 import at.tectas.buildbox.library.content.ItemList;
 import at.tectas.buildbox.library.content.items.DetailItem;
 import at.tectas.buildbox.library.content.items.Item;
-import at.tectas.buildbox.library.content.items.JsonItemParser;
-import at.tectas.buildbox.library.content.items.properties.DownloadType;
 import at.tectas.buildbox.library.download.DownloadActivity;
 import at.tectas.buildbox.library.helpers.PropertyHelper;
-import at.tectas.buildbox.library.preferences.BuildBoxPreferenceActivity;
-import at.tectas.buildbox.library.receiver.UpdateReceiver;
 import at.tectas.buildbox.library.service.DownloadService;
 import at.tectas.buildbox.R;
 
@@ -60,7 +38,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	
 	ViewPager mViewPager;
 	
-	protected PropertyHelper helper = null;
 	protected Dialog splashScreen = null;
 	public ActionBar bar = null;
 	protected TabsAdapter adapter = null;
@@ -68,7 +45,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	protected ItemList contentItems = null;
 	protected HashSet<String> contentUrls = new HashSet<String>();
 	protected Hashtable<String, Bitmap> remoteDrawables = new Hashtable<String, Bitmap>();
-	protected JsonItemParser parser = null;
 	protected DownloadBaseCallback downloadCallback = null;
 	
 	@Override
@@ -107,37 +83,6 @@ public class BuildBoxMainActivity extends DownloadActivity {
 	@Override
 	public String getDownloadDir() {
 		return this.helper.downloadDir;
-	}
-	
-	public void initialize() {
-		Item.setActivity(this);
-		
-		this.helper = new PropertyHelper(this.getApplicationContext());
-		
-		this.parser = new JsonItemParser(this, this.helper.deviceModel);
-		
-		this.contentUrls = this.helper.getUserContentUrls();
-		
-		if (PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl) && PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl) && this.contentUrls.size() == 0) {
-			this.refreshDownloadsView();
-		}
-		
-		try {
-			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl))
-				this.communicator.executeJSONObjectAsyncCommunicator(this.helper.romUrl, this);			
-			
-			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl))
-				this.communicator.executeJSONArrayAsyncCommunicator(this.helper.presetContentUrl, this);
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		for (String url: this.contentUrls) {
-			this.communicator.executeJSONArrayAsyncCommunicator(url, this);
-		}
-		
-		this.startUpdateAlarm();
 	}
 	
 	@Override

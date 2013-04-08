@@ -20,6 +20,7 @@ public class PropertyHelper {
 	public String downloadDir = null;
 	public String deviceModel = null;
 	public DownloadType type = null;
+	public HashSet<String> contentUrls = null;
 	
 	public PropertyHelper (Context context) {
 		this.context = context;
@@ -30,6 +31,7 @@ public class PropertyHelper {
 		this.downloadDir = this.getDownloadDirectory();
 		this.deviceModel = this.getDeviceModel();
 		this.type = this.getDownloadType();
+		this.contentUrls = this.getUserContentUrls();
 	}
 	
 	public String getRomUrl() {

@@ -46,6 +46,8 @@ import at.tectas.buildbox.library.communication.callbacks.interfaces.IDownloadFi
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDownloadProgressCallback;
 import at.tectas.buildbox.library.communication.handler.interfaces.IActivityInstallDownloadHandler;
 import at.tectas.buildbox.library.content.ItemList;
+import at.tectas.buildbox.library.content.items.Item;
+import at.tectas.buildbox.library.content.items.JsonItemParser;
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 import at.tectas.buildbox.library.fragments.FlashConfigurationDialog;
 import at.tectas.buildbox.library.helpers.PropertyHelper;
@@ -64,6 +66,8 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	
 	protected Communicator communicator = new Communicator();
 	protected DownloadMap downloads = new DownloadMap();
+	protected PropertyHelper helper = null;
+	protected JsonItemParser parser = null;
 	protected BaseAdapter dowloadViewAdapter = null;
 	protected DownloadServiceConnection serviceConnection = new DownloadServiceConnection(this);
 	protected OpenRecoveryScript recoveryScript = null;
@@ -133,6 +137,34 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		this.backupList = backups;
 	}
 	
+	public void initialize() {
+		Item.setActivity(this);
+		
+		this.helper = new PropertyHelper(this.getApplicationContext());
+		
+		this.parser = new JsonItemParser(this, this.helper.deviceModel);
+		
+		if (PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl) && PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl) && this.helper.contentUrls.size() == 0) {
+			this.refreshDownloadsView();
+		}
+		
+		try {
+			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl))
+				this.communicator.executeJSONObjectAsyncCommunicator(this.helper.romUrl, this);			
+			
+			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl))
+				this.communicator.executeJSONArrayAsyncCommunicator(this.helper.presetContentUrl, this);
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		for (String url: this.helper.contentUrls) {
+			this.communicator.executeJSONArrayAsyncCommunicator(url, this);
+		}
+		
+		this.startUpdateAlarm();
+	}
 	
 	@Override
 	protected void onStop() {
@@ -156,7 +188,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 				this.getServiceMap(true);
 			}
 			else {
-				this.restoreDownloadMapFromCache();
+				this.restoreDownloadMapFromCache(this);
 			}
 			
 			this.downloadMapRestored = true;
@@ -164,7 +196,8 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	}
 	
 	@Override
-	protected void onDestroy() {		
+	protected void onDestroy() {
+		Log.e(TAG, "onDestroy");
 		new DownloadMap().serializeMapToCache(this.getApplicationContext());
 		
 		super.onDestroy();

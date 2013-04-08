@@ -47,6 +47,8 @@ public class ShellHelper {
 		        
 			    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
 			    
+			    ArrayList<String> output = outWorker.result;
+			    
 			    for (int i = 1; i < commands.length; i++) {
 			    	shellIn.writeBytes(commands[i] + "\n");
 			    }
@@ -64,8 +66,6 @@ public class ShellHelper {
 				if (shellOut != null) {
 					shellOut.close();
 				}
-			    
-			    ArrayList<String> output = outWorker.result;
 			    
 			    process.destroy();
 			    
