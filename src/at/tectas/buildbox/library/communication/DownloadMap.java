@@ -18,6 +18,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDeserializeMapFinishedCallback;
+import at.tectas.buildbox.library.communication.callbacks.interfaces.ISerializeMapFinishedCallback;
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 
 import com.google.gson.JsonArray;
@@ -378,14 +379,22 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 	}
 	
 	public void serializeMapToCache(final Context context) {
-		this.serializeMapToFile(context, context.getString(R.string.downloads_cache_filename), true);
+		this.serializeMapToFile(context, context.getString(R.string.downloads_cache_filename), true, null);
+	}
+	
+	public void serializeMapToCache(final Context context, final ISerializeMapFinishedCallback callback) {
+		this.serializeMapToFile(context, context.getString(R.string.downloads_cache_filename), true, callback);
 	}
 	
 	public void serializeMapToStorage(final Context context, final String filePath) {
-		this.serializeMapToFile(context, filePath, false);
+		this.serializeMapToFile(context, filePath, false, null);
 	}
 	
-	public void serializeMapToFile(final Context context, final String filename, final boolean cache) {
+	public void serializeMapToStorage(final Context context, final String filePath, final ISerializeMapFinishedCallback callback) {
+		this.serializeMapToFile(context, filePath, false, callback);
+	}
+	
+	public void serializeMapToFile(final Context context, final String filename, final boolean cache, final ISerializeMapFinishedCallback callback) {
 		Handler handler = new Handler();
 		
 		final DownloadMap map = this;
@@ -412,6 +421,10 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 					
 					if (stream != null)
 						stream.close();
+					
+					if (callback != null) {
+						callback.mapSerializedCallback();
+					}
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {

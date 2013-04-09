@@ -332,7 +332,9 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		
 		if (response != null) {
 			DownloadPackage pack = this.map.get(response.getKey());
-			pack.setResponse(response);
+			
+			if (pack != null)
+				pack.setResponse(response);
 		}
 		
 		this.serviceBuilder.setContentText(response.pack.getFilename());
@@ -367,16 +369,16 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 		
 		for (DownloadPackage pack: this.map.values()) {
 			if (pack.getResponse() != null) {
-				if (response.status == DownloadStatus.Successful || response.status == DownloadStatus.Done)
+				if (pack.getResponse().status == DownloadStatus.Successful || pack.getResponse().status == DownloadStatus.Done)
 					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_finished));
-				else if (response.status == DownloadStatus.Broken)
+				else if (pack.getResponse().status == DownloadStatus.Broken)
 					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_failed));
-				else if (response.status == DownloadStatus.Md5mismatch)
+				else if (pack.getResponse().status == DownloadStatus.Md5mismatch)
 					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_mismatch));
-				else if (response.status == DownloadStatus.Aborted)
+				else if (pack.getResponse().status == DownloadStatus.Aborted)
 					inbox.addLine(pack.getFilename() + " " + getString(R.string.service_download_aborted));
 				
-				if(response.status != DownloadStatus.Pending) {
+				if(pack.getResponse().status != DownloadStatus.Pending && pack.getResponse().status != null) {
 					finishedDownloadsCount++;
 				}
 			}
@@ -413,7 +415,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			this.currentDownloadIndex = 0;
 			
 			if (this.clientsConnected <= 0) {
-				this.map.serializeMapToCache(this);
+				this.map.serializeMapToCache(this.getApplicationContext());
 				this.map = new DownloadMap();
 			}
 		}
@@ -441,7 +443,7 @@ public class DownloadService extends Service implements IDownloadProgressCallbac
 			this.currentDownloadIndex = 0;
 			
 			if (this.clientsConnected <= 0) {
-				this.map.serializeMapToCache(this);
+				this.map.serializeMapToCache(this.getApplicationContext());
 				this.map = new DownloadMap();
 			}
 		}

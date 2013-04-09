@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
@@ -37,13 +36,14 @@ import at.tectas.buildbox.library.communication.DownloadPackage;
 import at.tectas.buildbox.library.communication.DownloadResponse;
 import at.tectas.buildbox.library.communication.DownloadStatus;
 import at.tectas.buildbox.library.communication.callbacks.CallbackType;
-import at.tectas.buildbox.library.communication.callbacks.MapDeserializedProcessCallback;
+import at.tectas.buildbox.library.communication.callbacks.DeserializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.DownloadBaseCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.ICommunicatorCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDeserializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDownloadCancelledCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDownloadFinishedCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDownloadProgressCallback;
+import at.tectas.buildbox.library.communication.callbacks.interfaces.ISerializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.handler.interfaces.IActivityInstallDownloadHandler;
 import at.tectas.buildbox.library.content.ItemList;
 import at.tectas.buildbox.library.content.items.Item;
@@ -57,7 +57,7 @@ import at.tectas.buildbox.library.recovery.OpenRecoveryScript;
 import at.tectas.buildbox.library.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.library.service.DownloadService;
 
-public abstract class DownloadActivity extends FragmentActivity implements ICommunicatorCallback, IDeserializeMapFinishedCallback {
+public abstract class DownloadActivity extends FragmentActivity implements ICommunicatorCallback, IDeserializeMapFinishedCallback, ISerializeMapFinishedCallback {
 
 	public static final String TAG = "DownloadActivity";
 	public static final int PICK_FILE_RESULT = 1;
@@ -167,10 +167,12 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	}
 	
 	@Override
-	protected void onStop() {
+	protected void onStop() {		
 		this.removeActivityCallbacks();
 		
-		this.getDownloads().serializeMapToCache(getApplicationContext());
+		if (!this.isFinishing()) {
+			this.getDownloads().serializeMapToCache(getApplicationContext());
+		}
 		
 		this.downloadMapRestored = false;
 		
@@ -197,8 +199,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	
 	@Override
 	protected void onDestroy() {
-		Log.e(TAG, "onDestroy");
-		new DownloadMap().serializeMapToCache(this.getApplicationContext());
+		this.getApplicationContext().deleteFile(getString(R.string.downloads_cache_filename));
 		
 		super.onDestroy();
 	};
@@ -211,12 +212,12 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 				if (!this.downloadMapRestored) {
 					this.getDownloads().clear();
 					
-					this.loadDownloadsMapFromCacheFile(new MapDeserializedProcessCallback(this));
+					this.loadDownloadsMapFromCacheFile(new DeserializeMapFinishedCallback(this));
 					this.downloadMapRestored = true;
 				}
   				break;
   			case SETTINGS_RESULT:
-  				this.getDownloads().serializeMapToCache(this);
+  				this.getDownloads().serializeMapToCache(getApplicationContext());
   				
   				this.finish();
   				
@@ -225,48 +226,41 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
   				this.startActivity(intent);
   				break;
   			case PICK_FILE_RESULT:
-				String filePath = data.getData().getPath();
-				
-				if (filePath != null) {
-					String[] splittedPath = filePath.split("/");
+  				if (data != null) {
+					String filePath = data.getData().getPath();
 					
-					String fileName = splittedPath[splittedPath.length - 1];
-					
-					DownloadPackage pack = new DownloadPackage();
-					pack.title = fileName;
-					
-					pack.url = fileName;
-					
-					DownloadResponse response = new DownloadResponse();
-					response.progress = 100;
-					response.status = DownloadStatus.Done;
-					
-					pack.setResponse(response);
-					
-					pack.setFilename(fileName);
-					pack.setDirectory(filePath.replace(fileName, ""));
-					pack.md5sum = fileName;
-					
-					String extension = pack.getResponse().mime;
-					
-					if (extension != null && extension.toLowerCase().equals(DownloadType.zip.name())) {
-						pack.type = DownloadType.zip;
-					}
-					else {
-						pack.type = DownloadType.other;
-					}
-					
-					if (!this.downloadMapRestored) {
-						this.getDownloads().clear();
+					if (!PropertyHelper.stringIsNullOrEmpty(filePath)) {
+						String[] splittedPath = filePath.split("/");
 						
-						this.loadDownloadsMapFromCacheFile();
-						this.downloadMapRestored = true;
+						String fileName = splittedPath[splittedPath.length - 1];
+						
+						DownloadPackage pack = new DownloadPackage();
+						pack.title = fileName;
+						
+						pack.url = fileName;
+						
+						DownloadResponse response = new DownloadResponse();
+						response.progress = 100;
+						response.status = DownloadStatus.Done;
+						
+						pack.setResponse(response);
+						
+						pack.setFilename(fileName);
+						pack.setDirectory(filePath.replace(fileName, ""));
+						pack.md5sum = fileName;
+						
+						if (!this.downloadMapRestored) {
+							this.getDownloads().clear();
+							
+							this.loadDownloadsMapFromCacheFile();
+							this.downloadMapRestored = true;
+						}
+						
+						this.getDownloads().put(pack);
+						
+						this.refreshDownloadsView();
 					}
-					
-					this.getDownloads().put(pack);
-					
-					this.refreshDownloadsView();
-				}
+  				}
   				break;
 		}
 	}
@@ -328,9 +322,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 							}
 						}
 						
-						activity.getDownloads().serializeMapToStorage(activity, backupDirectory.getPath() + "/" + filename + getString(R.string.backup_file_extension));
-						
-						activity.fillBackupList();
+						activity.getDownloads().serializeMapToStorage(activity, backupDirectory.getPath() + "/" + filename + getString(R.string.backup_file_extension), activity);
 					}
 				}
 			});
@@ -564,7 +556,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		if (serviceMap != null && serviceMap.size() != 0) {
 			this.setDownloads(serviceMap);
 			this.refreshDownloadsView();
-			new DownloadMap().serializeMapToCache(this.getApplicationContext());
+			this.getApplicationContext().deleteFile(getString(R.string.downloads_cache_filename));
 		}
 		else {
 			this.loadDownloadsMapFromCacheFile();
@@ -597,8 +589,6 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	public void iterateDownloadsToInstall() {
 		for (; this.currentInstallIndex < this.getDownloads().size(); this.currentInstallIndex++) {
 			DownloadPackage pack = this.getDownloads().get(this.currentInstallIndex);
-			
-			Log.e(TAG, "iterate == " + pack);
 			
 			if (pack != null && pack.installHandler != null) {
 				
@@ -686,35 +676,48 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		}
 	}
 	
-	
 	protected void fillBackupList() {
-		File rootDirectory = new File(this.getDownloadDir());
-		
-		if (!rootDirectory.exists()) {
-			rootDirectory.mkdir();
-		}
-		
-		File queueDirectoy = new File(rootDirectory, getString(R.string.kitchen_backup_directory_name));
-		
-		if (!queueDirectoy.exists()) {
-			queueDirectoy.mkdirs();
-		}
-		
-		File[] fileList = queueDirectoy.listFiles(new FilenameFilter() {
+		this.fillBackupList(false);
+	}
+	
+	protected void fillBackupList(boolean force) {
+		if (this.backupList == null || force) {
 			
-			@Override
-			public boolean accept(File dir, String filename) {
-				if (filename.endsWith(getString(R.string.backup_file_extension)))
-					return true;
-				else
-					return false;
+			File rootDirectory = new File(this.getDownloadDir());
+			
+			if (!rootDirectory.exists()) {
+				rootDirectory.mkdirs();
 			}
-		});
-		
-		this.backupList = new Hashtable<String, File>();
-		
-		for (File file: fileList) {
-			this.backupList.put(file.getName(), file);
+			
+			File queueDirectoy = new File(rootDirectory, getString(R.string.kitchen_backup_directory_name));
+			
+			if (!queueDirectoy.exists()) {
+				queueDirectoy.mkdirs();
+			}
+			
+			File[] fileList = queueDirectoy.listFiles(new FilenameFilter() {
+				
+				@Override
+				public boolean accept(File dir, String filename) {
+					if (filename.endsWith(getString(R.string.backup_file_extension)))
+						return true;
+					else
+						return false;
+				}
+			});
+			
+			this.backupList = new Hashtable<String, File>();
+			
+			for (File file: fileList) {
+				this.backupList.put(file.getName(), file);
+			}
+			
+			this.invalidateOptionsMenu();
 		}
+	}
+	
+	@Override
+	public void mapSerializedCallback() {
+		this.fillBackupList(true);
 	}
 }
