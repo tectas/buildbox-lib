@@ -405,6 +405,12 @@ public class Communicator {
 	
 	public DownloadResponse downloadFileToSd(DownloadPackage pack, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) {
 		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		
 		DownloadResponse result = new DownloadResponse(pack, DownloadStatus.Pending);
 		
 		if (pack.url != null && !pack.url.isEmpty() && retries <= 5) {
