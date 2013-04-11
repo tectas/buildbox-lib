@@ -25,6 +25,7 @@ public class DownloadResponse implements IJsonSerialize, Parcelable {
 	}
 	
 	public DownloadResponse (DownloadPackage pack, JsonObject json) {
+		this.pack = pack;
 		this.status = this.getStatusFromString(DownloadResponse.helper.tryGetStringFromJson("status", json));
 		this.mime = DownloadResponse.helper.tryGetStringFromJson("mime", json);
 		this.progress = json.get("progress").getAsInt();

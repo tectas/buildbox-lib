@@ -615,6 +615,10 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		if (this.currentInstallIndex == this.getDownloads().size() && this.recoveryScript != null) {
 			this.recoveryScript.executeAndReboot();
 		}
+		
+		if (this.currentInstallIndex == this.getDownloads().size()) {
+			this.currentInstallIndex = 0;
+		}
 	}
 	
 	public void installFiles() {		

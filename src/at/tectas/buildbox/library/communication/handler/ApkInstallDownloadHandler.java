@@ -50,7 +50,7 @@ public class ApkInstallDownloadHandler implements IActivityInstallDownloadHandle
 				
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				
-				intent.setDataAndType(Uri.fromFile(new File(packag.getDirectory(), response.pack.getFilename())), "application/vnd.android.package-archive");
+				intent.setDataAndType(Uri.fromFile(new File(packag.getDirectory(), packag.getFilename())), "application/vnd.android.package-archive");
 				
 				if (activity != null)
 					activity.startActivityForResult(intent, DownloadActivity.PACKAGE_MANAGER_RESULT);
