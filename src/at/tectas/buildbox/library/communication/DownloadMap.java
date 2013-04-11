@@ -19,6 +19,7 @@ import android.util.Log;
 import at.tectas.buildbox.R;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDeserializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.ISerializeMapFinishedCallback;
+import at.tectas.buildbox.library.communication.handler.interfaces.IMapSortingHandler;
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 
 import com.google.gson.JsonArray;
@@ -31,13 +32,26 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 	protected static final String TAG = "DownloadMap";
 	private static final long serialVersionUID = 1L;
 
-	public DownloadMap(Parcel source) {
-		for (int i = 0; i < source.dataSize(); i++) {
-			this.put((DownloadPackage)source.readParcelable(DownloadPackage.class.getClassLoader()));
+	protected IMapSortingHandler sorter = null; 
+	
+	public void setMapSortingHandler(IMapSortingHandler handler) {
+		this.sorter = handler;
+		
+		if (this.sorter != null) {
+			this.sorter.setMap(this);
 		}
 	}
 	
-	public DownloadMap() { }
+	public DownloadMap(Parcel source) {
+		if (source != null) {
+			for (int i = 0; i < source.dataSize(); i++) {
+				this.put((DownloadPackage)source.readParcelable(DownloadPackage.class.getClassLoader()));
+			}
+		}
+	}
+	
+	public DownloadMap() {
+	}
 
 	public synchronized DownloadPackage get (String md5sum) {
 		for (DownloadKey key: this.keySet()) {
@@ -72,6 +86,16 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 					if (pack.type.equals(type))
 					return pack;
 			}
+		}
+		
+		return null;
+	}
+	
+	public synchronized DownloadKey getKey(int startingIndex, DownloadType type) {
+		DownloadPackage pack = this.get(startingIndex, type); 
+		
+		if (pack != null) {
+			return this.getKey(pack.getKey());
 		}
 		
 		return null;
@@ -233,6 +257,28 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		}
 		
 		key.index = newIndex;
+	}
+	
+	public void sort(IMapSortingHandler handler, boolean makeDefault) {
+		if (makeDefault) {
+			this.sorter = handler;
+		}
+		
+		if (handler != null) {
+			if (handler.getMap() == null) {
+				handler.setMap(this);
+			}
+			
+			handler.sortMap();
+		}
+	}
+	
+	public void sort(IMapSortingHandler handler) {
+		this.sort(handler, false);
+	}
+	
+	public void sort() {
+		this.sort(this.sorter);
 	}
 	
 	public JsonArray serializeToJsonArray() {

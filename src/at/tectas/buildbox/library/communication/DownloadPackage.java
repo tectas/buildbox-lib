@@ -19,6 +19,7 @@ import at.tectas.buildbox.library.communication.handler.interfaces.IInstallDownl
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 import at.tectas.buildbox.library.helpers.IJsonSerialize;
 import at.tectas.buildbox.library.helpers.JsonHelper;
+import at.tectas.buildbox.library.helpers.PropertyHelper;
 
 @SuppressLint("DefaultLocale")
 public class DownloadPackage implements IJsonSerialize, Parcelable {
@@ -82,6 +83,10 @@ public class DownloadPackage implements IJsonSerialize, Parcelable {
 		}
 		
 		this.response = response;
+		
+		if (!PropertyHelper.stringIsNullOrEmpty(this.filename)) {
+			this.setFilename(this.getFilename());
+		}
 	}
 	
 	public DownloadResponse getResponse() {

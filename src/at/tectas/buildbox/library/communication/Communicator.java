@@ -247,302 +247,181 @@ public class Communicator {
 	}
 	
 	public DownloadResponse downloadFileToSd(DownloadPackage pack, IDownloadAsyncCommunicator progressHandler) {
-		DownloadResponse result = new DownloadResponse(pack, DownloadStatus.Pending);
-		
-		if (pack.url != null) {
-			
-			InputStream in = null;
-		    FileOutputStream out = null;
-		    
-		    try {
-		    	HttpURLConnection connection = Communicator.getConnection(pack.url);
-		        
-		        boolean statusOk = Communicator.checkHttpStatus(connection);
-		        
-		        if (statusOk) {
-		        	
-			        String responseFilename = Communicator.tryGetFilenameFromConnection(connection);
-			        
-			        long fileSize = connection.getContentLength();
-			        
-			        in = new BufferedInputStream(connection.getInputStream());
-			        
-				    MessageDigest md = MessageDigest.getInstance("MD5");
-			        
-			        in = new DigestInputStream(in, md);
-			        
-			        File dir = new File(pack.directory);
-			        
-			        if (!dir.exists()) {
-			        	boolean successfull = dir.mkdirs();
-			        	
-			        	if (!successfull) {
-			        		throw new IOException("Couldn't create directory: " + dir.getPath());
-			        	}
-			        }
-			        
-			        pack.setFilename(
-			        		responseFilename == null || PropertyHelper.stringIsNullOrEmpty(responseFilename) ?
-			        				(
-			        						pack.getFilename().equals("") ?
-			        						(UUID.randomUUID().toString() + '.' + pack.type) : 
-			        						pack.getFilename()
-			        				) : 
-			        				responseFilename);
-			        
-			        File file = new File(pack.directory, pack.getFilename());
-			        
-			        if (file.exists()) {
-			        	file.delete();
-			        }
-			        
-			        out = new FileOutputStream(file);
-			        
-			        byte[] buffer = new byte[1024];
-			        
-			        int len;
-			        
-			        Integer processed = 0, publishSteps = 0;
-			        
-			        publishSteps = (int)(fileSize / 100);
-			        
-			        result.progress = (int)((100d / fileSize) * processed);
-	            	progressHandler.indirectPublishProgress(result);
-			        
-			        while ((len = in.read(buffer)) != -1) {
-			            out.write(buffer, 0, len);
-			            
-			            processed += len;
-			            
-			            if (progressHandler.isCancelled()) {
-			            	result.status = DownloadStatus.Aborted;
-			            	return result;
-			            }
-			            
-			            if (processed % (publishSteps < 1048576?1048576:publishSteps) <= 512) {
-			            	out.flush();
-			            	result.progress = (int)((100d / fileSize) * processed);
-			            	progressHandler.indirectPublishProgress(result);
-			            }
-			        }
-			        
-			        result.progress = (int)((100d / fileSize) * processed);
-			        progressHandler.indirectPublishProgress(result);
-			        
-			        out.flush();
-			        
-			        if (processed != (int)fileSize) {
-			        	if (in != null) {
-			        		in.close();
-			        		in = null;
-			        	}
-			        		
-			        	if (out != null) {
-			        		out.close();
-			        		out = null;
-			        	}
-			        	
-			        	result = this.downloadFileToSd(pack, progressHandler, processed, 1);
-			        }
-			        else {
-			        	if (pack.md5sum != null) {
-					        byte[] sumBytes = md.digest();
-					        
-					        StringBuffer hexString = new StringBuffer();
-					        
-					        for (int i=0; i<sumBytes.length; i++) {
-					        	
-					        	StringBuffer hex = new StringBuffer();
-					        	
-					        	hex.append(Integer.toHexString(0xFF & sumBytes[i]));
-					        	
-					        	if (hex.length() == 1)
-					        		hexString.append(0);
-					        	
-					            hexString.append(hex);
-					        }
-					        
-					        String sum = hexString.toString();
-					        
-					        if (sum.equals(pack.md5sum)) 
-					        	result.status = DownloadStatus.Successful;
-					        else {
-					        	
-					        	result.status = DownloadStatus.Md5mismatch;
-					        }
-			        	}
-			        	else {
-			        		result.status = DownloadStatus.Done;
-			        	}
-			        }
-		        }
-		        else {
-		        	result.status = DownloadStatus.Broken;
-		        	return result;
-		        }
-		    }
-	        catch (Exception e) {
-	        	e.printStackTrace();
-	        	result.status = DownloadStatus.Broken;
-	        }
-		    finally {
-		    	if (in != null)
-					try {
-						in.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-		    	if (out != null)
-					try {
-						out.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-		    }
-		}
-		return result;
+		return this.downloadFileToSd(pack, progressHandler, 0, 0);
 	}
 	
 	public DownloadResponse downloadFileToSd(DownloadPackage pack, IDownloadAsyncCommunicator progressHandler, int alreadyDownloaded, int retries) {
 		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-		
-		DownloadResponse result = new DownloadResponse(pack, DownloadStatus.Pending);
-		
-		if (pack.url != null && !pack.url.isEmpty() && retries <= 5) {
-			InputStream in = null;
-		    FileOutputStream out = null;
-		    
-		    try {
-		        HttpURLConnection connection = Communicator.getConnection(pack.url, alreadyDownloaded);
-		        
-		        boolean statusOk = Communicator.checkHttpStatus(connection);
-		        
-		        if (statusOk) {
-		        	
-			        Boolean ranges = Communicator.tryGetAcceptRangesFromConnection(connection);
+		if (pack != null) {			
+			pack.setResponse(new DownloadResponse(pack, DownloadStatus.Pending));
+			
+			if (pack.url != null && !pack.url.isEmpty() && retries < 5) {
+				InputStream in = null;
+			    FileOutputStream out = null;
+			    
+			    try {
+			        HttpURLConnection connection = Communicator.getConnection(pack.url, alreadyDownloaded);
 			        
-			        long fileSize = connection.getContentLength();
+			        boolean statusOk = Communicator.checkHttpStatus(connection);
 			        
-			        in = new BufferedInputStream(connection.getInputStream());
-			        
-				    MessageDigest md = MessageDigest.getInstance("MD5");
-			        
-			        in = new DigestInputStream(in, md);
-			        
-			        File file = new File(pack.directory, pack.getFilename());
-			        
-			        if (!ranges && file.exists()) {
-			        	file.delete();
-			        }
-			        
-			        out = new FileOutputStream(file, ranges);
-			        
-			        byte[] buffer = new byte[1024];
-			        
-			        int len;
-			        
-			        Integer processed = ranges ? alreadyDownloaded : 0;
-			        
-			        Integer publishSteps = (int)(fileSize / 100);
-			        
-			        result.progress = (int)((100d / fileSize) * processed);
-	            	progressHandler.indirectPublishProgress(result);
-			        
-			        while ((len = in.read(buffer)) != -1) {
-			            out.write(buffer, 0, len);
-			            processed += len;
-			            
-			            if (progressHandler.isCancelled()) {
-			            	result.status = DownloadStatus.Aborted;
-			            	return result;
-			            }
-			            
-			            if (processed % (publishSteps < 1048576?1048576:publishSteps) <= 512) {
-			            	out.flush();
-			            	result.progress = (int)((100d / fileSize) * processed);
-			            	progressHandler.indirectPublishProgress(result);
-			            }
-			        }
-			        
-	            	result.progress = (int)((100d / fileSize) * processed);
-	            	progressHandler.indirectPublishProgress(result);
-			        
-			        out.flush();
-			        
-			        if (processed != (int)fileSize) {
-			        	if (in != null) {
-			        		in.close();
-			        		in = null;
-			        	}
-			        		
-			        	if (out != null) {
-			        		out.close();
-			        		out = null;
-			        	}
+			        if (statusOk) {
 			        	
-			        	result = this.downloadFileToSd(pack, progressHandler, processed, retries + 1);
+				        String responseFilename = Communicator.tryGetFilenameFromConnection(connection);
+			        	
+				        Boolean ranges = Communicator.tryGetAcceptRangesFromConnection(connection);
+				        
+				        long fileSize = connection.getContentLength();
+				        
+				        in = new BufferedInputStream(connection.getInputStream());
+				        
+					    MessageDigest md = MessageDigest.getInstance("MD5");
+				        
+				        in = new DigestInputStream(in, md);
+				        
+				        File dir = new File(pack.directory);
+				        
+				        if (!dir.exists()) {
+				        	boolean successfull = dir.mkdirs();
+				        	
+				        	if (!successfull) {
+				        		throw new IOException("Couldn't create directory: " + dir.getPath());
+				        	}
+				        }
+				        
+				        pack.setFilename(
+				        		PropertyHelper.stringIsNullOrEmpty(responseFilename) ?
+				        				(
+				        						pack.getFilename().equals("") ?
+				        						(UUID.randomUUID().toString() + '.' + pack.type) : 
+				        						pack.getFilename()
+				        				) : 
+				        				responseFilename);
+				        
+				        File file = new File(pack.directory, pack.getFilename());
+				        
+				        if (file.exists()) {
+				        	file.delete();
+				        }
+				        
+				        out = new FileOutputStream(file, ranges);
+				        
+				        byte[] buffer = new byte[1024];
+				        
+				        int len;
+				        
+				        alreadyDownloaded = ranges ? alreadyDownloaded : 0;
+				        
+				        Integer publishSteps = (int)(fileSize / 100);
+				        
+				        pack.getResponse().progress = (int)((100d / fileSize) * alreadyDownloaded);
+		            	progressHandler.indirectPublishProgress(pack.getResponse());
+				        
+				        while ((len = in.read(buffer)) != -1) {
+				            out.write(buffer, 0, len);
+				            alreadyDownloaded += len;
+				            
+				            if (progressHandler.isCancelled()) {
+				            	pack.getResponse().status = DownloadStatus.Aborted;
+				            	return pack.getResponse();
+				            }
+				            
+				            if (alreadyDownloaded % (publishSteps < 1048576?1048576:publishSteps) <= 512) {
+				            	out.flush();
+				            	pack.getResponse().progress = (int)((100d / fileSize) * alreadyDownloaded);
+				            	progressHandler.indirectPublishProgress(pack.getResponse());
+				            }
+				        }
+				        
+				        pack.getResponse().progress = (int)((100d / fileSize) * alreadyDownloaded);
+				        
+				        out.flush();
+		            	progressHandler.indirectPublishProgress(pack.getResponse());
+				        
+				        out.flush();
+				        
+				        if (alreadyDownloaded != (int)fileSize) {
+				        	if (in != null) {
+				        		in.close();
+				        		in = null;
+				        	}
+				        		
+				        	if (out != null) {
+				        		out.close();
+				        		out = null;
+				        	}
+				        	
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e1) {
+								e1.printStackTrace();
+							}
+							
+				        	pack.setResponse(this.downloadFileToSd(pack, progressHandler, alreadyDownloaded, retries + 1));
+				        }
+				        else {
+				        	if (pack.md5sum != null) {
+						        byte[] sumBytes = md.digest();
+						        
+						        StringBuffer hexString = new StringBuffer();
+						        
+						        for (int i=0; i<sumBytes.length; i++) {
+						        	
+						        	StringBuffer hex = new StringBuffer();
+						        	
+						        	hex.append(Integer.toHexString(0xFF & sumBytes[i]));
+						        	
+						        	if (hex.length() == 1)
+						        		hexString.append(0);
+						        	
+						            hexString.append(hex);
+						        }
+						        
+						        String sum = hexString.toString();
+						        
+						        if (sum.equals(pack.md5sum)) 
+						        	pack.getResponse().status = DownloadStatus.Successful;
+						        else {
+						        	
+						        	pack.getResponse().status = DownloadStatus.Md5mismatch;
+						        }
+				        	}
+				        	else {
+				        		pack.getResponse().status = DownloadStatus.Done;
+				        	}
+				        }
 			        }
 			        else {
-			        	if (pack.md5sum != null) {
-					        byte[] sumBytes = md.digest();
-					        
-					        StringBuffer hexString = new StringBuffer();
-					        
-					        for (int i=0; i<sumBytes.length; i++) {
-					        	
-					        	StringBuffer hex = new StringBuffer();
-					        	
-					        	hex.append(Integer.toHexString(0xFF & sumBytes[i]));
-					        	
-					        	if (hex.length() == 1)
-					        		hexString.append(0);
-					        	
-					            hexString.append(hex);
-					        }
-					        
-					        String sum = hexString.toString();
-					        
-					        if (sum.equals(pack.md5sum)) 
-					        	result.status = DownloadStatus.Successful;
-					        else {
-					        	
-					        	result.status = DownloadStatus.Md5mismatch;
-					        }
-			        	}
-			        	else {
-			        		result.status = DownloadStatus.Successful;
-			        	}
+			        	pack.getResponse().status = DownloadStatus.Broken;
 			        }
-		        }
-		        else {
-		        	result.status = DownloadStatus.Broken;
-		        }
-		    }
-		    catch (Exception e) {
-		    	e.printStackTrace();
-	        	result.status = DownloadStatus.Broken;
-		    }
-		    finally {
-		    	if (in != null)
+			    }
+			    catch (Exception e) {
+			    	e.printStackTrace();
 					try {
-						in.close();
-					} catch (IOException e) {
-						e.printStackTrace();
+						Thread.sleep(1000);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
 					}
-		    	if (out != null)
-					try {
-						out.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-		    }
+			    	pack.setResponse(this.downloadFileToSd(pack, progressHandler, alreadyDownloaded, retries + 1));
+			    }
+			    finally {
+			    	if (in != null)
+						try {
+							in.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+			    	if (out != null)
+						try {
+							out.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+			    }
+			}
+			return pack.getResponse();
 		}
-		return result;
+		
+		return null;
 	}
 	
 	public static HttpURLConnection getConnection(String urlString) throws ClientProtocolException, IOException, URISyntaxException {

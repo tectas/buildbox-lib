@@ -35,6 +35,7 @@ import at.tectas.buildbox.library.communication.DownloadMap;
 import at.tectas.buildbox.library.communication.DownloadPackage;
 import at.tectas.buildbox.library.communication.DownloadResponse;
 import at.tectas.buildbox.library.communication.DownloadStatus;
+import at.tectas.buildbox.library.communication.TypeSortedDownloadMap;
 import at.tectas.buildbox.library.communication.callbacks.CallbackType;
 import at.tectas.buildbox.library.communication.callbacks.DeserializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.DownloadBaseCallback;
@@ -65,7 +66,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	public static final int PACKAGE_MANAGER_RESULT = 3;
 	
 	protected Communicator communicator = new Communicator();
-	protected DownloadMap downloads = new DownloadMap();
+	protected DownloadMap downloads = new TypeSortedDownloadMap();
 	protected PropertyHelper helper = null;
 	protected JsonItemParser parser = null;
 	protected BaseAdapter dowloadViewAdapter = null;
@@ -217,13 +218,19 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 				}
   				break;
   			case SETTINGS_RESULT:
-  				this.getDownloads().serializeMapToCache(getApplicationContext());
+  				final DownloadActivity activity = this;
   				
-  				this.finish();
-  				
-  				Intent intent = new Intent(this.getApplicationContext(), this.getClass());
-  				
-  				this.startActivity(intent);
+  				this.getDownloads().serializeMapToCache(getApplicationContext(), new ISerializeMapFinishedCallback() {
+					
+					@Override
+					public void mapSerializedCallback() {
+						activity.finish();
+		  				
+		  				Intent intent = new Intent(activity.getApplicationContext(), activity.getClass());
+		  				
+		  				activity.startActivity(intent);
+					}
+				});
   				break;
   			case PICK_FILE_RESULT:
   				if (data != null) {
@@ -438,7 +445,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 		this.refreshDownloadsView();
 	}
 	
-	public void refreshDownloadsView() {		
+	public void refreshDownloadsView() {
         if (this.dowloadViewAdapter != null) {
         	this.dowloadViewAdapter.notifyDataSetChanged();
         }
@@ -532,7 +539,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	
 	public abstract void startServiceDownload();
 	
-	public void startServiceDownload(IDownloadProgressCallback progressCallback, IDownloadFinishedCallback finishedCallback, IDownloadCancelledCallback cancelledCallback) {
+	public void startServiceDownload(IDownloadProgressCallback progressCallback, IDownloadFinishedCallback finishedCallback, IDownloadCancelledCallback cancelledCallback) {		
 		if (DownloadService.Processing == true) {
 			this.getServiceDownloadMap();
 		}
@@ -587,6 +594,8 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	public abstract void updateWithJsonObject(JsonObject result);
 	
 	public void iterateDownloadsToInstall() {
+		this.downloads.sort();
+		
 		for (; this.currentInstallIndex < this.getDownloads().size(); this.currentInstallIndex++) {
 			DownloadPackage pack = this.getDownloads().get(this.currentInstallIndex);
 			

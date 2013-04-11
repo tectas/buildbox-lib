@@ -35,25 +35,26 @@ public class ShellHelper {
 	}
 	
 	public static ArrayList<String> executeCommand(String[] commands) {
-		DataOutputStream shellIn = null;
-		BufferedReader shellOut = null;
-		
+		return ShellHelper.executeCommand(commands, 0);
+	}
+	
+	public static ArrayList<String> executeCommand(String[] commands, int retries) {		
 		try {
-			if (commands != null && commands.length > 0) {
+			if (retries < 5 && commands != null && commands.length > 0) {
 				Process process = Runtime.getRuntime().exec(commands[0]);
 				
-			    shellIn = new DataOutputStream(process.getOutputStream());
-			    shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				DataOutputStream shellIn = new DataOutputStream(process.getOutputStream());
+				BufferedReader shellOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		        
 			    ShellStreamWorker outWorker = new ShellStreamWorker(shellOut);
 			    
 			    ArrayList<String> output = outWorker.result;
 			    
+			    outWorker.start();
+			    
 			    for (int i = 1; i < commands.length; i++) {
 			    	shellIn.writeBytes(commands[i] + "\n");
 			    }
-		        
-			    outWorker.start();
 			    
 		        shellIn.writeBytes("exit\n");
 		        
@@ -74,6 +75,7 @@ public class ShellHelper {
 		}
 		catch (IOException e) {
 			e.printStackTrace();
+			ShellHelper.executeCommand(commands, retries + 1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

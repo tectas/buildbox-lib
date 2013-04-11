@@ -1,8 +1,8 @@
 package at.tectas.buildbox.library.content.items.properties;
 
 public enum DownloadType {
-	zip, 
-	apk, 
+	apk,
+	zip,  
 	other, 
 	web
 }
