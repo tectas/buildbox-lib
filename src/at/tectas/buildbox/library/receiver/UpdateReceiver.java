@@ -133,10 +133,10 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 					editor.commit();
 				}
 				
-				if (this.compareVersions(this.romItem.version, lastCheckedVersion) != 0) {
+				if (PropertyHelper.compareVersions(this.romItem.version, lastCheckedVersion) != 0) {
 					String version = this.helper.getVersion();
 					
-					int comparsion = this.compareVersions(version, this.romItem.version);
+					int comparsion = PropertyHelper.compareVersions(version, this.romItem.version);
 					
 					if (comparsion == 1) {
 						this.notifyUpdate();
@@ -155,99 +155,6 @@ public class UpdateReceiver extends BroadcastReceiver implements ICommunicatorCa
 			e.printStackTrace();
 		}
 		wakelock.release();
-	}
-	
-	public int compareVersions(String localVersion, String remoteVersion) {
-		if ((PropertyHelper.stringIsNullOrEmpty(localVersion) == true) && (PropertyHelper.stringIsNullOrEmpty(remoteVersion) == true))
-			return 0;
-			
-		if (PropertyHelper.stringIsNullOrEmpty(localVersion) == true)
-			return 1;
-		
-		if (PropertyHelper.stringIsNullOrEmpty(remoteVersion) == true)
-			return -1;
-		
-		if (localVersion.equals(remoteVersion))
-			return 0;
-		
-		String[] localVersionArray = localVersion.split("\\.");
-		String[] remoteVersionArray = remoteVersion.split("\\.");
-		
-		for (int i = 0; i < localVersionArray.length && i < remoteVersionArray.length; i++) {
-			boolean localIsLonger = localVersionArray[i].length() > remoteVersionArray[i].length();
-			
-			String longer = localIsLonger == true ? localVersionArray[i] : remoteVersionArray[i];
-			String shorter = localIsLonger == false ? localVersionArray[i] : remoteVersionArray[i];
-			
-			for (int k = shorter.length(); k < longer.length(); k++) {
-				
-				if (localIsLonger == true) {
-					remoteVersionArray[i] = "0" + remoteVersionArray[i];
-				}
-				else {
-					localVersionArray[i] = "0" + localVersionArray[i];
-				}
-			}
-			
-			if (localVersionArray[i].equals(remoteVersionArray[i])) {
-				continue;
-			}
-			else {
-				if (localVersionArray[i].length() < remoteVersionArray[i].length()) {
-					return 1;
-				}
-				else if (localVersionArray[i].length() > remoteVersionArray[i].length()) {
-					return -1;
-				}
-				else {
-					for (int j = 0; j < localVersionArray[i].length() && j < remoteVersionArray[i].length(); j++) {
-						if (localVersionArray[i].charAt(j) == remoteVersionArray[i].charAt(j)) {
-							continue;
-						}
-						else if (localVersionArray[i].charAt(j) > remoteVersionArray[i].charAt(j)) {
-							return -1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-			}
-		}
-		
-		boolean localIsLonger = localVersionArray.length > remoteVersionArray.length;
-		
-		String[] longerArray = localIsLonger == true ? localVersionArray : remoteVersionArray;
-		String[] shorterArray = localIsLonger == false ? localVersionArray : remoteVersionArray;
-		
-		for (int i = shorterArray.length; i < longerArray.length; i++) {
-			
-			if (longerArray[i].equals("0")) {
-				continue;
-			}
-			else {
-				if (longerArray[i].length() == 1) {
-					return 1;
-				}
-				else {
-					for (int j = 0; j < longerArray[i].length(); j++) {
-						if (longerArray[i].charAt(j) == '0') {
-							continue;
-						}
-						else {
-							if (localIsLonger == true) {
-								return -1;
-							}
-							else {
-								return 1;
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		return 0;
 	}
 	
 	public void notifyUpdate() {

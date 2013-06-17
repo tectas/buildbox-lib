@@ -106,4 +106,15 @@
     <string name="splashscreen_label">BuildBox\n by Tectas \n\nset your device free\n\n\nLoading content...</string>
     <string name="device_model_property">ro.product.model</string>
     <string name="item_device_type">device</string>
+    <string name="changelist_item_table_name">items</string>
+    <string name="changelist_database_name">Changelist.db</string>
+    <string name="changelist_version_field_name">version</string>
+    <string name="changelist_title_field_name">title</string>
+    <string name="changelist_url_field_name">url</string>
+    <string name="changelist_dialog_title">Changelog</string>
+    <string name="changelist_dialog_message">The following changes have happend at the content since last use.</string>
+    <string name="changelist_removed_head_text">Removed</string>
+    <string name="changelist_downgraded_head_text">Downgraded</string>
+    <string name="changelist_updated_head_text">Updated</string>
+    <string name="changelist_added_head_text">Added</string>
 </resources>

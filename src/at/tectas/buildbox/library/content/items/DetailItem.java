@@ -59,6 +59,12 @@ public class DetailItem extends Item {
 		this(null, json);
 	}
 	
+	public DetailItem(String title, String version, String url) {
+		this.title = title;
+		this.version = version;
+		this.url = url;
+	}
+	
 	@Override
 	public Bundle parseItemToBundle() {
 		Bundle result = super.parseItemToBundle();

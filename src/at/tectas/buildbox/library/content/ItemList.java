@@ -29,7 +29,7 @@ public class ItemList extends ArrayList<Item>  {
 		boolean result = false;
 		
 		for (Item item: this) {
-			if (item.ID == key) {
+			if (item.ID != null && item.ID.equals(key)) {
 				result = true;
 				break;
 			}
@@ -37,11 +37,11 @@ public class ItemList extends ArrayList<Item>  {
 		return result;
 	}
 
-	public boolean contains(String key) {
+	public boolean contains(String title) {
 		boolean result = false;
 		
 		for (Item item: this) {
-			if (item.ID.toString() == key) {
+			if (item.title != null && item.title.equalsIgnoreCase(title)) {
 				result = true;
 				break;
 			}
@@ -51,7 +51,7 @@ public class ItemList extends ArrayList<Item>  {
 
 	public Item get(Object key) {
 		for (Item item: this) {
-			if (item.ID == key) {
+			if (item.ID != null && item.ID.equals(key)) {
 				return item;
 			}
 		}
@@ -64,7 +64,7 @@ public class ItemList extends ArrayList<Item>  {
 	
 	public Item get(UUID id) {
 		for (Item item: this) {
-			if (item.ID == id) {
+			if (item.ID != null && item.ID.equals(id)) {
 				return item;
 			}
 		}
@@ -73,7 +73,7 @@ public class ItemList extends ArrayList<Item>  {
 	
 	public Item get (String title) {
 		for (Item item: this) {
-			if (item.title == title) {
+			if (item.title != null && item.title.equalsIgnoreCase(title)) {
 				return item;
 			}
 		}
@@ -87,7 +87,17 @@ public class ItemList extends ArrayList<Item>  {
 
 	public boolean remove(UUID key) {
 		for (Item item: this) {
-			if (item.ID == key) {
+			if (item.ID != null && item.ID.equals(key)) {
+				this.remove(item);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean remove(String title) {
+		for (Item item: this) {
+			if (item.title != null && item.title.equalsIgnoreCase(title)) {
 				this.remove(item);
 				return true;
 			}
@@ -103,5 +113,13 @@ public class ItemList extends ArrayList<Item>  {
 		}
 		
 		return result;
+	}
+	
+	public void add(ItemList list) {
+		if (list != null) {
+			for (Item item: list) {
+				this.add(item);
+			}
+		}
 	}
 }

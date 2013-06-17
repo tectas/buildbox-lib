@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    
+	<LinearLayout android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical" >
+	
+	    <TextView
+	        android:id="@+id/changelist_added_head"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/changelist_added_head_text"
+	        android:textAppearance="?android:attr/textAppearanceMedium" 
+	        android:visibility="gone"/>
+	
+	    <TextView
+	        android:id="@+id/changelist_added"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="5sp"
+	        android:paddingTop="5sp"
+	        android:paddingBottom="8sp"
+	        android:visibility="gone" />
+	
+	    <TextView
+	        android:id="@+id/changelist_removed_head"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/changelist_removed_head_text"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
+	        android:visibility="gone" />
+	
+	    <TextView
+	        android:id="@+id/changelist_removed"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="5sp"
+	        android:paddingTop="5sp"
+	        android:paddingBottom="8sp"
+	        android:visibility="gone" />
+	
+	    <TextView
+	        android:id="@+id/changelist_updated_head"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/changelist_updated_head_text"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
+	        android:visibility="gone" />
+	
+	    <TextView
+	        android:id="@+id/changelist_updated"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="5sp"
+	        android:paddingTop="5sp"
+	        android:paddingBottom="8sp"
+	        android:visibility="gone" />
+	
+	    <TextView
+	        android:id="@+id/changelist_downgraded_head"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/changelist_downgraded_head_text"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
+	        android:visibility="gone" />
+	
+	    <TextView
+	        android:id="@+id/changelist_downgraded"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="5sp"
+	        android:paddingTop="5sp"
+	        android:paddingBottom="8sp"
+	        android:visibility="gone" />
+		
+	</LinearLayout>
+</ScrollView>

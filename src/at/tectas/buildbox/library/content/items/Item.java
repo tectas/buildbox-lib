@@ -40,6 +40,8 @@ public class Item {
 		this.tryGetArrayFromJson(Item.context.getString(R.string.dependencies_property), json, ArrayTypes.DEPENDENCIES);
 	}
 	
+	protected Item () { }
+	
 	public static void setActivity(Context activity_) {
 		Item.context = activity_;
 	}

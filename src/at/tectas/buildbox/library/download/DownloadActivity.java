@@ -29,6 +29,8 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.changelist.ChangeList;
+import at.tectas.buildbox.library.changelist.ChangeListBuiltCallback;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.DownloadKey;
 import at.tectas.buildbox.library.communication.DownloadMap;
@@ -588,7 +590,11 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	public abstract void updateWithImage(ImageView view, Bitmap bitmap);
 
 	@Override
-	public abstract void updateWithJsonArray(JsonArray result);
+	public void updateWithJsonArray(JsonArray result) {
+		ChangeList changelist = new ChangeList(this, getContentItems(), new ChangeListBuiltCallback(this));
+		
+		changelist.run();
+	}
 
 	@Override
 	public abstract void updateWithJsonObject(JsonObject result);
