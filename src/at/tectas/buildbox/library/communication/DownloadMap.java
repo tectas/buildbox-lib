@@ -285,7 +285,10 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		JsonArray objects = new JsonArray();
 		
 		for (int i = 0; i < this.size(); i++) {
-			objects.add(this.get(i).serializeToJson());
+			
+			if (this.get(i) != null) {
+				objects.add(this.get(i).serializeToJson());
+			}
 		}
 		
 		return objects;
