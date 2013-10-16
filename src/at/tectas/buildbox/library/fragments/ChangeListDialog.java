@@ -18,7 +18,6 @@ public class ChangeListDialog extends DialogFragment {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
 		
 		builder.setTitle(R.string.changelist_dialog_title);
-		builder.setMessage(R.string.changelist_dialog_message);
 		
 		Bundle arguments = this.getArguments();
 		
@@ -29,7 +28,7 @@ public class ChangeListDialog extends DialogFragment {
 			
 			TextView textView = null;
 			
-			if (PropertyHelper.stringIsNullOrEmpty(changeText)) {
+			if (!PropertyHelper.stringIsNullOrEmpty(changeText)) {
 				((TextView) view.findViewById(R.id.changelist_added_head)).setVisibility(View.VISIBLE);
 				
 				textView = (TextView) view.findViewById(R.id.changelist_added);
@@ -41,7 +40,7 @@ public class ChangeListDialog extends DialogFragment {
 			
 			changeText = arguments.getString(ChangeType.updated.name());
 			
-			if (PropertyHelper.stringIsNullOrEmpty(changeText)) {
+			if (!PropertyHelper.stringIsNullOrEmpty(changeText)) {
 				((TextView) view.findViewById(R.id.changelist_updated_head)).setVisibility(View.VISIBLE);
 				
 				textView = (TextView) view.findViewById(R.id.changelist_updated);
@@ -53,17 +52,19 @@ public class ChangeListDialog extends DialogFragment {
 			
 			changeText = arguments.getString(ChangeType.downgraded.name());
 			
-			if (PropertyHelper.stringIsNullOrEmpty(changeText)) {
+			if (!PropertyHelper.stringIsNullOrEmpty(changeText)) {
 				((TextView) view.findViewById(R.id.changelist_downgraded_head)).setVisibility(View.VISIBLE);
 				
 				textView = (TextView) view.findViewById(R.id.changelist_downgraded);
 				
 				textView.setText(changeText);
+				
+				textView.setVisibility(View.VISIBLE);
 			}
 			
 			changeText = arguments.getString(ChangeType.removed.name());
 			
-			if (PropertyHelper.stringIsNullOrEmpty(changeText)) {
+			if (!PropertyHelper.stringIsNullOrEmpty(changeText)) {
 				((TextView) view.findViewById(R.id.changelist_removed_head)).setVisibility(View.VISIBLE);
 				
 				textView = (TextView) view.findViewById(R.id.changelist_removed);

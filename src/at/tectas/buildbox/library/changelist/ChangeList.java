@@ -22,6 +22,7 @@ public class ChangeList extends Thread {
 	public ChangeList (Context context, ItemList newList, IChangeListBuiltCallback callback) {
 		this.context = context;
 		this.newList = newList;
+		this.callback = callback;
 		this.changelist = 
 			ChangeListBackend.getInstance(
 				this.context, 

@@ -588,16 +588,18 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 	
 	@Override
 	public abstract void updateWithImage(ImageView view, Bitmap bitmap);
-
+	
 	@Override
-	public void updateWithJsonArray(JsonArray result) {
+	public abstract void updateWithJsonObject(JsonObject result);
+	
+	@Override
+	public abstract void updateWithJsonArray(JsonArray result);
+	
+	public void processChangeList() {
 		ChangeList changelist = new ChangeList(this, getContentItems(), new ChangeListBuiltCallback(this));
 		
 		changelist.run();
 	}
-
-	@Override
-	public abstract void updateWithJsonObject(JsonObject result);
 	
 	public void iterateDownloadsToInstall() {
 		this.downloads.sort();

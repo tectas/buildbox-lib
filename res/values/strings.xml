@@ -112,7 +112,7 @@
     <string name="changelist_title_field_name">title</string>
     <string name="changelist_url_field_name">url</string>
     <string name="changelist_dialog_title">Changelog</string>
-    <string name="changelist_dialog_message">The following changes have happend at the content since last use.</string>
+    <string name="changelist_dialog_message">The following changes have happend since last use.</string>
     <string name="changelist_removed_head_text">Removed</string>
     <string name="changelist_downgraded_head_text">Downgraded</string>
     <string name="changelist_updated_head_text">Updated</string>

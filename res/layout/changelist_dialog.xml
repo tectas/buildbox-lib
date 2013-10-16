@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
     
-	<LinearLayout android:layout_width="match_parent"
+<TextView android:id="@+id/changelist_message"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:text="@string/changelist_dialog_message"
+    android:paddingBottom="8sp"/>
+
+<View android:layout_width="fill_parent" 
+      android:layout_height="1px" 
+      android:background="#DADADA" />
+
+<ScrollView
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical"
+    android:fillViewport="true"
+    android:scrollbarAlwaysDrawVerticalTrack="true" >
+    
+	<LinearLayout android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:orientation="vertical" >
+	    android:orientation="vertical"
+        android:scrollbars="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true" >
 	
 	    <TextView
 	        android:id="@+id/changelist_added_head"
@@ -77,3 +98,4 @@
 		
 	</LinearLayout>
 </ScrollView>
+</LinearLayout>

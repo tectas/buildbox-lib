@@ -5,17 +5,17 @@ import java.util.Map.Entry;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.app.Activity;
 import at.tectas.buildbox.library.fragments.ChangeListDialog;
 import at.tectas.buildbox.R;
 
 public class ChangeListBuiltCallback implements IChangeListBuiltCallback {
 	
-	protected FragmentActivity context = null;
+	protected Activity context = null;
 	
 	public ChangeListBuiltCallback(Context context) {
-		if (context instanceof FragmentActivity) {
-			this.context = (FragmentActivity) context;
+		if (context instanceof Activity) {
+			this.context = (Activity) context;
 		}
 	}
 	
