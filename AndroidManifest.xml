@@ -22,7 +22,7 @@
             android:label="BuildBox Download Service">
         </service>
         <receiver
-            android:name="at.tectas.buildbox.receiver.UpdateReceiver" >
+            android:name="at.tectas.buildbox.library.receiver.UpdateReceiver" >
             <intent-filter>
             	<action android:name="android.intent.action.BOOT_COMPLETED" />
         	</intent-filter>
