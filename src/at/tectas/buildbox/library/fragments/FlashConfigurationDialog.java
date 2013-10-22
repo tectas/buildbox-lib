@@ -5,7 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.download.DownloadActivity;
 import at.tectas.buildbox.library.listeners.FlashdialogOnClickListener;
 

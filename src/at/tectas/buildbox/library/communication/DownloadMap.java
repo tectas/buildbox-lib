@@ -16,7 +16,7 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.IDeserializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.ISerializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.handler.interfaces.IMapSortingHandler;
@@ -123,9 +123,10 @@ public class DownloadMap extends Hashtable<DownloadKey, DownloadPackage> impleme
 		Set<Entry<DownloadKey, DownloadPackage>> set = this.entrySet();
 		
 		for (Entry<DownloadKey, DownloadPackage> entry: set) {
-			if (entry.getValue() != null && entry.getValue().equals(pack))
-				return entry.getKey().index;
-		}
+            if (entry.getValue() != null && ((DownloadPackage) entry.getValue()).equals(pack)) {
+                return entry.getKey().index;
+            }
+        }
 		
 		return -1;
 	}

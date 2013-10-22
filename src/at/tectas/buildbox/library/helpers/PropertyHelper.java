@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 
 public class PropertyHelper {

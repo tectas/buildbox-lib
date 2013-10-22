@@ -3,7 +3,7 @@ package at.tectas.buildbox.library.changelist;
 import java.util.HashMap;
 
 import android.content.Context;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.content.ItemList;
 import at.tectas.buildbox.library.content.items.ChildItem;
 import at.tectas.buildbox.library.content.items.DetailItem;

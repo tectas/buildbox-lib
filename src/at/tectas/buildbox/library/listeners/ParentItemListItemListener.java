@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.View.OnClickListener;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.adapters.ItemArrayAdapter;
 import at.tectas.buildbox.library.content.items.Item;
 import at.tectas.buildbox.library.download.DownloadActivity;

@@ -13,7 +13,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.content.items.ChildItem;
 import at.tectas.buildbox.library.content.items.DetailItem;

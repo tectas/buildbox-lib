@@ -28,7 +28,7 @@ import android.view.MenuItem;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.changelist.ChangeList;
 import at.tectas.buildbox.library.changelist.ChangeListBuiltCallback;
 import at.tectas.buildbox.library.communication.Communicator;
@@ -228,7 +228,7 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 					public void mapSerializedCallback() {
 						activity.finish();
 		  				
-		  				Intent intent = new Intent(activity.getApplicationContext(), activity.getClass());
+		  				Intent intent = new Intent(activity.getApplicationContext(), ((Activity)activity).getClass());
 		  				
 		  				activity.startActivity(intent);
 					}

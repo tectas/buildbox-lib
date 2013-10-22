@@ -7,7 +7,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.DownloadPackage;
 import at.tectas.buildbox.library.communication.DownloadResponse;
 import at.tectas.buildbox.library.communication.DownloadStatus;

@@ -2,7 +2,7 @@ package at.tectas.buildbox.library.listeners;
 
 import android.view.View;
 import android.widget.Button;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.download.DownloadActivity;
 import at.tectas.buildbox.library.service.DownloadService;
 

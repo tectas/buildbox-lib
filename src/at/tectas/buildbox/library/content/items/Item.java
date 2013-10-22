@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.content.items.properties.ArrayTypes;
 import at.tectas.buildbox.library.content.items.properties.Developer;
 import at.tectas.buildbox.library.content.items.properties.ItemTypes;

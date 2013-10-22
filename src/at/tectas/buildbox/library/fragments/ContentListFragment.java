@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.adapters.ItemArrayAdapter;
 import at.tectas.buildbox.library.content.items.Item;
 import at.tectas.buildbox.library.content.items.ParentItem;

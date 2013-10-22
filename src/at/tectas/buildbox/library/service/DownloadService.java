@@ -14,7 +14,7 @@ import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.DownloadMap;
 import at.tectas.buildbox.library.communication.DownloadPackage;

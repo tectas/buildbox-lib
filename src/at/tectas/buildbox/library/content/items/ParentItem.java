@@ -7,7 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import android.os.Bundle;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.content.ItemList;
 import at.tectas.buildbox.library.content.items.properties.ItemTypes;
 

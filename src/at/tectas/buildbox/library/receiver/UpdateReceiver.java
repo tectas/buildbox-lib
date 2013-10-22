@@ -20,7 +20,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.widget.ImageView;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.ICommunicatorCallback;
 import at.tectas.buildbox.library.content.items.DetailItem;

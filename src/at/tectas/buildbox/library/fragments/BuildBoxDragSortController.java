@@ -4,7 +4,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.BaseAdapter;
 
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.helpers.ViewHelper;
 
 import com.mobeta.android.dslv.DragSortController;

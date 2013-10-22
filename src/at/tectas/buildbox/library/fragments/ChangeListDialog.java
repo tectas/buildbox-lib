@@ -7,7 +7,7 @@ import android.app.DialogFragment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.changelist.ChangeType;
 import at.tectas.buildbox.library.helpers.PropertyHelper;
 

@@ -14,7 +14,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.DownloadPackage;
 import at.tectas.buildbox.library.communication.handler.DummyInstallDownloadHandler;

@@ -7,7 +7,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.app.Activity;
 import at.tectas.buildbox.library.fragments.ChangeListDialog;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 
 public class ChangeListBuiltCallback implements IChangeListBuiltCallback {
 	

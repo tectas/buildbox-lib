@@ -2,7 +2,7 @@ package at.tectas.buildbox.library.changelist;
 
 import java.util.HashMap;
 
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

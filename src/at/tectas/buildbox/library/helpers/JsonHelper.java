@@ -2,7 +2,7 @@ package at.tectas.buildbox.library.helpers;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import at.tectas.buildbox.R;
+import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.content.items.DetailItem;
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 
