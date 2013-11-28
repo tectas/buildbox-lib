@@ -45,7 +45,7 @@ public class BitmapAsyncCommunicator extends AsyncTask<String, Integer, Bitmap> 
 	@Override
 	protected void onPostExecute(Bitmap result) {
 		if (this.callbackListener != null)
-			this.callbackListener.updateWithImage(this.view, result);
+			this.callbackListener.updateImage(this.view, result);
 		super.onPostExecute(result);
 	}
 }

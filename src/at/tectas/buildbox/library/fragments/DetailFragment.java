@@ -2,8 +2,9 @@ package at.tectas.buildbox.library.fragments;
 
 import java.util.ArrayList;
 
+import com.actionbarsherlock.app.SherlockFragment;
+
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +26,7 @@ import at.tectas.buildbox.library.helpers.ViewHelper;
 import at.tectas.buildbox.library.listeners.BrowserUrlListener;
 import at.tectas.buildbox.library.listeners.ItemDownloadButtonListener;
 
-public class DetailFragment extends Fragment {
+public class DetailFragment extends SherlockFragment {
 	public static final String TAG = "DetailFragment";
 	
 	private ViewGroup relatedView = null;

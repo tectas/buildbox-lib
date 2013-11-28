@@ -39,8 +39,8 @@ public class ChangeList extends Thread {
 				if (item instanceof ParentItem || item instanceof ChildItem) {
 					ParentItem parentItem = (ParentItem) item;
 					
-					if (parentItem.childs != null) {
-						ItemList detailListPart = this.getDetailList(parentItem.childs);
+					if (parentItem.children != null) {
+						ItemList detailListPart = this.getDetailList(parentItem.children);
 						detailList.add(detailListPart);
 					}
 				}

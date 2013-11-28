@@ -76,8 +76,7 @@ public class JsonHelper {
 	public DownloadType tryGetDownloadTypeFromItem(DetailItem item, DownloadType defaultType) {
 		if (item.url == null && item.homePages != null && item.homePages.size() > 0) {
 			return DownloadType.web;
-		}
-		else {
+		} else {
 			return defaultType;
 		}
 	}

@@ -33,7 +33,7 @@ public class JSONObjectAsyncCommunicator extends AsyncTask<String, Integer, Json
 	@Override
 	protected void onPostExecute(JsonObject result) {
 		if (this.callbackListener != null)
-			this.callbackListener.updateWithJsonObject(result);
+			this.callbackListener.updateJsonObject(result);
 		super.onPostExecute(result);
 	}
 }

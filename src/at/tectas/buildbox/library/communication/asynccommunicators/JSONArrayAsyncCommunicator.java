@@ -6,20 +6,22 @@ import at.tectas.buildbox.library.communication.callbacks.interfaces.ICommunicat
 
 import com.google.gson.JsonArray;
 
-public class JSONArrayAsyncCommunicator extends AsyncTask<String, Integer, JsonArray> {
-	
+public class JSONArrayAsyncCommunicator extends
+		AsyncTask<String, Integer, JsonArray> {
+
 	private ICommunicatorCallback callbackListener = null;
 	private Communicator communicator = null;
-	
-	public JSONArrayAsyncCommunicator (Communicator communicator) {
+
+	public JSONArrayAsyncCommunicator(Communicator communicator) {
 		this.communicator = communicator;
 	}
-	
-	public JSONArrayAsyncCommunicator (Communicator communicator, ICommunicatorCallback callback) {
+
+	public JSONArrayAsyncCommunicator(Communicator communicator,
+			ICommunicatorCallback callback) {
 		this(communicator);
 		this.callbackListener = callback;
 	}
-	
+
 	@Override
 	protected JsonArray doInBackground(String... params) {
 		try {
@@ -29,12 +31,11 @@ public class JSONArrayAsyncCommunicator extends AsyncTask<String, Integer, JsonA
 			return null;
 		}
 	}
-	
+
 	@Override
 	protected void onPostExecute(JsonArray result) {
 		if (this.callbackListener != null)
-			this.callbackListener.updateWithJsonArray(result);
+			this.callbackListener.updateJsonArray(result);
 		super.onPostExecute(result);
 	}
 }
-

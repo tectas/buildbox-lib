@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -23,11 +24,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.support.v4.app.FragmentActivity;
-import android.view.MenuItem;
+import com.actionbarsherlock.view.MenuItem;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.changelist.ChangeList;
 import at.tectas.buildbox.library.changelist.ChangeListBuiltCallback;
@@ -38,6 +37,7 @@ import at.tectas.buildbox.library.communication.DownloadPackage;
 import at.tectas.buildbox.library.communication.DownloadResponse;
 import at.tectas.buildbox.library.communication.DownloadStatus;
 import at.tectas.buildbox.library.communication.TypeSortedDownloadMap;
+import at.tectas.buildbox.library.communication.asynccommunicators.JSONElementAsyncCommunicatorResult;
 import at.tectas.buildbox.library.communication.callbacks.CallbackType;
 import at.tectas.buildbox.library.communication.callbacks.DeserializeMapFinishedCallback;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.DownloadBaseCallback;
@@ -51,6 +51,7 @@ import at.tectas.buildbox.library.communication.handler.interfaces.IActivityInst
 import at.tectas.buildbox.library.content.ItemList;
 import at.tectas.buildbox.library.content.items.Item;
 import at.tectas.buildbox.library.content.items.JsonItemParser;
+import at.tectas.buildbox.library.content.items.ParentItem;
 import at.tectas.buildbox.library.content.items.properties.DownloadType;
 import at.tectas.buildbox.library.fragments.FlashConfigurationDialog;
 import at.tectas.buildbox.library.helpers.PropertyHelper;
@@ -60,595 +61,647 @@ import at.tectas.buildbox.library.recovery.OpenRecoveryScript;
 import at.tectas.buildbox.library.recovery.OpenRecoveryScriptConfiguration;
 import at.tectas.buildbox.library.service.DownloadService;
 
-public abstract class DownloadActivity extends FragmentActivity implements ICommunicatorCallback, IDeserializeMapFinishedCallback, ISerializeMapFinishedCallback {
+public abstract class DownloadActivity extends SherlockFragmentActivity implements
+		ICommunicatorCallback, IDeserializeMapFinishedCallback,
+		ISerializeMapFinishedCallback {
 
 	public static final String TAG = "DownloadActivity";
 	public static final int PICK_FILE_RESULT = 1;
 	public static final int SETTINGS_RESULT = 2;
 	public static final int PACKAGE_MANAGER_RESULT = 3;
-	
+
 	protected Communicator communicator = new Communicator();
 	protected DownloadMap downloads = new TypeSortedDownloadMap();
 	protected PropertyHelper helper = null;
 	protected JsonItemParser parser = null;
 	protected BaseAdapter dowloadViewAdapter = null;
-	protected DownloadServiceConnection serviceConnection = new DownloadServiceConnection(this);
+	protected DownloadServiceConnection serviceConnection = new DownloadServiceConnection(
+			this);
 	protected OpenRecoveryScript recoveryScript = null;
 	protected Hashtable<String, File> backupList = null;
 	protected int currentInstallIndex = 0;
 	protected boolean downloadMapRestored = false;
-	
+
 	public abstract String getDownloadDir();
-	
+
 	public abstract DownloadBaseCallback getDownloadCallback();
-	
+
 	public abstract void setDownloadCallback(DownloadBaseCallback callback);
-	
+
 	public abstract Hashtable<String, Bitmap> getRemoteDrawables();
-	
+
 	public abstract Fragment getCurrentFragment();
-	
+
 	public abstract ItemList getContentItems();
-	
+
 	public Communicator getCommunicator() {
 		return this.communicator;
 	}
-	
+
 	public synchronized DownloadMap getDownloads() {
 		return this.downloads;
 	}
-	
+
 	public synchronized void setDownloads(DownloadMap map) {
 		if (map != null) {
 			this.downloads = map;
 		}
 	}
-	
+
 	public DownloadServiceConnection getServiceConnection() {
 		return this.serviceConnection;
 	}
-	
+
 	public OpenRecoveryScript getOpenRecoveryScript() {
 		return this.recoveryScript;
 	}
-	
+
 	public void setOpenRecoveryScript(OpenRecoveryScript script) {
 		this.recoveryScript = script;
 	}
-	
+
 	public int getCurrentInstallIndex() {
 		return this.currentInstallIndex;
 	}
-	
+
 	public void setCurrentInstallIndex(int index) {
 		this.currentInstallIndex = index;
 	}
-	
+
 	public void setDownloadViewAdapter(BaseAdapter adapter) {
 		this.dowloadViewAdapter = adapter;
 	}
-	
+
 	public BaseAdapter getDownloadViewAdapter() {
 		return this.dowloadViewAdapter;
 	}
-	
+
 	public Hashtable<String, File> getBackupList() {
 		return this.backupList;
 	}
-	
+
 	public void setBackupList(Hashtable<String, File> backups) {
 		this.backupList = backups;
 	}
-	
+
+	public JsonItemParser getItemParser() {
+		return this.parser;
+	}
+
 	public void initialize() {
 		Item.setActivity(this);
-		
+		ParentItem.communicator = communicator;
 		this.helper = new PropertyHelper(this.getApplicationContext());
-		
+
 		this.parser = new JsonItemParser(this, this.helper.deviceModel);
-		
-		if (PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl) && PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl) && this.helper.contentUrls.size() == 0) {
+
+		this.parser.setOnDemandItemCallback(this);
+
+		if (PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl)
+				&& PropertyHelper
+						.stringIsNullOrEmpty(this.helper.presetContentUrl)
+				&& this.helper.contentUrls.size() == 0) {
 			this.refreshDownloadsView();
 		}
-		
+
 		try {
 			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.romUrl))
-				this.communicator.executeJSONObjectAsyncCommunicator(this.helper.romUrl, this);			
-			
-			if (!PropertyHelper.stringIsNullOrEmpty(this.helper.presetContentUrl))
-				this.communicator.executeJSONArrayAsyncCommunicator(this.helper.presetContentUrl, this);
-		} 
-		catch (Exception e) {
+				this.communicator.executeJSONObjectAsyncCommunicator(
+						this.helper.romUrl, this);
+
+			if (!PropertyHelper
+					.stringIsNullOrEmpty(this.helper.presetContentUrl))
+				this.communicator.executeJSONArrayAsyncCommunicator(
+						this.helper.presetContentUrl, this);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		for (String url: this.helper.contentUrls) {
+
+		for (String url : this.helper.contentUrls) {
 			this.communicator.executeJSONArrayAsyncCommunicator(url, this);
 		}
-		
+
 		this.startUpdateAlarm();
 	}
-	
+
 	@Override
-	protected void onStop() {		
+	protected void onStop() {
 		this.removeActivityCallbacks();
-		
+
 		if (!this.isFinishing()) {
 			this.getDownloads().serializeMapToCache(getApplicationContext());
 		}
-		
+
 		this.downloadMapRestored = false;
-		
+
 		super.onStop();
 	};
-	
+
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		
+
 		if (!this.downloadMapRestored) {
 			this.getDownloads().clear();
-			
+
 			if (DownloadService.Started) {
 				this.getServiceMap(true);
-			}
-			else {
+			} else {
 				this.restoreDownloadMapFromCache(this);
 			}
-			
+
 			this.downloadMapRestored = true;
 		}
 	}
-	
+
 	@Override
 	protected void onDestroy() {
-		this.getApplicationContext().deleteFile(getString(R.string.downloads_cache_filename));
-		
+		this.getApplicationContext().deleteFile(
+				getString(R.string.downloads_cache_filename));
+
 		super.onDestroy();
 	};
-	
+
 	@SuppressLint("DefaultLocale")
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch(requestCode){
-			case PACKAGE_MANAGER_RESULT:
-				if (!this.downloadMapRestored) {
-					this.getDownloads().clear();
-					
-					this.loadDownloadsMapFromCacheFile(new DeserializeMapFinishedCallback(this));
-					this.downloadMapRestored = true;
-				}
-  				break;
-  			case SETTINGS_RESULT:
-  				final DownloadActivity activity = this;
-  				
-  				this.getDownloads().serializeMapToCache(getApplicationContext(), new ISerializeMapFinishedCallback() {
-					
-					@Override
-					public void mapSerializedCallback() {
-						activity.finish();
-		  				
-		  				Intent intent = new Intent(activity.getApplicationContext(), ((Activity)activity).getClass());
-		  				
-		  				activity.startActivity(intent);
-					}
-				});
-  				break;
-  			case PICK_FILE_RESULT:
-  				if (data != null) {
-					String filePath = data.getData().getPath();
-					
-					if (!PropertyHelper.stringIsNullOrEmpty(filePath)) {
-						String[] splittedPath = filePath.split("/");
-						
-						String fileName = splittedPath[splittedPath.length - 1];
-						
-						DownloadPackage pack = new DownloadPackage();
-						pack.title = fileName;
-						
-						pack.url = fileName;
-						
-						DownloadResponse response = new DownloadResponse();
-						response.progress = 100;
-						response.status = DownloadStatus.Done;
-						
-						pack.setResponse(response);
-						
-						pack.setFilename(fileName);
-						pack.setDirectory(filePath.replace(fileName, ""));
-						pack.md5sum = fileName;
-						
-						if (!this.downloadMapRestored) {
-							this.getDownloads().clear();
-							
-							this.loadDownloadsMapFromCacheFile();
-							this.downloadMapRestored = true;
+		switch (requestCode) {
+		case PACKAGE_MANAGER_RESULT:
+			if (!this.downloadMapRestored) {
+				this.getDownloads().clear();
+
+				this.loadDownloadsMapFromCacheFile(new DeserializeMapFinishedCallback(
+						this));
+				this.downloadMapRestored = true;
+			}
+			break;
+		case SETTINGS_RESULT:
+			final DownloadActivity activity = this;
+
+			this.getDownloads().serializeMapToCache(getApplicationContext(),
+					new ISerializeMapFinishedCallback() {
+
+						@Override
+						public void mapSerializedCallback() {
+							activity.finish();
+
+							Intent intent = new Intent(activity
+									.getApplicationContext(), activity
+									.getClass());
+
+							activity.startActivity(intent);
 						}
-						
-						this.getDownloads().put(pack);
-						
-						this.refreshDownloadsView();
+					});
+			break;
+		case PICK_FILE_RESULT:
+			if (data != null) {
+				String filePath = data.getData().getPath();
+
+				if (!PropertyHelper.stringIsNullOrEmpty(filePath)) {
+					String[] splittedPath = filePath.split("/");
+
+					String fileName = splittedPath[splittedPath.length - 1];
+
+					DownloadPackage pack = new DownloadPackage();
+					pack.title = fileName;
+
+					pack.url = fileName;
+
+					DownloadResponse response = new DownloadResponse();
+					response.progress = 100;
+					response.status = DownloadStatus.Done;
+
+					pack.setResponse(response);
+
+					pack.setFilename(fileName);
+					pack.setDirectory(filePath.replace(fileName, ""));
+					pack.md5sum = fileName;
+
+					if (!this.downloadMapRestored) {
+						this.getDownloads().clear();
+
+						this.loadDownloadsMapFromCacheFile();
+						this.downloadMapRestored = true;
 					}
-  				}
-  				break;
+
+					this.getDownloads().put(pack);
+
+					this.refreshDownloadsView();
+				}
+			}
+			break;
 		}
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		final DownloadActivity activity = this;
-		
+
 		int itemId = item.getItemId();
 		if (itemId == R.id.settings) {
-			Intent preferenceIntent = new Intent(this, BuildBoxPreferenceActivity.class);
-			startActivityForResult(preferenceIntent, DownloadActivity.SETTINGS_RESULT);
+			Intent preferenceIntent = new Intent(this,
+					BuildBoxPreferenceActivity.class);
+			startActivityForResult(preferenceIntent,
+					DownloadActivity.SETTINGS_RESULT);
 			return true;
-		}
-		else if (itemId == R.id.remove_broken) {
+		} else if (itemId == R.id.remove_broken) {
 			this.removeBrokenAndAbortedFromMap();
 			return true;
-		}
-		else if (itemId == R.id.remove_all) {
+		} else if (itemId == R.id.remove_all) {
 			this.downloads.clear();
 			this.refreshDownloadsView();
 			return true;
-		}
-		else if (itemId == R.id.add_external) {
+		} else if (itemId == R.id.add_external) {
 			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 			intent.setType("file/*");
-			startActivityForResult(intent,DownloadActivity.PICK_FILE_RESULT);
+			startActivityForResult(intent, DownloadActivity.PICK_FILE_RESULT);
 			return true;
-		}
-		else if (itemId == R.id.backup_queue) {
+		} else if (itemId == R.id.backup_queue) {
 			final EditText backupFilenameField = new EditText(this);
 			Date now = new Date();
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.ENGLISH);
+			SimpleDateFormat format = new SimpleDateFormat(
+					"yyyy-MM-dd-HH-mm-ss", Locale.ENGLISH);
 			backupFilenameField.setText(format.format(now));
 			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
 			alertBuilder.setTitle(R.string.backup_dialog_title);
 			alertBuilder.setMessage(R.string.backup_dialog_text);
 			alertBuilder.setView(backupFilenameField);
-			alertBuilder.setPositiveButton(R.string.ok_button_text, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {						
-					String filename = backupFilenameField.getText().toString();
-					
-					if (!PropertyHelper.stringIsNullOrEmpty(filename)) {
-						
-						File backupDirectory = new File(activity.getDownloadDir() + getString(R.string.kitchen_backup_directory_name));
-								
-						if (!backupDirectory.exists()) {
-							boolean succuessful = backupDirectory.mkdirs();
-							
-							if (!succuessful) {
-								try {
-									throw new IOException("Couldn't create directory: " + backupDirectory);
-								} catch (IOException e) {
-									e.printStackTrace();
+			alertBuilder.setPositiveButton(R.string.ok_button_text,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							String filename = backupFilenameField.getText()
+									.toString();
+
+							if (!PropertyHelper.stringIsNullOrEmpty(filename)) {
+
+								File backupDirectory = new File(
+										activity.getDownloadDir()
+												+ getString(R.string.kitchen_backup_directory_name));
+
+								if (!backupDirectory.exists()) {
+									boolean succuessful = backupDirectory
+											.mkdirs();
+
+									if (!succuessful) {
+										try {
+											throw new IOException(
+													"Couldn't create directory: "
+															+ backupDirectory);
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
+									}
 								}
+
+								activity.getDownloads()
+										.serializeMapToStorage(
+												activity,
+												backupDirectory.getPath()
+														+ "/"
+														+ filename
+														+ getString(R.string.backup_file_extension),
+												activity);
 							}
 						}
-						
-						activity.getDownloads().serializeMapToStorage(activity, backupDirectory.getPath() + "/" + filename + getString(R.string.backup_file_extension), activity);
-					}
-				}
-			});
-			alertBuilder.setNegativeButton(R.string.cancel_button_text, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			});
+					});
+			alertBuilder.setNegativeButton(R.string.cancel_button_text,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					});
 			alertBuilder.create().show();
 			return true;
-		}
-		else if (itemId == R.id.restore_queue) {
+		} else if (itemId == R.id.restore_queue) {
 			this.fillBackupList();
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(getString(R.string.restore_alert_title));
 			final String[] keys = new String[this.getBackupList().size()];
 			int i = 0;
-			for (String key: this.getBackupList().keySet()) {
-				
-				keys[i] = key.replace(getString(R.string.backup_file_extension), "");
+			for (String key : this.getBackupList().keySet()) {
+
+				keys[i] = key.replace(
+						getString(R.string.backup_file_extension), "");
 				i++;
 			}
 			Arrays.sort(keys);
-			builder.setSingleChoiceItems(keys, -1, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-					
-					int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-					
-					if (selectedPosition < activity.getBackupList().size()) {
-						
-						activity.getDownloads().deserializeMapFromStorage(activity, activity.getBackupList().get(keys[selectedPosition] + getString(R.string.backup_file_extension)).getPath(), activity);
-					}
-				}
-			});
-			builder.setNegativeButton(R.string.cancel_button_text, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			});
+			builder.setSingleChoiceItems(keys, -1,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+
+							int selectedPosition = ((AlertDialog) dialog)
+									.getListView().getCheckedItemPosition();
+
+							if (selectedPosition < activity.getBackupList()
+									.size()) {
+
+								activity.getDownloads()
+										.deserializeMapFromStorage(
+												activity,
+												activity.getBackupList()
+														.get(keys[selectedPosition]
+																+ getString(R.string.backup_file_extension))
+														.getPath(), activity);
+							}
+						}
+					});
+			builder.setNegativeButton(R.string.cancel_button_text,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					});
 			builder.create().show();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	public void mapDeserializedCallback() {
 		if (this.getDownloads().size() != 0) {
 			this.refreshDownloadsView();
 		}
 	}
-	
+
 	public void startUpdateAlarm() {
 		Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.SECOND, 1);
-        
-        AlarmManager alarmManager = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, UpdateReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+		cal.add(Calendar.SECOND, 1);
+
+		AlarmManager alarmManager = (AlarmManager) this
+				.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(this, UpdateReceiver.class);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
+				intent, 0);
+		alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+				pendingIntent);
 	}
-	
+
 	public boolean allDownloadsFinished() {
 		int finishedDownloads = 0;
-		
-		for (DownloadPackage pack: this.getDownloads().values()) {
-			if (pack.getResponse() != null && pack.getResponse().status != DownloadStatus.Pending && pack.getResponse().status != DownloadStatus.Aborted) {
+
+		for (DownloadPackage pack : this.getDownloads().values()) {
+			if (pack.getResponse() != null
+					&& pack.getResponse().status != DownloadStatus.Pending
+					&& pack.getResponse().status != DownloadStatus.Aborted) {
 				finishedDownloads++;
 			}
 		}
-		
+
 		if (finishedDownloads == this.getDownloads().size()) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
-	
+
 	public boolean downloadMapContainsBrokenOrAborted() {
-		
-		for (DownloadPackage pack: this.getDownloads().values()) {
-			if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Broken || pack.getResponse().status == DownloadStatus.Aborted)) {
+
+		for (DownloadPackage pack : this.getDownloads().values()) {
+			if (pack.getResponse() != null
+					&& (pack.getResponse().status == DownloadStatus.Broken || pack
+							.getResponse().status == DownloadStatus.Aborted)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public void removeBrokenAndAbortedFromMap() {
 		ArrayList<DownloadKey> keys = new ArrayList<DownloadKey>();
-		
-		for (DownloadKey key: this.getDownloads().keySet()) {
+
+		for (DownloadKey key : this.getDownloads().keySet()) {
 			DownloadPackage pack = this.getDownloads().get(key);
-			
-			if (pack.getResponse() != null && (pack.getResponse().status == DownloadStatus.Broken || pack.getResponse().status == DownloadStatus.Aborted)) {
+
+			if (pack.getResponse() != null
+					&& (pack.getResponse().status == DownloadStatus.Broken || pack
+							.getResponse().status == DownloadStatus.Aborted)) {
 				keys.add(key);
 			}
 		}
-		
-		for (DownloadKey key: keys) {
+
+		for (DownloadKey key : keys) {
 			this.getDownloads().remove(key);
 		}
-		
+
 		this.refreshDownloadsView();
 	}
-	
+
 	public void refreshDownloadsView() {
-        if (this.dowloadViewAdapter != null) {
-        	this.dowloadViewAdapter.notifyDataSetChanged();
-        }
+		if (this.dowloadViewAdapter != null) {
+			this.dowloadViewAdapter.notifyDataSetChanged();
+		}
 	}
-	
+
 	public void bindDownloadService() {
-		Intent downloadServiceIntent = new Intent(this.getApplicationContext(), DownloadService.class);	
-		
-		if (DownloadService.Started == false) {	
+		Intent downloadServiceIntent = new Intent(this.getApplicationContext(),
+				DownloadService.class);
+
+		if (DownloadService.Started == false) {
 			this.startService(downloadServiceIntent);
 		}
-		
-		this.bindService(downloadServiceIntent, this.serviceConnection, Context.BIND_ADJUST_WITH_ACTIVITY);
+
+		this.bindService(downloadServiceIntent, this.serviceConnection,
+				Context.BIND_ADJUST_WITH_ACTIVITY);
 	}
-	
+
 	public void unbindDownloadService() {
 		if (this.serviceConnection.bound == true) {
 			try {
 				unbindService(this.serviceConnection);
 				this.serviceConnection.bound = false;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	public void startDownload() {
 		if (this.serviceConnection.bound == false) {
 			this.serviceConnection.executeStartDownloadCallback = true;
 			this.bindDownloadService();
-		}
-		else {
+		} else {
 			this.startServiceDownload();
 		}
 	}
-	
+
 	public void stopDownload() {
 		if (this.serviceConnection.bound == false) {
 			this.serviceConnection.executeStopDownloadCallback = true;
 			this.bindDownloadService();
-		}
-		else {
+		} else {
 			this.serviceConnection.service.stopDownloads();
 		}
 	}
-	
+
 	public void addDownload(DownloadPackage pack) {
 		if (DownloadService.Processing == true) {
 			if (this.serviceConnection.bound == false) {
 				this.serviceConnection.newPackage = pack;
 				this.bindDownloadService();
-			}
-			else {
+			} else {
 				this.serviceConnection.service.addDownload(pack);
 			}
-		}
-		else {
+		} else {
 			this.getDownloads().put(pack);
 		}
-		
+
 		this.refreshDownloadsView();
 	}
-	
+
 	public void getServiceMap() {
 		this.getServiceMap(true);
 	}
-	
+
 	public void getServiceMap(boolean addListeners) {
 		if (this.serviceConnection.bound == false) {
 			this.serviceConnection.executeGetDownloadMapCallback = true;
 			this.serviceConnection.addListernersAtGetDownloadMapCallback = addListeners;
 			this.bindDownloadService();
-		}
-		else {
+		} else {
 			this.getServiceDownloadMap(addListeners);
 		}
 	}
-	
+
 	public void removeActivityCallbacks() {
 		if (DownloadService.Started == true) {
 			if (this.serviceConnection.bound == false) {
 				this.serviceConnection.executeRemoveCallback = true;
 				this.bindDownloadService();
-			}
-			else {
+			} else {
 				this.removeCallbacksAndUnbind();
 			}
 		}
 	}
-	
+
 	public abstract void startServiceDownload();
-	
-	public void startServiceDownload(IDownloadProgressCallback progressCallback, IDownloadFinishedCallback finishedCallback, IDownloadCancelledCallback cancelledCallback) {		
+
+	public void startServiceDownload(
+			IDownloadProgressCallback progressCallback,
+			IDownloadFinishedCallback finishedCallback,
+			IDownloadCancelledCallback cancelledCallback) {
 		if (DownloadService.Processing == true) {
 			this.getServiceDownloadMap();
-		}
-		else {
+		} else {
 			this.serviceConnection.service.startDownload(this.getDownloads());
-			this.serviceConnection.service.addDownloadListeners(CallbackType.UI, progressCallback, finishedCallback, cancelledCallback);
+			this.serviceConnection.service.addDownloadListeners(
+					CallbackType.UI, progressCallback, finishedCallback,
+					cancelledCallback);
 		}
 	}
-	
+
 	public abstract void getServiceDownloadMap(boolean addListener);
-	
-	public void getServiceDownloadMap(IDownloadProgressCallback progressCallback, IDownloadFinishedCallback finishedCallback, IDownloadCancelledCallback cancelledCallback) {
-		this.serviceConnection.service.addDownloadListeners(CallbackType.UI, progressCallback, finishedCallback, cancelledCallback);
-		
+
+	public void getServiceDownloadMap(
+			IDownloadProgressCallback progressCallback,
+			IDownloadFinishedCallback finishedCallback,
+			IDownloadCancelledCallback cancelledCallback) {
+		this.serviceConnection.service.addDownloadListeners(CallbackType.UI,
+				progressCallback, finishedCallback, cancelledCallback);
+
 		this.getServiceDownloadMap();
 	}
-	
+
 	public void getServiceDownloadMap() {
 		DownloadMap serviceMap = this.serviceConnection.service.getMap();
-		
+
 		if (serviceMap != null && serviceMap.size() != 0) {
 			this.setDownloads(serviceMap);
 			this.refreshDownloadsView();
-			this.getApplicationContext().deleteFile(getString(R.string.downloads_cache_filename));
-		}
-		else {
+			this.getApplicationContext().deleteFile(
+					getString(R.string.downloads_cache_filename));
+		} else {
 			this.loadDownloadsMapFromCacheFile();
 		}
 	}
-	
+
 	public void removeCallbacksAndUnbind() {
 		this.serviceConnection.service.removeDownloadListeners(CallbackType.UI);
-		
+
 		this.unbindDownloadService();
 	}
-	
+
 	protected void loadDownloadsMapFromCacheFile() {
-		this.getDownloads().deserializeMapFromCache(this.getApplicationContext(), this);
+		this.getDownloads().deserializeMapFromCache(
+				this.getApplicationContext(), this);
 	}
 
-	protected void loadDownloadsMapFromCacheFile(IDeserializeMapFinishedCallback callback) {
-		this.getDownloads().deserializeMapFromCache(this.getApplicationContext(), callback);
+	protected void loadDownloadsMapFromCacheFile(
+			IDeserializeMapFinishedCallback callback) {
+		this.getDownloads().deserializeMapFromCache(
+				this.getApplicationContext(), callback);
 	}
-	
-	@Override
-	public abstract void updateWithImage(ImageView view, Bitmap bitmap);
-	
-	@Override
-	public abstract void updateWithJsonObject(JsonObject result);
-	
-	@Override
-	public abstract void updateWithJsonArray(JsonArray result);
-	
+
 	public void processChangeList() {
-		ChangeList changelist = new ChangeList(this, getContentItems(), new ChangeListBuiltCallback(this));
-		
+		ChangeList changelist = new ChangeList(this, getContentItems(),
+				new ChangeListBuiltCallback(this));
+
 		changelist.run();
 	}
-	
+
 	public void iterateDownloadsToInstall() {
 		this.downloads.sort();
-		
+
 		for (; this.currentInstallIndex < this.getDownloads().size(); this.currentInstallIndex++) {
-			DownloadPackage pack = this.getDownloads().get(this.currentInstallIndex);
-			
+			DownloadPackage pack = this.getDownloads().get(
+					this.currentInstallIndex);
+
 			if (pack != null && pack.installHandler != null) {
-				
+
 				pack.installHandler.setParentActivity(this);
-				
+
 				pack.installHandler.install();
-				
+
 				if (pack.installHandler instanceof IActivityInstallDownloadHandler) {
 					this.currentInstallIndex++;
 					break;
 				}
 			}
 		}
-		
-		if (this.currentInstallIndex == this.getDownloads().size() && this.recoveryScript != null) {
+
+		if (this.currentInstallIndex == this.getDownloads().size()
+				&& this.recoveryScript != null) {
 			this.recoveryScript.executeAndReboot();
 		}
-		
+
 		if (this.currentInstallIndex == this.getDownloads().size()) {
 			this.currentInstallIndex = 0;
 		}
 	}
-	
-	public void installFiles() {		
-		DownloadPackage pack = this.getDownloads().get(this.currentInstallIndex, DownloadType.zip);
-		
+
+	public void installFiles() {
+		DownloadPackage pack = this.getDownloads().get(
+				this.currentInstallIndex, DownloadType.zip);
+
 		if (pack != null) {
 			this.showFlashOptionsDialog();
-		}
-		else {	
+		} else {
 			this.iterateDownloadsToInstall();
 		}
 	}
-	
+
 	public void showFlashOptionsDialog() {
 		FlashConfigurationDialog dialog = new FlashConfigurationDialog();
-		dialog.show(getFragmentManager(), this.getString(R.string.download_flash_options_title));
+		dialog.show(getFragmentManager(),
+				this.getString(R.string.download_flash_options_title));
 	}
-	
+
 	public void installZips(ArrayList<Integer> list) {
-		OpenRecoveryScriptConfiguration config = new OpenRecoveryScriptConfiguration(this.getDownloadDir());
-		
-		for (Integer option: list){			
+		OpenRecoveryScriptConfiguration config = new OpenRecoveryScriptConfiguration(
+				this.getDownloadDir());
+
+		for (Integer option : list) {
 			if (option.equals(Integer.valueOf(0))) {
 				config.backupFirst = true;
 			}
@@ -659,86 +712,110 @@ public abstract class DownloadActivity extends FragmentActivity implements IComm
 				config.includeMd5mismatch = true;
 			}
 		}
-		
+
 		if (!list.contains(Integer.valueOf(0))) {
 			config.backupFirst = false;
 		}
-		
+
 		this.recoveryScript = new OpenRecoveryScript(config);
-		
+
 		this.iterateDownloadsToInstall();
 	}
-	
+
 	public void restoreDownloadMapFromCache() {
 		this.restoreDownloadMapFromCache(null);
 	}
-	
-	public void restoreDownloadMapFromCache(IDeserializeMapFinishedCallback callback) {
+
+	public void restoreDownloadMapFromCache(
+			IDeserializeMapFinishedCallback callback) {
 		if (!this.downloadMapRestored) {
 			this.getDownloads().clear();
-			
+
 			if (callback == null) {
 				this.loadDownloadsMapFromCacheFile(callback);
-			}
-			else {
+			} else {
 				this.loadDownloadsMapFromCacheFile();
 			}
-			
+
 			this.downloadMapRestored = true;
 		}
 	}
-	
-	public void getDownloadsMapandUpdateList () {
+
+	public void getDownloadsMapandUpdateList() {
 		this.getServiceMap(false);
-		
+
 		if (this.getDownloads().size() != 0) {
-			
+
 			this.refreshDownloadsView();
 		}
 	}
-	
+
 	protected void fillBackupList() {
 		this.fillBackupList(false);
 	}
-	
+
 	protected void fillBackupList(boolean force) {
 		if (this.backupList == null || force) {
-			
+
 			File rootDirectory = new File(this.getDownloadDir());
-			
+
 			if (!rootDirectory.exists()) {
 				rootDirectory.mkdirs();
 			}
-			
-			File queueDirectoy = new File(rootDirectory, getString(R.string.kitchen_backup_directory_name));
-			
+
+			File queueDirectoy = new File(rootDirectory,
+					getString(R.string.kitchen_backup_directory_name));
+
 			if (!queueDirectoy.exists()) {
 				queueDirectoy.mkdirs();
 			}
-			
+
 			File[] fileList = queueDirectoy.listFiles(new FilenameFilter() {
-				
+
 				@Override
 				public boolean accept(File dir, String filename) {
-					if (filename.endsWith(getString(R.string.backup_file_extension)))
+					if (filename
+							.endsWith(getString(R.string.backup_file_extension)))
 						return true;
 					else
 						return false;
 				}
 			});
-			
+
 			this.backupList = new Hashtable<String, File>();
-			
-			for (File file: fileList) {
+
+			for (File file : fileList) {
 				this.backupList.put(file.getName(), file);
 			}
-			
+
 			this.invalidateOptionsMenu();
 		}
 	}
-	
+
+	@Override
+	public void updateJsonElement(JSONElementAsyncCommunicatorResult result) {
+		if (result != null && result.element != null) {
+			try {
+				JsonObject object = result.element.getAsJsonObject();
+				Item item = parser.parseJsonItem(result.parent, object);
+
+				item.addToParent(result.parent);
+			} catch (Exception e) {
+				JsonArray array = result.element.getAsJsonArray();
+				ItemList list = parser.parseJson(array);
+
+				for (Item item : list) {
+					item.addToParent(result.parent);
+				}
+			}
+			updateContent(this.getContentItems().containsAtIndex(result.parent));
+		}
+	}
+
 	@Override
 	public void mapSerializedCallback() {
 		this.fillBackupList(true);
 	}
+
+	public abstract void updateContent(int index);
 }

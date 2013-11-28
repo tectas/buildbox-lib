@@ -1,5 +1,8 @@
 package at.tectas.buildbox.library.listeners;
 
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 import android.view.View;
 import at.tectas.buildbox.library.communication.DownloadPackage;
 import at.tectas.buildbox.library.download.DownloadActivity;
@@ -18,6 +21,6 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
  		
  		activity.addDownload(pack);
  		
- 		while(activity.getCurrentFragment().getChildFragmentManager().popBackStackImmediate());
+ 		//while(((SherlockFragment)activity.getCurrentFragment()).getChildFragmentManager().popBackStackImmediate());
 	}
 }

@@ -25,7 +25,11 @@ public class DetailItem extends Item {
 	
 	public DetailItem (Item parent, JsonObject json) {
 		super(parent, json);
-		
+
+		if (parent != null) {
+			((ParentItem)parent).children.add(this);
+		}
+
 		if (this.title == null && parent != null) {
 			this.title = parent.title;
 		}
@@ -108,5 +112,10 @@ public class DetailItem extends Item {
 		}
 		
 		return result;
+	}
+
+	@Override
+	public ArrayList<Item> getChildren() {
+		return null;
 	}
 }
