@@ -7,7 +7,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import android.os.Bundle;
-import android.util.Log;
 import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.ICommunicatorCallback;

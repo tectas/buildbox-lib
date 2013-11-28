@@ -3,7 +3,6 @@ package at.tectas.buildbox.library.adapters;
 import java.util.ArrayList;
 
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 import at.tectas.buildbox.library.R;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.content.items.ChildItem;
-import at.tectas.buildbox.library.content.items.DetailItem;
 import at.tectas.buildbox.library.content.items.Item;
 import at.tectas.buildbox.library.content.items.ParentItem;
 import at.tectas.buildbox.library.content.items.properties.ItemTypes;
@@ -27,10 +25,10 @@ import at.tectas.buildbox.library.listeners.ItemListItemListener;
 public class ItemArrayAdapter extends
 		ArrayAdapter<at.tectas.buildbox.library.content.items.Item> {
 
-	private final static String TAG = "ItemArrayAdapter";
 	private final DownloadActivity context;
 	private final Item[] items;
 	private FragmentManager manager = null;
+	private Class<? extends ItemListItemListener> listenerClass = null;
 
 	static class ViewHolder {
 		public TextView text;
@@ -38,17 +36,24 @@ public class ItemArrayAdapter extends
 	}
 
 	public ItemArrayAdapter(DownloadActivity context, int textViewResourceId,
-			Item[] objects) {
+			Item[] objects, FragmentManager manager,
+			Class<ItemListItemListener> listener) {
 		super(context, textViewResourceId, objects);
 		this.context = context;
 		this.items = objects;
+		this.manager = manager;
+		this.listenerClass = listener;
+	}
+
+	public ItemArrayAdapter(DownloadActivity context, int textViewResourceId,
+			Item[] objects) {
+		this(context, textViewResourceId, objects, null, null);
 	}
 
 	public ItemArrayAdapter(DownloadActivity context, int textViewResourceId,
 			ArrayList<Item> objects, FragmentManager manager) {
 		this(context, textViewResourceId, objects.toArray(new Item[objects
 				.size()]));
-
 		this.manager = manager;
 	}
 
@@ -114,32 +119,68 @@ public class ItemArrayAdapter extends
 			}
 
 			if (item.type == ItemTypes.ParentItem) {
-
-				ParentItem child = (ParentItem) item;
-
-				rowView.setOnClickListener(new ItemListItemListener(
-						this.context, child, manager, child.children));
+				if (listenerClass != null) {
+					rowView.setOnClickListener(this.getListenerInstance(item, item.getChildren()));
+				} else {
+					rowView.setOnClickListener(new ItemListItemListener(
+							this.context, item, manager, item.getChildren()));
+				}
 			}
 
 			else if (item.type == ItemTypes.ChildItem) {
-
-				ChildItem child = (ChildItem) item;
-
-				if (child.children.size() == 0
-						&& PropertyHelper.stringIsNullOrEmpty(child.detailUrl)) {
-
+				if (item.getChildren().size() == 0
+						&& PropertyHelper
+								.stringIsNullOrEmpty(((ChildItem) item).detailUrl)) {
 				} else {
-					if (child.children.size() > 0) {
-						rowView.setOnClickListener(new ItemListItemListener(
-								this.context, child, manager,
-								(DetailItem) child.children.get(0)));
+					if (item.getChildren().size() > 0) {
+						if (listenerClass != null) {
+							rowView.setOnClickListener(this.getListenerInstance(item, item.getChildren().get(0)));
+						} else {
+							rowView.setOnClickListener(new ItemListItemListener(
+									this.context, item, manager, item.getChildren()
+										.get(0)));
+						}
 					} else {
-						rowView.setOnClickListener(new ItemListItemListener(
-								context, child, manager, child.detailUrl));
+						ChildItem child = (ChildItem) item;
+						if (listenerClass != null) {
+							rowView.setOnClickListener(this.getListenerInstance(child, child.detailUrl));
+						} else {
+							rowView.setOnClickListener(new ItemListItemListener(
+									context, item, manager, child.detailUrl,
+									context.getCommunicator()));
+						}
 					}
 				}
 			}
 		}
 		return rowView;
+	}
+
+	public ItemListItemListener getListenerInstance(Item parent, Item detail, ArrayList<Item> list, String url) {
+		ItemListItemListener listener = null;
+		try {
+			listener = listenerClass.newInstance();
+			listener.setActivity(context);
+			listener.setFragmentManager(manager);
+			listener.setParent(parent);
+			listener.setItem(detail);
+			listener.setItemList(list);
+			listener.setUrl(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return listener;
+	}
+	
+	public ItemListItemListener getListenerInstance(Item parent, ArrayList<Item> list) {
+		return getListenerInstance(parent, null, list, null);
+	}
+	
+	public ItemListItemListener getListenerInstance(Item parent, Item detail) {
+		return getListenerInstance(parent, detail, null, null);
+	}
+	
+	public ItemListItemListener getListenerInstance(Item parent, String url) {
+		return getListenerInstance(parent, null, null, url);
 	}
 }

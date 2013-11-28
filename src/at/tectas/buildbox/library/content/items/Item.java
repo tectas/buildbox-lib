@@ -127,8 +127,8 @@ public abstract class Item {
 				Item.helper.tryGetJsonArrayFromJson(property, json), type);
 	}
 
-	public void addToParent(ParentItem parent) {
-		parent.children.add(this);
+	public void addToParent(Item parent) {
+		parent.getChildren().add(this);
 		this.parent = parent;
 	}
 	

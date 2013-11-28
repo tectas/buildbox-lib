@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -818,4 +819,6 @@ public abstract class DownloadActivity extends SherlockFragmentActivity implemen
 	}
 
 	public abstract void updateContent(int index);
+	
+	public abstract void afterFragmentChange(SherlockFragment fragment);
 }

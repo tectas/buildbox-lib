@@ -1,14 +1,11 @@
 package at.tectas.buildbox.library.listeners;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
 import android.view.View;
 import at.tectas.buildbox.library.communication.DownloadPackage;
 import at.tectas.buildbox.library.download.DownloadActivity;
 
 public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
-	
+
 	public ItemDownloadButtonListener(DownloadActivity activity) {
 		super(activity);
 	}
@@ -16,11 +13,11 @@ public class ItemDownloadButtonListener extends DownloadButtonBaseListener {
 	@Override
 	public void onClick(View v) {
 		final View button = v;
-			
- 		DownloadPackage pack = (DownloadPackage) button.getTag();
- 		
- 		activity.addDownload(pack);
- 		
- 		//while(((SherlockFragment)activity.getCurrentFragment()).getChildFragmentManager().popBackStackImmediate());
+
+		DownloadPackage pack = (DownloadPackage) button.getTag();
+
+		activity.addDownload(pack);
+
+		// while(((SherlockFragment)activity.getCurrentFragment()).getChildFragmentManager().popBackStackImmediate());
 	}
 }

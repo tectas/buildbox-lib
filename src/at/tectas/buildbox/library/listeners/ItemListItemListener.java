@@ -1,9 +1,11 @@
 package at.tectas.buildbox.library.listeners;
 
+import java.util.ArrayList;
+
+import com.actionbarsherlock.app.SherlockFragment;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import android.support.v4.app.Fragment;
 import android.graphics.Bitmap;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -18,7 +20,6 @@ import at.tectas.buildbox.library.communication.callbacks.interfaces.ICommunicat
 import at.tectas.buildbox.library.content.ItemList;
 import at.tectas.buildbox.library.content.items.DetailItem;
 import at.tectas.buildbox.library.content.items.Item;
-import at.tectas.buildbox.library.content.items.ParentItem;
 import at.tectas.buildbox.library.download.DownloadActivity;
 import at.tectas.buildbox.library.fragments.ContentListFragment;
 import at.tectas.buildbox.library.fragments.DetailFragment;
@@ -26,15 +27,17 @@ import at.tectas.buildbox.library.fragments.DetailFragment;
 public class ItemListItemListener implements OnClickListener,
 		ICommunicatorCallback {
 
+	public static int staticLayoutID = -1;
 	private FragmentManager manager = null;
-	private DetailItem item = null;
-	private ParentItem parent = null;
-	private ItemList list = null;
+	private Item item = null;
+	private Item parent = null;
+	private ArrayList<Item> list = null;
 	private String url = null;
 	private DownloadActivity activity = null;
 	private Communicator communicator = null;
+	private int layoutID = -1;
 
-	public ItemListItemListener(DownloadActivity activity, ParentItem parent,
+	public ItemListItemListener(DownloadActivity activity, Item parent,
 			FragmentManager manager, String url, Communicator communicator) {
 		this.parent = parent;
 		this.url = url;
@@ -43,21 +46,60 @@ public class ItemListItemListener implements OnClickListener,
 		this.communicator = communicator;
 	}
 
-	public ItemListItemListener(DownloadActivity activity, ParentItem parent,
-			FragmentManager manager, String url) {
-		this(activity, parent, manager, url, new Communicator());
+	public ItemListItemListener(DownloadActivity activity, Item parent,
+			FragmentManager manager, ArrayList<Item> list,
+			Communicator communicator) {
+		this(activity, parent, manager, (String) null, communicator);
+		this.list = list;
 	}
 
-	public ItemListItemListener(DownloadActivity activity, ParentItem parent,
-			FragmentManager manager, DetailItem item) {
-		this(activity, parent, manager, null, null);
+	public ItemListItemListener(DownloadActivity activity, Item parent,
+			FragmentManager manager, Item item) {
+		this(activity, parent, manager, (String) null, null);
 		this.item = item;
 	}
 
-	public ItemListItemListener(DownloadActivity activity, ParentItem parent,
-			FragmentManager manager, ItemList itemList) {
-		this(activity, parent, manager, null, null);
+	public ItemListItemListener(DownloadActivity activity, Item parent,
+			FragmentManager manager, ArrayList<Item> itemList) {
+		this(activity, parent, manager, itemList, null);
 		this.list = itemList;
+	}
+
+	public ItemListItemListener(DownloadActivity activity,
+			FragmentManager manager) {
+		this(activity, null, manager, (String) null, null);
+	}
+
+	public ItemListItemListener() {
+
+	}
+
+	public void setParent(Item item) {
+		this.parent = item;
+	}
+
+	public void setItem(Item item) {
+		this.item = item;
+	}
+
+	public void setItemList(ArrayList<Item> list) {
+		this.list = list;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public void setLayoutID(int id) {
+		this.layoutID = id;
+	}
+
+	public void setActivity(DownloadActivity activity) {
+		this.activity = activity;
+	}
+
+	public void setFragmentManager(FragmentManager manager) {
+		this.manager = manager;
 	}
 
 	@Override
@@ -71,10 +113,11 @@ public class ItemListItemListener implements OnClickListener,
 		}
 	}
 
-	public void replaceFragemntCommit(Fragment fragment) {
+	public void replaceFragemntCommit(SherlockFragment fragment) {
 		FragmentTransaction fragmentTransaction = manager.beginTransaction();
 
-		fragmentTransaction.replace(R.id.list_layout, fragment);
+		fragmentTransaction.replace(layoutID == -1 ? (staticLayoutID == -1 ? R.id.list_layout : staticLayoutID ) : layoutID,
+				fragment);
 
 		fragmentTransaction
 				.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
@@ -82,6 +125,8 @@ public class ItemListItemListener implements OnClickListener,
 		fragmentTransaction.addToBackStack(null);
 
 		fragmentTransaction.commit();
+
+		activity.afterFragmentChange(fragment);
 	}
 
 	public void loadItem(String url) {
@@ -113,7 +158,7 @@ public class ItemListItemListener implements OnClickListener,
 		replaceDetailFragment(detail);
 	}
 
-	public void replaceContentListFragment(ItemList items) {
+	public void replaceContentListFragment(ArrayList<Item> items) {
 		ContentListFragment fragment = new ContentListFragment(
 				new ItemArrayAdapter(this.activity, R.id.ListItemTextView,
 						items, this.manager));
@@ -121,7 +166,7 @@ public class ItemListItemListener implements OnClickListener,
 		replaceFragemntCommit(fragment);
 	}
 
-	public void replaceDetailFragment(DetailItem item) {
+	public void replaceDetailFragment(Item item) {
 		DetailFragment fragment = new DetailFragment();
 
 		fragment.setArguments(item.parseItemToBundle());
