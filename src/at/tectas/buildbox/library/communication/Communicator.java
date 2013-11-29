@@ -183,17 +183,32 @@ public class Communicator {
 	}
 
 	public String getString(String url) throws Exception {
-		return getString(url, null);
+		return getString(url, (Object) null);
+	}
+
+	public String getString(String url, JsonElement parameters) {
+		return this.getString(url, (Object)parameters);
 	}
 
 	public String getString(String url, ArrayList<NameValuePair> parameters)
 			throws Exception {
+		return this.getString(url, (Object)parameters);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected String getString(String url, Object parameters) {
 		if (url != null) {
 			BufferedReader in = null;
 			try {
 				HttpURLConnection connection = null;
 				if (parameters != null) {
-					connection = Communicator.getConnection(url, parameters);
+					if (parameters instanceof JsonElement) {
+					connection = Communicator.getConnection(url, (JsonElement)parameters);
+					} else if (parameters instanceof ArrayList<?>) {
+						connection = Communicator.getConnection(url, (ArrayList<NameValuePair>)parameters);
+					} else {
+						connection = Communicator.getConnection(url);
+					}
 				} else {
 					connection = Communicator.getConnection(url);
 				}
@@ -291,13 +306,46 @@ public class Communicator {
 		return this.getJsonElement(url).getAsJsonObject();
 	}
 
+	public JsonObject getJsonObject(String url, JsonElement element) throws Exception {
+		return this.getJsonElement(url, element).getAsJsonObject();
+	}
+
+	public JsonObject getJsonObject(String url, ArrayList<NameValuePair> parameters) throws Exception {
+		return this.getJsonElement(url, parameters).getAsJsonObject();
+	}
+	
 	public JsonArray getJsonArray(String url) throws Exception {
 		return this.getJsonElement(url).getAsJsonArray();
 	}
 
+	public JsonArray getJsonArray(String url, JsonElement parameters) throws Exception {
+		return this.getJsonElement(url, parameters).getAsJsonArray();
+	}
+	
+	public JsonArray getJsonArray(String url, ArrayList<NameValuePair> parameters) throws Exception {
+		return this.getJsonElement(url, parameters).getAsJsonArray();
+	}
+	
 	public JsonElement getJsonElement(String url) throws Exception {
 		String respond = this.getString(url);
 
+		JsonParser parser = new JsonParser();
+
+		return parser.parse(respond);
+	}
+
+	public JsonElement getJsonElement(String url, JsonElement element) throws Exception {
+		String respond = this.getString(url, element);
+
+		JsonParser parser = new JsonParser();
+
+		return parser.parse(respond);
+	}
+
+	public JsonElement getJsonElement(String url,
+			ArrayList<NameValuePair> parameters) throws Exception {
+		String respond = this.getString(url, parameters);
+		
 		JsonParser parser = new JsonParser();
 
 		return parser.parse(respond);
@@ -510,6 +558,24 @@ public class Communicator {
 		writer.print(query);
 		writer.close();
 		os.close();
+
+		return urlConnection;
+	}
+
+	public static HttpURLConnection getConnection(String urlString,
+			JsonElement element) throws IOException {
+		HttpURLConnection urlConnection = Communicator
+				.getConnectionWithoutConnect(urlString);
+		urlConnection.setRequestMethod("POST");
+		urlConnection.setDoInput(true);
+		urlConnection.setDoOutput(true);
+		urlConnection.setRequestProperty("Content-Type", "application/json");
+		urlConnection.setRequestProperty("Accept", "application/json");
+		urlConnection.connect();
+		byte[] params = element.toString().getBytes();
+		OutputStream writer = urlConnection.getOutputStream();
+		writer.write(params);
+		writer.close();
 
 		return urlConnection;
 	}
