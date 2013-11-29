@@ -9,14 +9,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.UUID;
 
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.params.CoreProtocolPNames;
 
@@ -29,6 +37,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
+import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.DownloadStatus;
 import at.tectas.buildbox.library.communication.asynccommunicators.BitmapAsyncCommunicator;
 import at.tectas.buildbox.library.communication.asynccommunicators.DownloadAsyncCommunicator;
@@ -174,22 +183,25 @@ public class Communicator {
 	}
 
 	public String getString(String url) throws Exception {
+		return getString(url, null);
+	}
+
+	public String getString(String url, ArrayList<NameValuePair> parameters)
+			throws Exception {
 		if (url != null) {
 			BufferedReader in = null;
 			try {
-				HttpURLConnection connection = Communicator.getConnection(url);
-
-				in = new BufferedReader(new InputStreamReader(
-						connection.getInputStream()));
-
-				StringBuilder sb = new StringBuilder();
-				String line = "";
-
-				while ((line = in.readLine()) != null) {
-					sb.append(line);
+				HttpURLConnection connection = null;
+				if (parameters != null) {
+					connection = Communicator.getConnection(url, parameters);
+				} else {
+					connection = Communicator.getConnection(url);
 				}
-				in.close();
-				return sb.toString();
+
+				if (connection != null) {
+					return Communicator.readStream(connection.getInputStream());
+				}
+				return null;
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -479,14 +491,33 @@ public class Communicator {
 		return null;
 	}
 
+	public static HttpURLConnection getConnection(String urlString,
+			ArrayList<NameValuePair> map) throws ClientProtocolException,
+			IOException, URISyntaxException {
+		HttpURLConnection urlConnection = Communicator
+				.getConnectionWithoutConnect(urlString);
+		urlConnection.setRequestMethod("POST");
+		urlConnection.setDoInput(true);
+		urlConnection.setDoOutput(true);
+		String query = getQuery(map);
+		urlConnection.setFixedLengthStreamingMode(query.getBytes().length);
+		urlConnection.setRequestProperty("Content-Type",
+				"application/x-www-form-urlencoded");
+		urlConnection.connect();
+		OutputStream os = urlConnection.getOutputStream();
+		PrintWriter writer = new PrintWriter(
+				new OutputStreamWriter(os, "UTF-8"));
+		writer.print(query);
+		writer.close();
+		os.close();
+
+		return urlConnection;
+	}
+
 	public static HttpURLConnection getConnection(String urlString)
 			throws ClientProtocolException, IOException, URISyntaxException {
-		URL url = new URL(urlString);
-		HttpURLConnection urlConnection = (HttpURLConnection) url
-				.openConnection();
-		urlConnection.addRequestProperty(CoreProtocolPNames.USER_AGENT,
-				"android");
-		urlConnection.addRequestProperty("Cache-Control", "no-cache");
+		HttpURLConnection urlConnection = Communicator
+				.getConnectionWithoutConnect(urlString);
 
 		urlConnection.connect();
 
@@ -496,17 +527,58 @@ public class Communicator {
 	public static HttpURLConnection getConnection(String urlString,
 			int alreadyDownloaded) throws ClientProtocolException, IOException,
 			URISyntaxException {
+		HttpURLConnection urlConnection = Communicator
+				.getConnectionWithoutConnect(urlString);
+
+		urlConnection.addRequestProperty("Range", "bytes=" + alreadyDownloaded);
+
+		urlConnection.connect();
+
+		return urlConnection;
+	}
+
+	protected static HttpURLConnection getConnectionWithoutConnect(
+			String urlString) throws IOException {
 		URL url = new URL(urlString);
 		HttpURLConnection urlConnection = (HttpURLConnection) url
 				.openConnection();
 		urlConnection.addRequestProperty(CoreProtocolPNames.USER_AGENT,
 				"android");
 		urlConnection.addRequestProperty("Cache-Control", "no-cache");
-		urlConnection.addRequestProperty("Range", "bytes=" + alreadyDownloaded);
-
-		urlConnection.connect();
 
 		return urlConnection;
+	}
+
+	public static String readStream(InputStream in) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		BufferedReader r = new BufferedReader(new InputStreamReader(in), 1000);
+
+		for (String line = r.readLine(); line != null; line = r.readLine()) {
+			sb.append(line).append("\n");
+		}
+
+		in.close();
+
+		return sb.toString();
+	}
+
+	private static String getQuery(List<NameValuePair> params)
+			throws UnsupportedEncodingException {
+		StringBuilder result = new StringBuilder();
+		boolean first = true;
+
+		for (NameValuePair pair : params) {
+			if (first)
+				first = false;
+			else
+				result.append("&");
+
+			result.append(pair.getName());
+			result.append("=");
+			result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+		}
+
+		return result.toString();
 	}
 
 	public static Boolean tryGetAcceptRangesFromConnection(
