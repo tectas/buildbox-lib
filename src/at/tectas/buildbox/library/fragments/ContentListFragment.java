@@ -18,14 +18,29 @@ import at.tectas.buildbox.library.download.DownloadActivity;
 @SuppressLint("ValidFragment")
 public class ContentListFragment extends SherlockFragment {
 	private ItemArrayAdapter adapter = null;
+	private int listItemViewId = R.id.ListItemImageView;
+	private ArrayList<Item> items = null;
 
 	public ContentListFragment() {
 		super();
 	}
 
+	@Deprecated
 	public ContentListFragment(ItemArrayAdapter adapter) {
 		super();
 		this.adapter = adapter;
+	}
+
+	public void setListItemViewId(int id) {
+		this.listItemViewId = id;
+	}
+
+	public void setListItems(ArrayList<Item> items) {
+		this.items = items;
+	}
+
+	public ArrayList<Item> getListItems() {
+		return this.items;
 	}
 
 	@Override
@@ -46,10 +61,12 @@ public class ContentListFragment extends SherlockFragment {
 
 		DownloadActivity activity = (DownloadActivity) getActivity();
 
+		this.items = this.items == null ? activity.getContentItems()
+				.get(arrayIndex).getChildren() : this.items;
+
 		list.setAdapter(adapter == null ? new ItemArrayAdapter(activity,
-				R.id.ListItemTextView, new ArrayList<Item>(activity
-						.getContentItems().get(arrayIndex).getChildren()),
-				getChildFragmentManager()) : this.adapter);
+				this.listItemViewId, this.items, getChildFragmentManager())
+				: this.adapter);
 
 		return view;
 	}

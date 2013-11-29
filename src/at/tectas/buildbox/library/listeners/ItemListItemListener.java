@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import at.tectas.buildbox.library.R;
-import at.tectas.buildbox.library.adapters.ItemArrayAdapter;
 import at.tectas.buildbox.library.communication.Communicator;
 import at.tectas.buildbox.library.communication.asynccommunicators.JSONElementAsyncCommunicatorResult;
 import at.tectas.buildbox.library.communication.callbacks.interfaces.ICommunicatorCallback;
@@ -159,9 +158,9 @@ public class ItemListItemListener implements OnClickListener,
 	}
 
 	public void replaceContentListFragment(ArrayList<Item> items) {
-		ContentListFragment fragment = new ContentListFragment(
-				new ItemArrayAdapter(this.activity, R.id.ListItemTextView,
-						items, this.manager));
+		ContentListFragment fragment = new ContentListFragment();
+
+		fragment.setListItems(items);
 
 		replaceFragemntCommit(fragment);
 	}
